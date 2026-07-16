@@ -21,6 +21,8 @@ export type Review = {
   dek: string;       // one-line summary
   body: string[];    // paragraphs
   image: string;     // /art/art-0X.jpg
+  width?: number;    // true pixel width of the marquee image (from Airtable), for natural aspect
+  height?: number;   // true pixel height of the marquee image (from Airtable), for natural aspect
   artist: string;
   artwork: string;   // artwork title
   credit: string;    // full public-domain credit line

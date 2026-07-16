@@ -39,55 +39,55 @@ function useInView<T extends Element>(): { ref: React.RefObject<T | null>; inVie
   return { ref, inView };
 }
 
-// Gentle parallax drift via a `--shift` custom property; the CSS consumes it
-// only when motion is allowed, so it's inert for reduced-motion users.
-function useParallax<T extends HTMLElement>(): React.RefObject<T | null> {
-  const ref = useRef<T | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight || 1;
-      const center = rect.top + rect.height / 2;
-      const progress = Math.max(-1, Math.min(1, (center - vh / 2) / vh));
-      const shift = progress * -22;
-      el.style.setProperty("--shift", `${shift.toFixed(2)}px`);
-    };
-    const onScroll = () => {
-      if (!raf) raf = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  return ref;
-}
-
+// Meta line: venue · hood · date. The section is dropped here — it already
+// lives in the `№ · section` plate directly above this line.
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
-      <span className={styles.metaSection}>{review.section}</span>
-      <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.venue}</span>
+      <span className={styles.metaSection}>{review.venue}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span>{review.hood}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>
+  );
+}
+
+// The marquee image, rendered at its TRUE aspect ratio, uncropped. When the
+// real pixel dims are known we hand next/image intrinsic width/height and let
+// it size fluidly (width:100% / height:auto). Without dims we fall back to a
+// 4/3 box with `contain` — still the whole artwork, no crop.
+function Plate({ review, priority }: { review: Review; priority: boolean }) {
+  const { width, height } = review;
+  if (typeof width === "number" && typeof height === "number") {
+    return (
+      <div className={styles.plate}>
+        <Image
+          className={styles.plateImg}
+          src={review.image}
+          alt={review.alt}
+          width={width}
+          height={height}
+          sizes="(max-width: 880px) 100vw, 50vw"
+          style={{ width: "100%", height: "auto" }}
+          priority={priority}
+        />
+      </div>
+    );
+  }
+  return (
+    <div className={styles.plate}>
+      <div className={styles.plateBox}>
+        <Image
+          className={styles.plateImg}
+          src={review.image}
+          alt={review.alt}
+          fill
+          sizes="(max-width: 880px) 100vw, 50vw"
+          priority={priority}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -99,7 +99,6 @@ function Moment({ review, index }: { review: Review; index: number }) {
   const first = index === 0;
   const imageRight = index % 2 === 0;
   const { ref, inView } = useInView<HTMLElement>();
-  const plateRef = useParallax<HTMLDivElement>();
 
   const className = [
     styles.moment,
@@ -115,35 +114,25 @@ function Moment({ review, index }: { review: Review; index: number }) {
     <article ref={ref} className={className} data-side={imageRight ? "right" : "left"}>
       <div className={gridClassName}>
         <div className={styles.splitMedia}>
-          <div className={styles.plate}>
-            <div ref={plateRef} className={styles.plateImgWrap}>
-              <Image
-                className={styles.plateImg}
-                src={review.image}
-                alt={review.alt}
-                fill
-                sizes="(max-width: 880px) 100vw, 50vw"
-                priority={first}
-              />
-            </div>
-          </div>
+          <Plate review={review} priority={first} />
+          {review.credit && <p className={styles.mediaCredit}>{review.credit}</p>}
         </div>
         <div className={styles.splitText}>
           <p className={styles.sectionTag}>
             <span className={styles.no}>{review.no}</span>
+            <span className={styles.dot} aria-hidden="true">·</span>
             <span>{review.section}</span>
           </p>
+          <Meta review={review} />
           <h2 className={styles.mTitle}>{review.title}</h2>
           <p className={styles.mDek}>{review.dek}</p>
           <div className={styles.reading}>
-            <Meta review={review} />
             <p className={styles.byline}>By {review.by}</p>
             <div className={styles.prose}>
               {review.body.map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
             </div>
-            <p className={styles.credit}>{review.credit}</p>
           </div>
         </div>
       </div>
@@ -151,13 +140,74 @@ function Moment({ review, index }: { review: Review; index: number }) {
   );
 }
 
+// Floating "back to top" control — appears once the reader is past ~1 viewport,
+// pinned bottom-right (clear of the bottom-center theme switcher). Scroll
+// position is read on a rAF-throttled scroll listener; the click honors
+// prefers-reduced-motion (jump vs. smooth).
+function BackToTop() {
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      setShown(window.scrollY > window.innerHeight);
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  function toTop() {
+    const reduce =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  }
+
+  return (
+    <button
+      type="button"
+      className={`${styles.toTop} ${shown ? styles.toTopShown : ""}`}
+      onClick={toTop}
+      aria-label="Back to top"
+      aria-hidden={shown ? undefined : true}
+      tabIndex={shown ? 0 : -1}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <polyline
+          points="6 14 12 8 18 14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
 export function Stream({ reviews }: { reviews: Review[] }) {
   if (reviews.length === 0) return null;
   return (
-    <div className={styles.stream}>
-      {reviews.map((review, i) => (
-        <Moment key={review.slug} review={review} index={i} />
-      ))}
-    </div>
+    <>
+      <div className={styles.stream}>
+        {reviews.map((review, i) => (
+          <Moment key={review.slug} review={review} index={i} />
+        ))}
+      </div>
+      <BackToTop />
+    </>
   );
 }

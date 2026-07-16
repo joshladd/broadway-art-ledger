@@ -57,7 +57,16 @@ export async function getReviews(): Promise<Review[]> {
       // The marquee image is the uploaded Photo attachment, served through our
       // stable /api/photo proxy (robust to Airtable's expiring URLs). Every
       // published review is expected to carry one.
-      const photo = Array.isArray(f["Photo"]) && f["Photo"].length > 0;
+      const attachments = Array.isArray(f["Photo"])
+        ? (f["Photo"] as Array<{ width?: number; height?: number }>)
+        : [];
+      const photo = attachments.length > 0;
+      // The first attachment carries the true pixel dimensions; we thread them
+      // through so themes can render at the image's natural aspect ratio
+      // (the /api/photo proxy preserves aspect). Left undefined when absent.
+      const first = photo ? attachments[0] : undefined;
+      const width = typeof first?.width === "number" ? first.width : undefined;
+      const height = typeof first?.height === "number" ? first.height : undefined;
       out.push({
         slug: rec.id,
         no: "", // derived from position after the full list is assembled (below)
@@ -71,6 +80,8 @@ export async function getReviews(): Promise<Review[]> {
         dek: str(f["Dek"]),
         body: str(f["Body"]).split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
         image: photo ? `/api/photo/${rec.id}` : "",
+        width,
+        height,
         artist: str(f["Artist"]),
         artwork: str(f["Artwork"]),
         credit: str(f["Credit"]),
