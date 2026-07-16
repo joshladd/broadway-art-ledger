@@ -1,0 +1,408 @@
+/* Catalogue — a text-first auction-catalogue / reading-list index.
+   No images at rest: reviews are a numbered typographic table. Desktop hover
+   floats a quiet marquee preview near the cursor; a click expands the row inline
+   to the full notice. The quietest, most typographic of the five Lab designs —
+   the whole design lives in the type scale, tracking, alignment, and rhythm. */
+
+.page {
+  --col-no: 3.25rem;
+  --indent: 3.25rem;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4.25rem) clamp(1.15rem, 4vw, 3rem) 7rem;
+  font-family: var(--f-read);
+}
+
+/* ---- Masthead ---------------------------------------------------------- */
+.masthead {
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: clamp(1.1rem, 2.5vw, 1.6rem);
+  margin-bottom: 0;
+}
+.kicker {
+  margin: 0;
+  font-family: var(--f-label);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+.title {
+  margin: 0.5rem 0 0;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: clamp(3.1rem, 10vw, 6.25rem);
+  line-height: 0.92;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+.sub {
+  margin: 0.35rem 0 0;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 3.6vw, 2rem);
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+.amp {
+  font-style: italic;
+  color: var(--accent);
+  padding: 0 0.06em;
+}
+.lede {
+  margin: 1.1rem 0 0;
+  max-width: 46ch;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.count {
+  margin: 0.85rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.dot { color: var(--line); padding: 0 0.15em; }
+
+/* ---- Column header (sticky) ------------------------------------------- */
+.tableHead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: var(--col-no) minmax(0, 1.7fr) minmax(0, 1.05fr) 8rem 5rem 1.6rem;
+  align-items: end;
+  gap: 0 1.25rem;
+  padding: 0.7rem 0 0.55rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--f-label);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.hDate { text-align: right; }
+.hMark { }
+
+/* ---- The index list --------------------------------------------------- */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.item {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+/* Left "current lot" marker for the open entry. */
+.item::before {
+  content: "";
+  position: absolute;
+  left: -0.9rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transform-origin: top;
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.itemOpen::before { opacity: 1; transform: scaleY(1); }
+
+.rowH { margin: 0; font-weight: inherit; }
+
+.rowBtn {
+  display: grid;
+  grid-template-columns: var(--col-no) minmax(0, 1.7fr) minmax(0, 1.05fr) 8rem 5rem 1.6rem;
+  grid-template-areas: "no title venue section date mark";
+  align-items: baseline;
+  gap: 0 1.25rem;
+  width: 100%;
+  padding: clamp(0.85rem, 1.8vw, 1.2rem) 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: background 0.25s ease;
+}
+.rowBtn:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .rowBtn:hover { background: var(--panel); }
+  .rowBtn:hover .tTitle { color: var(--accent-2); }
+}
+
+/* cMeta collapses onto the outer grid on wide screens (contents), and becomes
+   its own wrapped line on mobile. */
+.cMeta { display: contents; }
+
+.cNo {
+  grid-area: no;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: color 0.25s ease;
+}
+.itemOpen .cNo { color: var(--accent); }
+
+.cTitle { grid-area: title; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.tTitle {
+  font-family: var(--f-read);
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  transition: color 0.2s ease;
+}
+.tArtist {
+  font-style: italic;
+  font-size: 0.84rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.cVenue { grid-area: venue; min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.vName { font-size: 0.94rem; line-height: 1.25; color: var(--ink); }
+.vHood {
+  font-family: var(--f-label);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--muted);
+}
+
+.cSection {
+  grid-area: section;
+  font-family: var(--f-label);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cDate {
+  grid-area: date;
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cMark {
+  grid-area: mark;
+  justify-self: end;
+  align-self: center;
+}
+.markGlyph {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1), color 0.25s ease;
+}
+.itemOpen .markGlyph { transform: rotate(45deg); color: var(--accent); }
+
+/* ---- Accordion panel -------------------------------------------------- */
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.itemOpen .panel { grid-template-rows: 1fr; }
+.panelClip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panelInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(14rem, 32%, 20rem);
+  grid-template-areas:
+    "dek    fig"
+    "byline fig"
+    "body   fig"
+    "credit fig";
+  align-items: start;
+  column-gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(0.4rem, 1.4vw, 1rem) 0 clamp(2rem, 4vw, 3rem);
+  padding-left: var(--indent);
+}
+
+.dek {
+  grid-area: dek;
+  margin: 0 0 0.9rem;
+  max-width: 30ch;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.35rem, 2.8vw, 1.95rem);
+  line-height: 1.22;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.byline {
+  grid-area: byline;
+  margin: 0 0 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: var(--f-label);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.byName { color: var(--accent-2); }
+.bySep { color: var(--line); }
+
+.figure { grid-area: fig; margin: 0; }
+.frame {
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease 0.08s, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s;
+}
+.itemOpen .img { opacity: 1; transform: none; }
+.cap {
+  margin-top: 0.55rem;
+  font-family: var(--f-label);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.body { grid-area: body; }
+.body p {
+  margin: 0 0 1rem;
+  max-width: 62ch;
+  font-size: 1.04rem;
+  line-height: 1.68;
+  color: var(--ink);
+}
+.body p:last-child { margin-bottom: 0; }
+
+.credit {
+  grid-area: credit;
+  margin: 1.6rem 0 0;
+  max-width: 62ch;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+/* ---- Floating hover preview (desktop) --------------------------------- */
+.preview {
+  position: fixed;
+  z-index: 50;
+  width: 200px;
+  height: 178px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 34px -18px rgba(20, 18, 13, 0.45);
+  pointer-events: none;
+  animation: pvIn 0.18s ease both;
+}
+.previewImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.previewTag {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 0.15rem 0.4rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+}
+@keyframes pvIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@media (hover: none) {
+  .preview { display: none; }
+}
+
+/* ---- Mobile ----------------------------------------------------------- */
+@media (max-width: 760px) {
+  .page { --indent: 2.75rem; }
+  .tableHead { display: none; }
+
+  .rowBtn {
+    grid-template-columns: 2.75rem 1fr auto;
+    grid-template-areas:
+      "no title mark"
+      "no meta  meta";
+    row-gap: 0.55rem;
+    align-items: baseline;
+  }
+  .cNo { grid-area: no; align-self: start; padding-top: 0.15rem; }
+  .cTitle { grid-area: title; }
+  .cMark { grid-area: mark; }
+
+  .cMeta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.9rem;
+  }
+  .cVenue { flex-direction: row; align-items: baseline; gap: 0.4rem; }
+  .cDate { text-align: left; }
+
+  .panelInner {
+    display: block;
+    padding-left: var(--indent);
+  }
+  .dek { max-width: none; }
+  .figure { margin: 0 0 1.4rem; max-width: 30rem; }
+}
+
+/* ---- Reduced motion --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+  .img,
+  .markGlyph,
+  .cNo,
+  .tTitle,
+  .rowBtn,
+  .item::before { transition: none; }
+  .img { opacity: 1; transform: none; }
+  .preview { animation: none; }
+}

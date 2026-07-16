@@ -1,0 +1,477 @@
+/* Salon — a composed asymmetric "salon hang" index. Marquee images are hung as
+   framed works at deliberately varied sizes; stepping up to one opens the full
+   review in a reading panel. Mobile-first; house palette + faces from .labRoot. */
+
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(40px, 7vw, 88px) clamp(16px, 4vw, 44px) 104px;
+}
+
+/* ---- intro moment ---------------------------------------------------- */
+.intro {
+  max-width: 60ch;
+  margin: 0 0 clamp(30px, 5vw, 56px);
+}
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.title {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(52px, 12vw, 128px);
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px;
+}
+.lede {
+  font-family: var(--f-read);
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 42ch;
+  margin: 0;
+}
+.empty {
+  font-family: var(--f-read);
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ---- the wall (mobile-first: tidy 2-up contact sheet) ---------------- */
+.wall {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.tile {
+  min-width: 0;
+}
+/* Occasional full-width work for rhythm on small screens. */
+.tile:nth-child(6n + 1) {
+  grid-column: 1 / -1;
+}
+
+.work {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  animation: rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+/* Gentle staggered arrival. */
+.tile:nth-child(2n) .work { animation-delay: 0.04s; }
+.tile:nth-child(3n) .work { animation-delay: 0.09s; }
+.tile:nth-child(5n) .work { animation-delay: 0.14s; }
+.tile:nth-child(7n) .work { animation-delay: 0.19s; }
+
+.frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--panel);
+  /* the mat + hairline frame */
+  padding: 7px;
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(20, 18, 13, 0.03);
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.tile:nth-child(6n + 1) .frame {
+  aspect-ratio: 16 / 10;
+}
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* sit the image inside the mat */
+  border: 1px solid rgba(20, 18, 13, 0.06);
+}
+
+/* "Step up to read" cue — hidden until hover/focus on pointer devices. */
+.cue {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 7px;
+  padding: 8px 10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: rgba(20, 18, 13, 0.82);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  pointer-events: none;
+}
+
+.plaque {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 10px 2px 2px;
+}
+.pno {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+.pbody {
+  min-width: 0;
+  display: block;
+}
+.partist {
+  display: block;
+  font-family: var(--f-label);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ptitle {
+  display: block;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-size: clamp(15px, 2.4vw, 18px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-top: 2px;
+}
+.psection {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Hover / focus lift (pointer devices). */
+@media (hover: hover) {
+  .work:hover .frame,
+  .work:focus-visible .frame {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px -14px rgba(20, 18, 13, 0.4);
+    border-color: var(--muted);
+  }
+  .work:hover .cue,
+  .work:focus-visible .cue {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.work:focus-visible {
+  outline: none;
+}
+.work:focus-visible .frame {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+/* ---- the composed asymmetric wall (larger screens) ------------------- */
+@media (min-width: 680px) {
+  .wall {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: clamp(52px, 6.6vw, 88px);
+    grid-auto-flow: row dense;
+    gap: clamp(16px, 1.7vw, 26px);
+    align-items: stretch;
+  }
+  .work {
+    height: 100%;
+  }
+  .frame {
+    aspect-ratio: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .tile:nth-child(6n + 1) .frame {
+    aspect-ratio: auto;
+  }
+  .plaque {
+    flex: 0 0 auto;
+  }
+
+  /* Deliberately varied tile sizes (col-span / row-span), cycling every 8
+     so the composition holds for any number of works. */
+  .tile:nth-child(8n + 1) { grid-column: span 3; grid-row: span 5; }
+  .tile:nth-child(8n + 2) { grid-column: span 2; grid-row: span 3; }
+  .tile:nth-child(8n + 3) { grid-column: span 2; grid-row: span 4; }
+  .tile:nth-child(8n + 4) { grid-column: span 3; grid-row: span 3; }
+  .tile:nth-child(8n + 5) { grid-column: span 2; grid-row: span 4; }
+  .tile:nth-child(8n + 6) { grid-column: span 2; grid-row: span 3; }
+  .tile:nth-child(8n + 7) { grid-column: span 3; grid-row: span 4; }
+  .tile:nth-child(8n)     { grid-column: span 2; grid-row: span 3; }
+}
+
+/* ---- reading panel / lightbox ---------------------------------------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0px, 4vw, 48px);
+  background: rgba(20, 18, 13, 0.52);
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.24s ease both;
+}
+.overlay[data-phase="exit"] {
+  animation: fadeOut 0.22s ease both;
+}
+
+.dialog {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  width: min(1080px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 80px -30px rgba(20, 18, 13, 0.6);
+  animation: panelIn 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.overlay[data-phase="exit"] .dialog {
+  animation: panelOut 0.22s ease both;
+}
+.dialog:focus {
+  outline: none;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.close:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+.close:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.media {
+  margin: 0;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.mediaImg {
+  display: block;
+  width: 100%;
+  max-height: 42vh;
+  object-fit: cover;
+  border-bottom: 1px solid var(--line);
+}
+.artwork {
+  padding: 12px 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  align-items: baseline;
+}
+.artistName {
+  font-family: var(--f-label);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.artworkTitle {
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.read {
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.readInner {
+  padding: clamp(24px, 4vw, 44px) clamp(22px, 4vw, 48px) clamp(30px, 5vw, 52px);
+  max-width: 62ch;
+}
+.reyebrow {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.raccent {
+  color: var(--accent);
+}
+.rtitle {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+}
+.rdek {
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(17px, 2.4vw, 21px);
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+.rmeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 0;
+  margin: 0 0 20px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.rby {
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.rvenue {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.rbody > p {
+  font-family: var(--f-read);
+  font-size: clamp(16px, 2.1vw, 18px);
+  line-height: 1.62;
+  color: var(--ink);
+  margin: 0 0 1.05em;
+}
+.rbody > p:first-child::first-letter {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  float: left;
+  font-size: 3.4em;
+  line-height: 0.82;
+  padding: 4px 10px 0 0;
+  color: var(--accent);
+}
+.credit {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 24px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* Two-column reading panel on wider screens. */
+@media (min-width: 860px) {
+  .dialog {
+    grid-template-columns: 1.05fr 1fr;
+  }
+  .media {
+    border-right: 1px solid var(--line);
+  }
+  .mediaImg {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+    border-bottom: 0;
+  }
+  .artwork {
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* ---- animations ------------------------------------------------------ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: scale(0.965) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes panelOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.98); }
+}
+
+/* ---- reduced motion -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .work,
+  .overlay,
+  .overlay[data-phase="exit"],
+  .dialog,
+  .overlay[data-phase="exit"] .dialog {
+    animation: none;
+  }
+  .frame,
+  .cue {
+    transition: none;
+  }
+  .work:hover .frame,
+  .work:focus-visible .frame {
+    transform: none;
+  }
+}

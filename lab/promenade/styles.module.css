@@ -1,0 +1,433 @@
+/* Promenade — a horizontal gallery walk on desktop, a vertical stroll on phones.
+   Palette + fonts inherit from .labRoot (see app/lab/lab-tokens.css). */
+
+.root {
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------- the hall */
+/* Desktop: a single horizontal-scroll, scroll-snapping track of full-height
+   panels. Vertical wheel is translated to horizontal in JS; trackpads work
+   natively via overflow-x. */
+.hall {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: clamp(20px, 4vw, 56px);
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.hall:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -3px;
+}
+
+/* Thin, restrained scrollbar so the track still reads as a "hall". */
+.hall::-webkit-scrollbar {
+  height: 6px;
+}
+.hall::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+.hall::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ------------------------------------------------------------- intro panel */
+.intro {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: clamp(440px, 62vw, 780px);
+  height: 100dvh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: clamp(40px, 6vw, 88px) clamp(28px, 5vw, 72px) clamp(96px, 12vh, 132px);
+  border-right: 1px solid var(--line);
+  position: relative;
+}
+.eyebrow {
+  font-family: var(--f-label);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+.introTitle {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(64px, 12vw, 128px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin: 0 0 26px;
+}
+.introLede {
+  font-family: var(--f-read);
+  font-size: clamp(18px, 2.3vw, 23px);
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 34ch;
+  margin: 0 0 30px;
+}
+.amp {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-feature-settings: "swsh" 1, "ss01" 1;
+  color: var(--accent);
+  padding: 0 0.04em;
+}
+.introMeta {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+.introCount {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+/* Directional cue — an arrow that points the way through the hall. */
+.cue {
+  margin-top: 34px;
+  width: 64px;
+  height: 2px;
+  background: var(--ink);
+  position: relative;
+  animation: cueX 2.4s ease-in-out infinite;
+}
+.cue::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  transform: translateY(-50%) rotate(45deg);
+}
+@keyframes cueX {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(10px); opacity: 1; }
+}
+
+/* ------------------------------------------------------------ review panel */
+.panel {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: clamp(760px, 94vw, 1320px);
+  height: 100dvh;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 54%);
+  align-items: stretch;
+  gap: clamp(28px, 3.5vw, 60px);
+  padding: clamp(36px, 4.5vw, 72px) clamp(28px, 4vw, 64px) clamp(88px, 11vh, 120px);
+  border-right: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Big, faint room number floating behind the label column. */
+.roomNo {
+  position: absolute;
+  top: clamp(14px, 2vw, 30px);
+  right: clamp(20px, 3vw, 48px);
+  font-family: var(--f-mono);
+  font-size: clamp(56px, 8vw, 104px);
+  line-height: 1;
+  color: var(--line);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- the "work" */
+.frame {
+  position: relative;
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 22px 60px -34px rgba(20, 18, 13, 0.55);
+}
+.shot {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.1) translate3d(var(--shift, 0px), 0, 0);
+  will-change: transform;
+}
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+.cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 26px 18px 14px;
+  font-family: var(--f-mono);
+  color: #f4f1ea;
+  background: linear-gradient(to top, rgba(20, 18, 13, 0.68), rgba(20, 18, 13, 0));
+}
+.capArtist {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.capWork {
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.82;
+  font-family: var(--f-read);
+  letter-spacing: 0.01em;
+}
+
+/* --------------------------------------------------------- the wall label */
+.label {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  padding-bottom: 8px;
+}
+.label::-webkit-scrollbar { width: 5px; }
+.label::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.section { color: var(--accent); }
+.dot { color: var(--line); }
+.no { margin-left: auto; color: var(--ink); }
+
+.title {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(34px, 4.4vw, 58px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+.dek {
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(18px, 1.9vw, 22px);
+  line-height: 1.4;
+  color: var(--accent-2);
+  margin: 0 0 18px;
+  max-width: 46ch;
+}
+.by {
+  font-family: var(--f-label);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+.body {
+  font-family: var(--f-read);
+  font-size: clamp(15.5px, 1.15vw, 17px);
+  line-height: 1.62;
+  color: var(--ink);
+  max-width: 62ch;
+}
+.body p { margin: 0 0 1.1em; }
+.body p:first-of-type::first-letter {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 3.1em;
+  line-height: 0.78;
+  float: left;
+  padding: 4px 10px 0 0;
+  color: var(--accent);
+}
+.credit {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin: 22px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  max-width: 60ch;
+}
+
+/* ------------------------------------------------------- side nav buttons */
+.nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px -16px rgba(20, 18, 13, 0.5);
+  transition: background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+.nav:hover { background: var(--paper); border-color: var(--ink); }
+.nav:disabled { opacity: 0.32; cursor: default; }
+.navPrev { left: clamp(12px, 1.6vw, 22px); }
+.navNext { right: clamp(12px, 1.6vw, 22px); }
+
+/* ---------------------------------------------------------- progress rail */
+.rail {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 clamp(16px, 3vw, 40px);
+  pointer-events: none;
+  background: linear-gradient(to top, var(--paper), rgba(241, 239, 233, 0));
+}
+.railCount {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.railSlash { color: var(--muted); padding: 0 4px; }
+.track {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.railHint {
+  font-family: var(--f-label);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Keep the centered bottom switcher clear of the counter/hint. */
+@media (max-width: 620px) {
+  .railHint { display: none; }
+}
+
+/* =================================================== MOBILE — vertical walk */
+/* Below ~820px the hall tips upright: vertical scroll-snap, stacked panels,
+   and strictly no horizontal overflow. */
+@media (max-width: 819px) {
+  .hall {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 0;
+    overscroll-behavior-x: none;
+  }
+
+  .intro,
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .intro {
+    height: 100dvh;
+    padding: clamp(28px, 8vw, 56px) clamp(22px, 7vw, 40px) clamp(96px, 16vh, 132px);
+  }
+  .cue { transform: rotate(90deg); animation: cueY 2.4s ease-in-out infinite; }
+
+  .panel {
+    height: 100dvh;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 40dvh) minmax(0, 1fr);
+    gap: clamp(16px, 4vw, 26px);
+    padding: clamp(20px, 5vw, 40px) clamp(20px, 6vw, 36px) clamp(84px, 13vh, 116px);
+  }
+  .roomNo {
+    font-size: clamp(40px, 16vw, 72px);
+    top: clamp(10px, 3vw, 20px);
+    right: clamp(16px, 5vw, 28px);
+  }
+  .title { font-size: clamp(30px, 8vw, 44px); }
+  .body p:first-of-type::first-letter { font-size: 2.6em; }
+
+  /* Side arrows don't belong on a vertical phone scroll. */
+  .nav { display: none; }
+}
+
+@keyframes cueY {
+  0%, 100% { transform: rotate(90deg) translateX(0); opacity: 0.55; }
+  50% { transform: rotate(90deg) translateX(10px); opacity: 1; }
+}
+
+/* ============================================================ reduced motion */
+/* Keep scroll-snap; drop parallax and the animated cue. */
+@media (prefers-reduced-motion: reduce) {
+  .shot { transform: none; }
+  .cue { animation: none; }
+  .fill { transition: none; }
+  .nav { transition: none; }
+}

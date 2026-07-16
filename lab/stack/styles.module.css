@@ -1,0 +1,392 @@
+/* Stack — full-viewport scroll-snap cards on a visible, tactile deck.
+   The signature: each card is sticky-stacked so the next slides up over the
+   current one, while the current recedes (scale + dim, driven by --leave); the
+   marquee image lags the title on entry (parallax, driven by --enter). Faux
+   stacked sheets peek beneath every card so the pile reads even at rest. */
+
+.root {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+/* The scroll container: the snap authority, and the sticky ancestor. */
+.scroller {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  scrollbar-width: none;
+}
+.scroller::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Each card holds a full screen of scroll and sticks at the top, so the card
+   after it climbs up and over — the deck. Snap + sticky live here; the recede
+   transform lives on .stage so it can't disturb the snap geometry. */
+.card {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  padding: clamp(10px, 2.4vw, 26px);
+  /* room for the fixed bottom switcher + a peek of the sheets beneath */
+  padding-bottom: clamp(84px, 9vh, 108px);
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  transform-origin: 50% 38%;
+  transform: translateY(calc(var(--leave, 0) * -2.4vh))
+    scale(calc(1 - var(--leave, 0) * 0.07));
+  filter: brightness(calc(1 - var(--leave, 0) * 0.32))
+    saturate(calc(1 - var(--leave, 0) * 0.22));
+  will-change: transform, filter;
+}
+
+/* Two faux sheets peeking below/right — the rest of the pile. */
+.stage::before,
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.stage::before {
+  transform: translateY(11px) scale(0.984);
+  opacity: 0.9;
+  box-shadow: 0 24px 44px -30px rgba(20, 18, 13, 0.45);
+}
+.stage::after {
+  transform: translateY(22px) scale(0.968);
+  opacity: 0.66;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(251, 250, 246, 0.6) inset,
+    0 34px 66px -32px rgba(20, 18, 13, 0.55),
+    0 10px 24px -14px rgba(20, 18, 13, 0.4);
+}
+
+/* ---- Marquee: bold image block with the title lockup overlaid ---- */
+.marquee {
+  position: relative;
+  flex: 0 0 42%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--ink);
+}
+.img {
+  position: absolute;
+  top: -8%;
+  left: 0;
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+  /* parallax: image sits lower and settles as the card arrives */
+  transform: translateY(calc((1 - var(--enter, 1)) * 7%));
+  will-change: transform;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to top,
+      rgba(10, 9, 6, 0.86) 0%,
+      rgba(10, 9, 6, 0.26) 30%,
+      rgba(10, 9, 6, 0) 56%
+    ),
+    linear-gradient(to bottom, rgba(10, 9, 6, 0.5) 0%, rgba(10, 9, 6, 0) 22%);
+}
+
+.kicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: clamp(12px, 1.7vw, 18px);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f1efe9;
+}
+.no {
+  color: var(--accent);
+  font-weight: 700;
+}
+.section::before {
+  content: "·";
+  margin: 0 0.55em;
+  color: rgba(241, 239, 233, 0.5);
+}
+.date {
+  margin-left: auto;
+  opacity: 0.82;
+}
+
+.title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: clamp(14px, 2vw, 28px);
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(2rem, 6.4vw, 4.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  color: #faf8f2;
+  text-shadow: 0 2px 34px rgba(0, 0, 0, 0.45);
+  text-wrap: balance;
+}
+
+/* ---- Readout: the review itself, scrolls internally if it runs long ---- */
+.readout {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: clamp(16px, 2.4vw, 30px);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.readout::-webkit-scrollbar {
+  width: 8px;
+}
+.readout::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+  border: 2px solid var(--panel);
+}
+
+.dek {
+  margin: 0 0 0.8rem;
+  max-width: 42ch;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-size: clamp(1.15rem, 2.4vw, 1.58rem);
+  line-height: 1.22;
+  color: var(--ink);
+  font-feature-settings: "swsh" 1; /* swash italic, incl. the ampersand */
+}
+
+.rule {
+  height: 1px;
+  background: var(--line);
+  margin: 0.7rem 0 0.9rem;
+}
+
+.byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin-bottom: 1.15rem;
+}
+.by {
+  font-family: var(--f-label);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.by::before {
+  content: "By ";
+  color: var(--muted);
+  font-weight: 500;
+}
+.place {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+.body p {
+  margin: 0 0 1rem;
+  max-width: 64ch;
+  font-family: var(--f-read);
+  font-size: clamp(1rem, 1.1vw, 1.075rem);
+  line-height: 1.62;
+  color: #28241c;
+}
+.body p:first-of-type::first-letter {
+  float: left;
+  margin: 0.02em 0.12em 0 0;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 3.1em;
+  line-height: 0.78;
+  color: var(--accent-2);
+}
+
+.credit {
+  margin: 1.5rem 0 0.4rem;
+  max-width: 60ch;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.work {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--f-label);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* ---- Fixed progress indicator (top-left pill) ---- */
+.progress {
+  position: fixed;
+  top: clamp(14px, 2.4vw, 26px);
+  left: clamp(14px, 2.4vw, 26px);
+  z-index: 50;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: var(--f-mono);
+  box-shadow: 0 6px 18px -12px rgba(20, 18, 13, 0.5);
+}
+.pnow {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.pslash {
+  opacity: 0.4;
+}
+.ptot {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.psec {
+  align-self: center;
+  margin-left: 0.55rem;
+  font-family: var(--f-label);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- Fixed dot navigation (right edge) ---- */
+.dots {
+  position: fixed;
+  right: clamp(8px, 1.4vw, 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dot {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 0;
+  border-radius: 999px;
+}
+.dotMark {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.dot:hover .dotMark {
+  background: var(--ink);
+}
+.dotOn .dotMark {
+  background: var(--accent);
+  transform: scale(1.55);
+}
+.dot:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---- Desktop: image beside the text, a stronger lockup ---- */
+@media (min-width: 880px) {
+  .inner {
+    flex-direction: row;
+  }
+  .marquee {
+    flex: 0 0 46%;
+  }
+  .title {
+    font-size: clamp(2.6rem, 4vw, 4.6rem);
+  }
+  .readout {
+    padding: clamp(26px, 3vw, 46px);
+  }
+}
+
+/* Keep the dot rail from crowding text on the smallest screens. */
+@media (max-width: 560px) {
+  .dots {
+    display: none;
+  }
+}
+
+/* ---- Reduced motion: keep snapping, drop parallax + peel ---- */
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    transform: none !important;
+    filter: none !important;
+  }
+  .img {
+    transform: none !important;
+    top: 0;
+    height: 100%;
+  }
+  .dotMark {
+    transition: none;
+  }
+}

@@ -1,0 +1,502 @@
+/* ================================================================== *
+ * Splash — kinetic masthead + scroll-choreographed cover story.
+ * Palette + fonts inherited from .labRoot (app/lab/lab-tokens.css).
+ * Boldness is spent on type, scale, and motion — never on color.
+ * ================================================================== */
+
+.page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  font-family: var(--f-read);
+}
+
+/* ------------------------------------------------------------------ *
+ * HERO — the masthead moment (first 100dvh).
+ * ------------------------------------------------------------------ */
+.hero {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 4vw, 56px) clamp(18px, 5vw, 72px) clamp(28px, 4vw, 48px);
+  position: relative;
+}
+
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 clamp(18px, 3vw, 34px);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kickerDot { color: var(--accent); }
+
+/* Oversized masthead. Words rise + fade in on load, staggered. */
+.masthead {
+  margin: 0 0 auto;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(52px, 13.5vw, 210px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+.mastBreak {
+  display: block;
+  height: 0;
+}
+/* Featured swash-italic ampersand — the house signature. */
+.amp {
+  font-style: italic;
+  font-weight: 500;
+  font-feature-settings: "swsh" 1, "ss01" 1;
+  color: var(--accent);
+  padding: 0 0.06em;
+}
+
+/* --- Campaign hero: the newest review dressed as the cover story --- */
+.campaign {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(20px, 3.5vw, 56px);
+  align-items: end;
+  margin-top: clamp(24px, 4vh, 56px);
+}
+
+.campaignMedia {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  aspect-ratio: 16 / 10;
+  background: var(--panel);
+  box-shadow: 0 1px 0 var(--line), 0 30px 60px -40px rgba(20, 18, 13, 0.5);
+}
+.campaignImg {
+  position: absolute;
+  inset: -6% 0;
+  width: 100%;
+  height: 112%;
+  object-fit: cover;
+  display: block;
+}
+
+.campaignText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: 4px;
+}
+.campaignLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-family: var(--f-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.campaignLabelStar { font-size: 10px; }
+.campaignSection {
+  margin: 0 0 10px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.campaignTitle {
+  margin: 0 0 14px;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(30px, 4.4vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.campaignDek {
+  margin: 0 0 18px;
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 22px);
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 34ch;
+}
+.campaignByline {
+  margin: 0;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.scrollCue {
+  margin: clamp(20px, 4vh, 40px) 0 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.scrollArrow { display: inline-block; color: var(--accent); }
+
+/* ------------------------------------------------------------------ *
+ * STREAM — the choreographed reviews.
+ * ------------------------------------------------------------------ */
+.stream {
+  display: flex;
+  flex-direction: column;
+}
+
+.moment {
+  padding: clamp(56px, 11vh, 130px) clamp(18px, 5vw, 72px);
+  border-top: 1px solid var(--line);
+}
+.moment:first-child { border-top: none; }
+
+/* --- variant: split (image left, text right) --- */
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.splitMedia { position: sticky; top: 40px; }
+
+/* --- variant: full (full-bleed image, overlaid title, body below) --- */
+.v_full { padding-left: 0; padding-right: 0; }
+.fullMedia {
+  position: relative;
+  height: clamp(58vh, 78vh, 88vh);
+  overflow: hidden;
+  background: var(--ink);
+}
+.fullMedia .plate {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+.fullMedia .plateImg { border-radius: 0; box-shadow: none; }
+.fullScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(20, 18, 13, 0.82) 0%,
+    rgba(20, 18, 13, 0.34) 34%,
+    rgba(20, 18, 13, 0.05) 62%,
+    rgba(20, 18, 13, 0.12) 100%
+  );
+  pointer-events: none;
+}
+.fullOverlay {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(24px, 5vw, 72px);
+  color: var(--paper);
+}
+.fullOverlay .sectionTag { color: rgba(241, 239, 233, 0.72); }
+.fullOverlay .sectionTag .no { color: var(--paper); }
+.fullOverlay .mTitle { color: var(--paper); max-width: 16ch; }
+.fullOverlay .mDek { color: rgba(241, 239, 233, 0.9); }
+.fullBody {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 72px) clamp(18px, 5vw, 24px) 0;
+}
+
+/* --- variant: text (text-forward, smaller plate aside) --- */
+.textGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.textAside { position: sticky; top: 40px; }
+.textAside .plate { aspect-ratio: 4 / 5; }
+
+/* ------------------------------------------------------------------ *
+ * Shared moment pieces.
+ * ------------------------------------------------------------------ */
+.plate {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  aspect-ratio: 4 / 3;
+  background: var(--panel);
+  box-shadow: 0 1px 0 var(--line), 0 40px 70px -50px rgba(20, 18, 13, 0.55);
+}
+.plateImg {
+  position: absolute;
+  inset: -7% 0;
+  width: 100%;
+  height: 114%;
+  object-fit: cover;
+  display: block;
+}
+.fullMedia .plateImg { inset: -9% 0; height: 118%; }
+
+.sectionTag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sectionTag .no { color: var(--accent); font-weight: 700; }
+
+.mTitle {
+  margin: 0 0 14px;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(30px, 4.6vw, 62px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.mDek {
+  margin: 0 0 22px;
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(17px, 1.9vw, 23px);
+  line-height: 1.42;
+  color: var(--ink);
+  max-width: 38ch;
+}
+
+.reading { max-width: 62ch; }
+.metaLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.metaSection { color: var(--ink); font-weight: 600; }
+.metaDate { font-family: var(--f-mono); letter-spacing: 0.04em; }
+.dot { color: var(--line); }
+
+.byline {
+  margin: 0 0 22px;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.prose > p {
+  margin: 0 0 1.05em;
+  font-family: var(--f-read);
+  font-size: clamp(17px, 1.25vw, 19px);
+  line-height: 1.62;
+  color: var(--ink);
+}
+.prose > p:first-child::first-letter {
+  float: left;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 3.4em;
+  line-height: 0.78;
+  padding: 0.02em 0.09em 0 0;
+  color: var(--accent);
+}
+.prose > p:last-child { margin-bottom: 0; }
+
+.credit {
+  margin: 24px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ *
+ * End mark.
+ * ------------------------------------------------------------------ */
+.endMark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(60px, 12vh, 130px) 24px clamp(40px, 8vh, 80px);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.endAmp {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-style: italic;
+  font-weight: 500;
+  font-feature-settings: "swsh" 1, "ss01" 1;
+  font-size: clamp(56px, 10vw, 120px);
+  line-height: 1;
+  color: var(--accent);
+}
+.endText {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Clearance for the fixed bottom Lab switcher. */
+.switcherClearance { height: 80px; }
+
+/* ------------------------------------------------------------------ *
+ * MOTION — everything above is legible in place. Transforms,
+ * reveals, parallax and load animations live only here.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  /* masthead load stagger */
+  .word {
+    opacity: 0;
+    transform: translateY(0.42em);
+    animation: wordRise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .word:nth-child(1) { animation-delay: 0.05s; }
+  .word:nth-child(2) { animation-delay: 0.15s; }
+  .word:nth-child(4) { animation-delay: 0.28s; }
+  .word:nth-child(5) { animation-delay: 0.42s; }
+  .word:nth-child(6) { animation-delay: 0.5s; }
+
+  .kicker,
+  .campaign {
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .kicker { animation-delay: 0s; }
+  .campaign { animation-delay: 0.55s; }
+
+  .scrollArrow { animation: bob 1.8s ease-in-out infinite; }
+
+  /* parallax drift on the big plates */
+  .campaignImg,
+  .plateImg {
+    transform: translate3d(0, var(--shift, 0px), 0);
+    will-change: transform;
+  }
+
+  /* scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(42px);
+    transition: opacity 0.85s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .reveal.inView {
+    opacity: 1;
+    transform: none;
+  }
+  /* gentle intra-moment stagger between media + text */
+  .reveal .splitText,
+  .reveal .fullBody,
+  .reveal .textMain {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s,
+      transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s;
+  }
+  .reveal.inView .splitText,
+  .reveal.inView .fullBody,
+  .reveal.inView .textMain {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wordRise {
+  from { opacity: 0; transform: translateY(0.42em); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ------------------------------------------------------------------ *
+ * Focus + interactive niceties.
+ * ------------------------------------------------------------------ */
+:where(.page) a:focus-visible,
+:where(.page) button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ------------------------------------------------------------------ *
+ * RESPONSIVE — stack to single column, lighten the motion.
+ * ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .campaign {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  .campaignText { padding-bottom: 0; }
+  .splitGrid,
+  .textGrid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .splitMedia,
+  .textAside { position: static; top: auto; }
+  .textAside { max-width: 420px; }
+  .splitMedia { order: -1; }
+  .textAside { order: -1; }
+  .fullMedia { height: clamp(52vh, 66vh, 74vh); }
+}
+
+@media (max-width: 560px) {
+  .moment { padding-top: 44px; padding-bottom: 44px; }
+  .prose > p:first-child::first-letter { font-size: 3em; }
+  .campaignMedia { aspect-ratio: 3 / 2; }
+  .masthead { letter-spacing: -0.02em; }
+}
