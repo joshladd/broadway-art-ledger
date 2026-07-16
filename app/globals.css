@@ -1,13 +1,6 @@
-/* Minimal reset — theme stylesheets layer on top of this. */
-:root {
-  --f-fraunces: "Fraunces", Georgia, "Times New Roman", serif;
-  --f-newsreader: "Newsreader", Georgia, "Times New Roman", serif;
-  --f-instrument: "Instrument Serif", Georgia, serif;
-  --f-syne: "Syne", system-ui, -apple-system, sans-serif;
-  --f-bricolage: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
-  --f-archivo: "Archivo", system-ui, -apple-system, sans-serif;
-  --f-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-}
+/* Minimal reset — theme stylesheets layer on top of this.
+   Font CSS variables (--f-fraunces, --f-newsreader, --f-archivo, --f-mono)
+   are provided by next/font on <html> (see lib/fonts.ts), self-hosted. */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; }
