@@ -124,8 +124,8 @@
   display: block;
   font-family: var(--f-fraunces);
   font-optical-sizing: auto;
-  font-weight: 600;
-  font-size: clamp(30px, 4.4vw, 46px);
+  font-weight: 720;
+  font-size: clamp(38px, 5vw, 62px);
   line-height: 1.04;
   letter-spacing: -0.015em;
   text-wrap: balance;

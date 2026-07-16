@@ -109,8 +109,8 @@
   display: block;
   font-family: var(--f-newsreader);
   font-optical-sizing: auto;
-  font-weight: 700;
-  font-size: clamp(32px, 5.4vw, 48px);
+  font-weight: 760;
+  font-size: clamp(38px, 5.8vw, 64px);
   line-height: 1.04;
   letter-spacing: -0.015em;
   text-wrap: balance;

@@ -104,8 +104,8 @@
   display: block;
   font-family: var(--f-fraunces);
   font-optical-sizing: auto;
-  font-weight: 700;
-  font-size: clamp(32px, 4.6vw, 50px);
+  font-weight: 760;
+  font-size: clamp(38px, 5.2vw, 66px);
   line-height: 1.04;
   letter-spacing: -0.02em;
   text-wrap: balance;
