@@ -151,10 +151,6 @@ export const reviews: Review[] = [
   },
 ];
 
-export function getReview(slug: string): Review | undefined {
-  return reviews.find((r) => r.slug === slug);
-}
-
 export const nav = [
   { label: "Current", href: "" },
   { label: "Archive", href: "" },
