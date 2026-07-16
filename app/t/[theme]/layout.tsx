@@ -6,18 +6,19 @@ export function generateStaticParams() {
   return themes.map((t) => ({ theme: t.key }));
 }
 
-export default function ThemeLayout({
+export default async function ThemeLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { theme: string };
+  params: Promise<{ theme: string }>;
 }) {
-  if (!getTheme(params.theme)) notFound();
+  const { theme } = await params;
+  if (!getTheme(theme)) notFound();
   return (
-    <div data-theme={params.theme}>
+    <div data-theme={theme}>
       {children}
-      <Switcher themes={themes.map((t) => ({ key: t.key, name: t.name }))} current={params.theme} />
+      <Switcher themes={themes.map((t) => ({ key: t.key, name: t.name }))} current={theme} />
     </div>
   );
 }

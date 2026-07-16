@@ -2,15 +2,17 @@ import { notFound } from "next/navigation";
 import { getTheme } from "@/lib/themes";
 import { submitFields } from "@/content/reviews";
 
-export default function SubmitRoute({
+export default async function SubmitRoute({
   params,
   searchParams,
 }: {
-  params: { theme: string };
-  searchParams: { sent?: string };
+  params: Promise<{ theme: string }>;
+  searchParams: Promise<{ sent?: string }>;
 }) {
-  const theme = getTheme(params.theme);
+  const { theme: t } = await params;
+  const sp = await searchParams;
+  const theme = getTheme(t);
   if (!theme) notFound();
   const Submit = theme.Submit;
-  return <Submit fields={submitFields} t={params.theme} sent={searchParams?.sent === "1"} />;
+  return <Submit fields={submitFields} t={t} sent={sp?.sent === "1"} />;
 }
