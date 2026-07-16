@@ -11,6 +11,9 @@ export type ThemeModule = {
   ReviewPage: ComponentType<{ review: Review; prev: Review | null; next: Review | null; t: string }>;
   About: ComponentType<{ about: AboutContent; t: string }>;
   Submit: ComponentType<{ fields: SubmitField[]; t: string; sent: boolean; error: boolean }>;
+  // Optional per-theme archive (list view). If absent, /t/<theme>/archive falls
+  // back to the shared /archive page.
+  Archive?: ComponentType<{ reviews: Review[]; t: string }>;
 };
 
 // Theme registry. Each theme is a self-contained folder under themes/<key>/
