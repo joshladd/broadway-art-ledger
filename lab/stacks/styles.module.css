@@ -1,0 +1,629 @@
+/* ================================================================== *
+ * Stacks — the ARCHIVE as risograph stacked cards.
+ * Page ground + text inherit the Lab tokens (app/lab/lab-tokens.css).
+ * The two-ink RISO look (bold blue + warm red, off-register, a chunky
+ * offset stacked shadow) is local to this module — the boldness this
+ * design spends is on PRINT: duotone plates and misregistered shadows.
+ * ================================================================== */
+.page {
+  --riso-blue: #1b4dd1;
+  --riso-red: #e5432a;
+
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  font-family: var(--f-read);
+  /* faint press-registration hatch on the paper ground */
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 3px,
+    rgba(27, 77, 209, 0.02) 3px,
+    rgba(27, 77, 209, 0.02) 6px
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * DUOTONE — the house risograph plate. next/image fills the frame; two
+ * ink layers (blue multiply for shadows, warm red screen for highlights)
+ * blend over the desaturated art. isolate keeps the blend local.
+ * ------------------------------------------------------------------ */
+.duo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--paper);
+}
+.cardImg,
+.stageImg {
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.08) brightness(1.1);
+}
+/* shadows carry the blue ink */
+.duo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--riso-blue);
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+  pointer-events: none;
+}
+/* highlights carry the warm red ink, nudged off-register */
+.duo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--riso-red);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  transform: translate(2px, -2px);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * MASTHEAD + ARCHIVE HEADER
+ * ------------------------------------------------------------------ */
+.masthead {
+  box-sizing: border-box;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 56px) clamp(18px, 5vw, 64px) clamp(18px, 2.5vw, 30px);
+}
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 clamp(14px, 2.4vw, 26px);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kickerDot { color: var(--riso-red); }
+
+.title {
+  margin: 0;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(52px, 12vw, 150px);
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: var(--riso-blue);
+  /* off-register ghost of the warm-red plate */
+  text-shadow: 0.04em 0.04em 0 var(--riso-red);
+}
+.count {
+  margin: clamp(14px, 2vw, 22px) 0 0;
+  max-width: 46ch;
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(16px, 1.7vw, 20px);
+  line-height: 1.45;
+  color: var(--ink);
+}
+.countNum {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--riso-red);
+}
+
+/* ---- tools: search + filters (designed, inert) ---- */
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: clamp(22px, 3vw, 34px);
+  padding-top: clamp(18px, 2.4vw, 26px);
+  border-top: 2px solid var(--ink);
+}
+.search {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+}
+.searchGlyph {
+  position: absolute;
+  left: 14px;
+  display: inline-flex;
+  color: var(--riso-blue);
+  pointer-events: none;
+}
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--f-read);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--riso-blue);
+  padding: 11px 14px 11px 42px;
+}
+.searchInput::placeholder { color: var(--muted); }
+.searchInput:focus {
+  outline: none;
+  border-color: var(--riso-red);
+  box-shadow: 4px 4px 0 var(--riso-red);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 2px solid var(--line);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--riso-blue); color: var(--riso-blue); }
+.chipOn {
+  color: var(--panel);
+  background: var(--riso-blue);
+  border-color: var(--riso-blue);
+}
+.chipOn:hover { color: var(--panel); }
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.sortLabel {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sortSelect {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  padding: 7px 10px;
+  cursor: pointer;
+}
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--riso-red);
+}
+
+/* ------------------------------------------------------------------ *
+ * STACK — the wall of cards. Two columns on desktop, one on mobile.
+ * The newest review (i===0, biggest №) leads full-width.
+ * ------------------------------------------------------------------ */
+.stack {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(26px, 3.6vw, 52px);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(26px, 3.4vw, 46px) clamp(18px, 5vw, 64px) 0;
+}
+
+/* Each card is a real button, dressed as a printed plate on a chunky
+   two-ink OFFSET stacked shadow. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--riso-red), 13px 13px 0 var(--riso-blue);
+  -webkit-tap-highlight-color: transparent;
+}
+.card[data-featured="true"] {
+  grid-column: 1 / -1;
+  box-shadow: 10px 10px 0 var(--riso-red), 18px 18px 0 var(--riso-blue);
+}
+
+.cardMedia {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-bottom: 2px solid var(--ink);
+  overflow: hidden;
+}
+.card[data-featured="true"] .cardMedia {
+  aspect-ratio: 16 / 9;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(16px, 2vw, 26px);
+}
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.no {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  color: var(--riso-red);
+  font-variant-numeric: tabular-nums;
+}
+.metaSep { color: var(--line); }
+.section { color: var(--riso-blue); font-weight: 700; }
+
+.cardTitle {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.card[data-featured="true"] .cardTitle {
+  font-size: clamp(34px, 5.4vw, 68px);
+  max-width: 18ch;
+}
+.cardVenue {
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(15px, 1.6vw, 18px);
+  color: var(--muted);
+}
+.cardCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--f-label);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--riso-blue);
+}
+.cardCtaGlyph { color: var(--riso-red); }
+
+/* ------------------------------------------------------------------ *
+ * Colophon sign-off.
+ * ------------------------------------------------------------------ */
+.colophon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(48px, 10vh, 104px) 24px clamp(30px, 6vh, 56px);
+  text-align: center;
+}
+.colophonMark {
+  font-size: clamp(28px, 5vw, 46px);
+  line-height: 1;
+  color: var(--riso-red);
+}
+.colophonText {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Clearance for the fixed bottom Lab switcher. */
+.switcherClearance { height: 80px; }
+
+/* ================================================================== *
+ * PORTAL OVERLAY — the opened review.
+ * ================================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--ink);
+}
+
+/* The shared element: the card plate grown to fullscreen. Its transform is
+   driven inline (FLIP) — collapsed onto the card, then released. */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.stageScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(
+    to top,
+    rgba(20, 18, 13, 0.92) 0%,
+    rgba(20, 18, 13, 0.55) 32%,
+    rgba(20, 18, 13, 0.2) 64%,
+    rgba(20, 18, 13, 0.5) 100%
+  );
+}
+
+/* Scrollable reading layer over the fixed image. */
+.scroller {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  outline: none;
+}
+.article { display: block; }
+
+/* First screen: the essay's masthead over the enlarged plate. */
+.lede {
+  min-height: 100svh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: clamp(28px, 6vh, 80px) clamp(20px, 6vw, 96px) clamp(30px, 7vh, 84px);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.ledeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 239, 233, 0.82);
+}
+.ledeMeta .no { color: #ff8a6e; }
+.ledeMeta .metaSep { color: rgba(241, 239, 233, 0.4); }
+.ledeTitle {
+  margin: 4px 0 4px;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(40px, 8vw, 104px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  color: #f7f5ef;
+  text-wrap: balance;
+}
+.ledeDek {
+  margin: 0 0 8px;
+  max-width: 32ch;
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(18px, 2.2vw, 26px);
+  line-height: 1.36;
+  color: rgba(247, 245, 239, 0.94);
+}
+.ledeVenue {
+  margin: 0;
+  font-family: var(--f-read);
+  font-size: clamp(15px, 1.6vw, 18px);
+  color: rgba(241, 239, 233, 0.86);
+}
+.ledeByline {
+  margin: 2px 0 0;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(241, 239, 233, 0.86);
+}
+.scrollCue {
+  margin: clamp(16px, 3vh, 30px) 0 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(241, 239, 233, 0.9);
+}
+.scrollArrow { display: inline-block; color: #ff8a6e; }
+
+/* The paper reading panel that rises over the image as you scroll. */
+.panel {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  padding: clamp(40px, 8vh, 96px) clamp(20px, 6vw, 96px) clamp(80px, 14vh, 140px);
+  border-top: 4px solid var(--riso-red);
+}
+.prose {
+  max-width: 66ch;
+  margin: 0 auto;
+}
+.prose > p {
+  margin: 0 0 1.05em;
+  font-family: var(--f-read);
+  font-size: clamp(17px, 1.25vw, 20px);
+  line-height: 1.64;
+  color: var(--ink);
+}
+.prose > p:first-child::first-letter {
+  float: left;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.78;
+  padding: 0.02em 0.1em 0 0;
+  color: var(--riso-red);
+}
+.prose > p:last-child { margin-bottom: 0; }
+
+.credit {
+  max-width: 66ch;
+  margin: 28px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.panelMeta {
+  max-width: 66ch;
+  margin: 12px auto 0;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.panelArtwork { font-style: italic; }
+
+/* Close control — always reachable, top-right. */
+.close {
+  position: fixed;
+  top: clamp(14px, 2.4vw, 26px);
+  right: clamp(14px, 2.4vw, 26px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 12px;
+  border: 2px solid rgba(241, 239, 233, 0.5);
+  background: rgba(20, 18, 13, 0.55);
+  backdrop-filter: blur(6px);
+  color: #f6f4ee;
+  font-family: var(--f-label);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.closeGlyph { font-size: 20px; line-height: 1; color: #ff8a6e; }
+.closeText { line-height: 1; }
+
+/* ------------------------------------------------------------------ *
+ * MOTION — the zoom and every reveal live here. Everything above is
+ * legible in place, so reduced-motion users lose nothing.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  .card { transition: transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.36s ease; }
+  .cardImg { transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .cardCta { transition: transform 0.36s ease; }
+  /* the plate lifts off its stacked shadow on hover */
+  .card:hover,
+  .card:focus-visible {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0 var(--riso-red), 17px 17px 0 var(--riso-blue);
+  }
+  .card[data-featured="true"]:hover,
+  .card[data-featured="true"]:focus-visible {
+    box-shadow: 13px 13px 0 var(--riso-red), 22px 22px 0 var(--riso-blue);
+  }
+  .card:hover .cardImg,
+  .card:focus-visible .cardImg { transform: scale(1.04); }
+  .card:hover .cardCta,
+  .card:focus-visible .cardCta { transform: translateX(3px); }
+
+  .scrollArrow { animation: bob 1.8s ease-in-out infinite; }
+
+  /* THE SIGNATURE: the shared-element zoom. The stage transitions from its
+     collapsed (card) transform up to fullscreen and back. */
+  .stage { transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.2, 1); }
+
+  /* Essay content fades/rises in only once the plate has arrived. */
+  .lede > *,
+  .close { opacity: 0; }
+  .overlay[data-mode="shown"] .lede > *,
+  .overlay[data-mode="shown"] .close {
+    opacity: 1;
+    transition: opacity 0.5s ease 0.16s;
+  }
+  .overlay[data-mode="shown"] .ledeTitle,
+  .overlay[data-mode="shown"] .ledeDek {
+    animation: fadeUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.18s both;
+  }
+  .overlay[data-mode="exit"] .lede > *,
+  .overlay[data-mode="exit"] .close {
+    opacity: 0;
+    transition: opacity 0.24s ease;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ------------------------------------------------------------------ *
+ * Focus — visible and consistent.
+ * ------------------------------------------------------------------ */
+:where(.page) button:focus-visible,
+:where(.page) input:focus-visible,
+:where(.page) select:focus-visible,
+:where(.overlay) button:focus-visible,
+:where(.overlay) .scroller:focus-visible {
+  outline: 3px solid var(--riso-red);
+  outline-offset: 3px;
+}
+.scroller:focus-visible { outline-offset: -3px; }
+
+/* ------------------------------------------------------------------ *
+ * RESPONSIVE — single column, lighter type.
+ * ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .stack {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .card[data-featured="true"] .cardMedia { aspect-ratio: 4 / 3; }
+}
+
+@media (max-width: 560px) {
+  .card { box-shadow: 5px 5px 0 var(--riso-red), 9px 9px 0 var(--riso-blue); }
+  .card[data-featured="true"] { box-shadow: 6px 6px 0 var(--riso-red), 11px 11px 0 var(--riso-blue); }
+  .ledeTitle { font-size: clamp(36px, 11vw, 60px); }
+  .prose > p:first-child::first-letter { font-size: 3em; }
+}

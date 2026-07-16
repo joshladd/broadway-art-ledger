@@ -12,16 +12,56 @@
 }
 
 /* ------------------------------------------------------------------ *
- * HERO — the masthead moment (first 100dvh).
+ * INTRO — masthead splash + reviews[0], sharing ONE persistent plate.
+ * A tall section: the image column is sticky (the cover plate, present
+ * from the very top), and the text column stacks the oversized masthead
+ * ABOVE reviews[0]'s full review. Scrolling carries the masthead up and
+ * out; the cover review reads in beside the same pinned plate, becoming
+ * the first side-by-side moment. Grid areas place the three pieces so the
+ * masthead + review share one column while the plate spans both rows.
  * ------------------------------------------------------------------ */
-.hero {
-  min-height: 100dvh;
+.intro {
   box-sizing: border-box;
+  min-height: 180vh;
+  padding: clamp(20px, 4vw, 56px) clamp(18px, 5vw, 72px) clamp(56px, 11vh, 130px);
+}
+
+.introGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "mast   image"
+    "review image";
+  column-gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* The persistent cover plate. Sticky on desktop so it stays in view as
+   the masthead scrolls away and reviews[0] reads in beside it. Spans both
+   grid rows on the image side; un-stuck on mobile (responsive block). */
+.introMedia {
+  grid-area: image;
+  position: sticky;
+  top: clamp(24px, 6vh, 56px);
+  align-self: start;
+  max-height: calc(100dvh - clamp(24px, 6vh, 56px) - 24px);
+}
+
+/* Masthead splash — holds (roughly) the first screen above the review,
+   then scrolls out the top. Kicker up top, masthead centered, scroll cue
+   pushed to the bottom edge via the masthead's auto bottom margin. */
+.introMast {
+  grid-area: mast;
   display: flex;
   flex-direction: column;
-  padding: clamp(20px, 4vw, 56px) clamp(18px, 5vw, 72px) clamp(28px, 4vw, 48px);
-  position: relative;
+  min-height: min(84vh, 760px);
+  padding-bottom: clamp(24px, 5vh, 56px);
 }
+
+/* reviews[0]'s full review — reuses the shared moment text pieces. */
+.introText { grid-area: review; }
 
 .kicker {
   display: flex;
@@ -37,14 +77,16 @@
 }
 .kickerDot { color: var(--accent); }
 
-/* Oversized masthead. Words rise + fade in on load, staggered. */
+/* Oversized masthead. Words rise + fade in on load, staggered. Sized to
+   the text column (it now shares a row with the sticky plate), so the
+   Fraunces scale stays big without overrunning the column or the body. */
 .masthead {
   margin: 0 0 auto;
   font-family: var(--f-display);
   font-optical-sizing: auto;
   font-weight: 600;
-  font-size: clamp(52px, 13.5vw, 210px);
-  line-height: 0.9;
+  font-size: clamp(44px, 7vw, 116px);
+  line-height: 0.92;
   letter-spacing: -0.03em;
   color: var(--ink);
   text-wrap: balance;
@@ -66,89 +108,7 @@
   padding: 0 0.06em;
 }
 
-/* --- Campaign hero: the newest review dressed as the cover story --- */
-.campaign {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: clamp(20px, 3.5vw, 56px);
-  align-items: end;
-  margin-top: clamp(24px, 4vh, 56px);
-}
-
-.campaignMedia {
-  position: relative;
-  overflow: hidden;
-  border-radius: 3px;
-  aspect-ratio: 16 / 10;
-  background: var(--panel);
-  box-shadow: 0 1px 0 var(--line), 0 30px 60px -40px rgba(20, 18, 13, 0.5);
-}
-.campaignImg {
-  position: absolute;
-  inset: -6% 0;
-  width: 100%;
-  height: 112%;
-  object-fit: cover;
-  display: block;
-}
-
-.campaignText {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-bottom: 4px;
-}
-.campaignLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 14px;
-  padding: 6px 12px;
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  font-family: var(--f-label);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-.campaignLabelStar { font-size: 10px; }
-.campaignSection {
-  margin: 0 0 10px;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.campaignTitle {
-  margin: 0 0 14px;
-  font-family: var(--f-display);
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-size: clamp(30px, 4.4vw, 60px);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  text-wrap: balance;
-}
-.campaignDek {
-  margin: 0 0 18px;
-  font-family: var(--f-read);
-  font-style: italic;
-  font-size: clamp(17px, 1.7vw, 22px);
-  line-height: 1.4;
-  color: var(--ink);
-  max-width: 34ch;
-}
-.campaignByline {
-  margin: 0;
-  font-family: var(--f-label);
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  color: var(--muted);
-}
+/* Scroll cue — sits at the bottom of the masthead splash. */
 .scrollCue {
   margin: clamp(20px, 4vh, 40px) 0 0;
   font-family: var(--f-mono);
@@ -171,7 +131,8 @@
   padding: clamp(56px, 11vh, 130px) clamp(18px, 5vw, 72px);
   border-top: 1px solid var(--line);
 }
-.moment:first-child { border-top: none; }
+/* The stream now starts at reviews[1]; its first moment keeps its
+   border-top as the divider between the intro and the rest of the feed. */
 
 /* --- side-by-side moment: image column + text column --- */
 .splitGrid {
@@ -359,18 +320,14 @@
   .word:nth-child(5) { animation-delay: 0.42s; }
   .word:nth-child(6) { animation-delay: 0.5s; }
 
-  .kicker,
-  .campaign {
+  .kicker {
     opacity: 0;
     animation: fadeUp 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
-  .kicker { animation-delay: 0s; }
-  .campaign { animation-delay: 0.55s; }
 
   .scrollArrow { animation: bob 1.8s ease-in-out infinite; }
 
   /* parallax drift on the big plates */
-  .campaignImg,
   .plateImg {
     transform: translate3d(0, var(--shift, 0px), 0);
     will-change: transform;
@@ -427,12 +384,26 @@
  * RESPONSIVE — stack to single column, lighten the motion.
  * ------------------------------------------------------------------ */
 @media (max-width: 880px) {
-  .campaign {
+  /* Intro stacks cleanly: masthead, then the cover plate (normal flow,
+     not sticky), then reviews[0]. No repeated image, no huge min-height. */
+  .intro { min-height: auto; }
+  .introGrid {
     grid-template-columns: 1fr;
-    gap: 22px;
-    align-items: start;
+    grid-template-areas:
+      "mast"
+      "image"
+      "review";
+    gap: 28px;
   }
-  .campaignText { padding-bottom: 0; }
+  .introMedia {
+    position: static;
+    top: auto;
+    max-height: none;
+  }
+  .introMast {
+    min-height: auto;
+    padding-bottom: 4px;
+  }
   .splitGrid {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -459,6 +430,5 @@
 @media (max-width: 560px) {
   .moment { padding-top: 44px; padding-bottom: 44px; }
   .prose > p:first-child::first-letter { font-size: 3em; }
-  .campaignMedia { aspect-ratio: 3 / 2; }
   .masthead { letter-spacing: -0.02em; }
 }
