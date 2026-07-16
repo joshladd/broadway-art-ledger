@@ -48,12 +48,18 @@
   color: var(--ink);
   transition: color 0.2s ease;
 }
-.navWordmark em {
-  font-style: italic;
+/* The two-squares house mark set between "Art" and "Ledger" — a scaled-down
+   echo of the masthead: black wordmark, red accent boxes. */
+.navWordMark {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  top: -0.02em;
+  margin: 0 0.16em;
+  font-size: 0.82em;
   color: var(--accent);
-  transition: color 0.2s ease;
 }
-.navWordmark:hover em { color: var(--ink); }
 .navLinks {
   display: flex;
   flex-wrap: wrap;

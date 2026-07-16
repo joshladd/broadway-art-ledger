@@ -31,8 +31,10 @@ function TopNav({ t, active, home = false }: { t: string; active: string; home?:
   return (
     <nav className={styles.topnav} aria-label="Primary">
       {!home && (
-        <a href={tHref(t)} className={styles.navWordmark}>
-          The Broadway <em>Art Ledger</em>
+        <a href={tHref(t)} className={styles.navWordmark} aria-label="The Broadway Art Ledger">
+          The Broadway Art{" "}
+          <span className={styles.navWordMark} aria-hidden="true"><Mark /></span>{" "}
+          Ledger
         </a>
       )}
       <div className={styles.navLinks}>
