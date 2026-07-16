@@ -54,35 +54,37 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
     <div className={styles.page}>
       <Header t={t} active="Index" />
       <div className={styles.feed}>
-        <div className={styles.indexHead}>
-          <span className={styles.headPlate} aria-hidden="true" />
-          <span>Date</span>
-          <span>Section</span>
-          <span>Show &amp; venue</span>
-          <span className={styles.headBy}>By</span>
-        </div>
-        <div className={styles.rows}>
-          {reviews.map((r) => (
-            <a key={r.slug} href={reviewHref(t, r.slug)} className={styles.row}>
-              <span className={styles.plate}>
-                <img className={styles.plateImg} src={r.image} alt={r.alt} loading="lazy" />
-              </span>
-              <span className={styles.rowDate}>
-                <span className={styles.rowDay}>{r.date}</span>
-                <span className={styles.rowNo}>{r.no}</span>
-              </span>
-              <span className={styles.rowSection}>{r.section}</span>
-              <span className={styles.rowMain}>
-                <span className={styles.rowTitle}>{r.title}</span>
-                <span className={styles.rowDek}>{r.dek}</span>
-                <span className={styles.rowVenue}>
-                  {r.venue}, {r.hood}
-                </span>
-              </span>
-              <span className={styles.rowBy}>{r.by}</span>
-            </a>
-          ))}
-        </div>
+        {reviews.map((r) => (
+          <article key={r.slug} className={styles.entry}>
+            <div className={styles.gutter}>
+              <span className={styles.gNo}>{r.no}</span>
+              <span className={styles.gDate}>{r.date}</span>
+              <span className={styles.gSection}>{r.section}</span>
+              <span className={styles.gBy}>by {r.by}</span>
+            </div>
+            <div className={styles.entryMain}>
+              <h2 className={styles.entryTitle}>
+                {r.title}
+              </h2>
+              <p className={styles.entryDek}>{r.dek}</p>
+              <p className={styles.entryVenue}>
+                {r.venue}, {r.hood}
+              </p>
+              <figure className={styles.figure}>
+                <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
+                <figcaption className={styles.caption}>{r.credit}</figcaption>
+              </figure>
+              <div className={styles.copy}>
+                {r.body.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <p className={styles.artLine}>
+                {r.artist}, <span className={styles.artwork}>{r.artwork}</span>
+              </p>
+            </div>
+          </article>
+        ))}
       </div>
       <Footer />
     </div>
@@ -241,7 +243,7 @@ const theme: ThemeModule = {
   meta: {
     key: "index",
     name: "The Index",
-    blurb: "A ruled reading index — Archivo, Fraunces titles, one crimson mark on paper.",
+    blurb: "An annotated ledger of full reviews — index margins, Fraunces titles, serif column.",
   },
   Home,
   ReviewPage,

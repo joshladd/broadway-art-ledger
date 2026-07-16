@@ -51,15 +51,16 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
               <span>{r.date}</span>
               <span className={styles.metaNo}>{r.no}</span>
             </div>
-            <a href={reviewHref(t, r.slug)} className={styles.figure}>
+            <figure className={styles.figure}>
               <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
-            </a>
+            </figure>
             <p className={styles.caption}>{r.credit}</p>
-            <a href={reviewHref(t, r.slug)} className={styles.title}>{r.title}</a>
+            <h2 className={styles.title}>{r.title}</h2>
             <div className={styles.byline}>{r.venue}, {r.hood} — by <b>{r.by}</b></div>
             <p className={styles.dek}>{r.dek}</p>
-            <p className={styles.teaser}>{r.body[0]}</p>
-            <a href={reviewHref(t, r.slug)} className={styles.more}>Read the review →</a>
+            <div className={styles.copy}>
+              {r.body.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
           </article>
         ))}
       </div>

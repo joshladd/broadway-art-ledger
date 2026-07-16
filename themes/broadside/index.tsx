@@ -63,27 +63,26 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
             key={r.slug}
             className={`${styles.entry} ${i % 2 === 1 ? styles.entryFlip : ""}`}
           >
-            <a href={reviewHref(t, r.slug)} className={styles.media}>
+            <div className={styles.meta}>
+              <span className={styles.metaSection}>{r.section}</span>
+              <span className={styles.metaDate}>{r.date}</span>
+              <span className={styles.metaNo}>{r.no}</span>
+            </div>
+            <h2 className={styles.title}>
+              {r.title}
+            </h2>
+            <p className={styles.byline}>
+              {r.venue}, {r.hood} — by <b>{r.by}</b>
+            </p>
+            <p className={styles.dek}>{r.dek}</p>
+            <figure className={styles.marquee}>
               <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
               <span className={styles.caption}>{r.credit}</span>
-            </a>
-            <div className={styles.textcol}>
-              <div className={styles.meta}>
-                <span className={styles.metaSection}>{r.section}</span>
-                <span className={styles.metaDate}>{r.date}</span>
-                <span className={styles.metaNo}>{r.no}</span>
-              </div>
-              <a href={reviewHref(t, r.slug)} className={styles.title}>
-                {r.title}
-              </a>
-              <p className={styles.byline}>
-                {r.venue}, {r.hood} — by <b>{r.by}</b>
-              </p>
-              <p className={styles.dek}>{r.dek}</p>
-              <p className={styles.teaser}>{r.body[0]}</p>
-              <a href={reviewHref(t, r.slug)} className={styles.more}>
-                Read the review
-              </a>
+            </figure>
+            <div className={styles.copy}>
+              {r.body.map((p, j) => (
+                <p key={j}>{p}</p>
+              ))}
             </div>
           </article>
         ))}
@@ -253,7 +252,7 @@ const theme: ThemeModule = {
   meta: {
     key: "broadside",
     name: "Broadside",
-    blurb: "Warm paper, ink-blue hairlines, Bricolage headlines on an asymmetric editorial grid.",
+    blurb: "Warm paper, ink-blue hairlines, big Fraunces serif over a continuous asymmetric reading column.",
   },
   Home,
   ReviewPage,

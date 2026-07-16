@@ -51,9 +51,9 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
       <div className={styles.feed}>
         {reviews.map((r) => (
           <article key={r.slug} className={styles.entry}>
-            <a href={reviewHref(t, r.slug)} className={styles.figure}>
+            <figure className={styles.figure}>
               <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
-            </a>
+            </figure>
             <p className={styles.credit}>{r.credit}</p>
             <div className={styles.entryText}>
               <div className={styles.meta}>
@@ -61,10 +61,13 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
                 <span>{r.section}</span>
                 <span>{r.date}</span>
               </div>
-              <a href={reviewHref(t, r.slug)} className={styles.title}>{r.title}</a>
+              <h2 className={styles.title}>{r.title}</h2>
               <p className={styles.venue}>{r.venue}, {r.hood}</p>
               <p className={styles.dek}>{r.dek}</p>
               <p className={styles.byline}>By {r.by}</p>
+            </div>
+            <div className={styles.copy}>
+              {r.body.map((p, i) => <p key={i}>{p}</p>)}
             </div>
           </article>
         ))}
@@ -169,7 +172,7 @@ function Submit({ fields, t, sent }: { fields: SubmitField[]; t: string; sent: b
 }
 
 const theme: ThemeModule = {
-  meta: { key: "kunsthalle", name: "Kunsthalle", blurb: "Museum-wall restraint — Archivo grotesque, near-white walls, only the art has color." },
+  meta: { key: "kunsthalle", name: "Kunsthalle", blurb: "Museum-wall restraint — Newsreader serif, near-white walls, only the art has color." },
   Home,
   ReviewPage,
   About,

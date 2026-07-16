@@ -29,11 +29,12 @@
   border-bottom: 2px solid var(--ink);
 }
 .wordmark {
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 700;
   font-size: clamp(30px, 5vw, 46px);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
+  line-height: 0.94;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 .nav {
@@ -79,51 +80,20 @@
   margin: 0;
 }
 
-/* ---------- feed / asymmetric grid ---------- */
+/* ---------- feed / continuous asymmetric column ---------- */
 .feed {
-  max-width: 1180px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 0 40px;
 }
+/* one continuous reading column; the marquee bleeds wider than it */
 .entry {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 0 52px;
-  align-items: start;
-  padding: 58px 0;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 62px 0;
   border-bottom: 1px solid var(--rule);
 }
-.entryFlip {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
-}
-.entryFlip .media { order: 2; }
-.entryFlip .textcol { order: 1; }
 
-.media {
-  display: block;
-  align-self: start;
-}
-.img {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: #e5e0d2;
-  border: 1px solid var(--ink);
-}
-.caption {
-  display: block;
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.02em;
-  line-height: 1.5;
-  color: var(--ink2);
-  margin-top: 10px;
-}
-
-.textcol {
-  align-self: center;
-  max-width: 30rem;
-}
 .meta {
   display: flex;
   gap: 14px;
@@ -141,18 +111,19 @@
 
 .title {
   display: block;
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 700;
-  font-size: clamp(30px, 4vw, 50px);
+  font-size: clamp(34px, 5vw, 58px);
   line-height: 0.98;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   color: var(--ink);
   margin: 0 0 14px;
 }
-/* headline breaks its measure toward the image */
-.entry .title { margin-right: -3.5rem; }
-.entryFlip .title { margin-right: 0; margin-left: -3.5rem; }
+/* headline breaks its measure toward the bleed side */
+.entry .title { margin-right: -3rem; }
+.entryFlip .title { margin-right: 0; margin-left: -3rem; }
 .title:hover { color: var(--blue); }
 
 .byline {
@@ -166,21 +137,50 @@
 .dek {
   font-family: var(--f-newsreader);
   font-style: italic;
-  font-size: 22px;
+  font-size: 23px;
   line-height: 1.36;
-  margin: 0 0 14px;
+  margin: 0 0 26px;
 }
-.teaser { margin: 0 0 18px; }
-.more {
+
+/* marquee image bleeds wider than the reading column, alternating sides */
+.marquee {
+  display: block;
+  margin: 0 0 30px;
+}
+.entry .marquee { margin-right: -160px; }
+.entryFlip .marquee { margin-right: 0; margin-left: -160px; }
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #e5e0d2;
+  border: 1px solid var(--ink);
+}
+.caption {
+  display: block;
   font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--blue);
-  border-bottom: 1px solid var(--blue);
-  padding-bottom: 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  color: var(--ink2);
+  margin-top: 10px;
 }
-.more:hover { color: var(--ink); border-color: var(--ink); }
+
+.copy {
+  font-size: 19px;
+  line-height: 1.7;
+}
+.copy p { margin: 0 0 22px; }
+.copy p:last-child { margin-bottom: 0; }
+.copy p:first-of-type::first-letter {
+  font-family: var(--f-fraunces);
+  font-weight: 700;
+  font-size: 3.2em;
+  line-height: 0.72;
+  float: left;
+  padding: 6px 12px 0 0;
+  color: var(--blue);
+}
 
 /* ---------- footer ---------- */
 .footer {
@@ -195,7 +195,8 @@
   margin-bottom: 24px;
 }
 .motto {
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 600;
   font-size: clamp(20px, 3vw, 30px);
   letter-spacing: -0.02em;
@@ -260,11 +261,12 @@
 }
 .aHeadText { align-self: end; }
 .aTitle {
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 700;
   font-size: clamp(38px, 6vw, 72px);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  line-height: 0.94;
+  letter-spacing: -0.025em;
   text-wrap: balance;
   margin: 10px 0 18px;
   /* break the measure toward the image */
@@ -309,7 +311,7 @@
 }
 .body p { margin: 0 0 22px; }
 .body p:first-of-type::first-letter {
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
   font-weight: 700;
   font-size: 3.4em;
   line-height: 0.72;
@@ -339,7 +341,8 @@
 }
 .pagerTitle {
   display: block;
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 600;
   font-size: 19px;
   letter-spacing: -0.02em;
@@ -355,10 +358,11 @@
   padding: 48px 40px 0;
 }
 .aboutTitle {
-  font-family: var(--f-bricolage);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 700;
   font-size: clamp(34px, 5vw, 56px);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   line-height: 0.96;
   margin: 0 0 24px;
 }
@@ -432,11 +436,12 @@
 .submitBtn:hover { background: var(--ink); }
 
 /* ---------- responsive ---------- */
+@media (max-width: 1120px) {
+  .entry .marquee { margin-right: -96px; }
+  .entryFlip .marquee { margin-left: -96px; }
+}
 @media (max-width: 860px) {
-  .entry, .entryFlip { grid-template-columns: 1fr; gap: 22px; }
-  .entryFlip .media { order: 1; }
-  .entryFlip .textcol { order: 2; }
-  .textcol { align-self: start; max-width: none; }
+  .entry .marquee, .entryFlip .marquee { margin-left: 0; margin-right: 0; }
   .entry .title, .entryFlip .title { margin-left: 0; margin-right: 0; }
   .aHead { grid-template-columns: 1fr; gap: 26px; align-items: start; }
   .aTitle { margin-right: 0; }

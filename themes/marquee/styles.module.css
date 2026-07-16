@@ -1,6 +1,6 @@
-/* Marquee — type-as-identity. A giant Syne wordmark carries every page;
+/* Marquee — type-as-identity. A giant bold-serif wordmark carries every page;
    everything below it stays deliberately quiet. Bone ground, ink text,
-   one restrained warm red. */
+   one restrained warm red. Title and body set in serif; metadata in mono. */
 .page {
   --bg: #efece2;
   --ink: #17150f;
@@ -24,11 +24,12 @@
 }
 .wordmark {
   display: block;
-  font-family: var(--f-syne);
-  font-weight: 800;
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 700;
   color: var(--ink);
   text-transform: uppercase;
-  line-height: 0.86;
+  line-height: 0.88;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -102,11 +103,12 @@
 .metaNo { margin-left: auto; }
 .title {
   display: block;
-  font-family: var(--f-syne);
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
   font-weight: 700;
-  font-size: clamp(28px, 4.4vw, 40px);
-  line-height: 1.03;
-  letter-spacing: -0.02em;
+  font-size: clamp(30px, 4.6vw, 44px);
+  line-height: 1.04;
+  letter-spacing: -0.018em;
   text-wrap: balance;
   margin: 0 0 8px;
 }
@@ -130,9 +132,19 @@
   margin: 0 0 20px;
   line-height: 1.5;
 }
-.teaser { margin: 0 0 14px; }
-.more { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
-.more:hover { text-decoration: underline; text-underline-offset: 3px; }
+.copy { font-family: var(--f-newsreader); font-size: 20px; line-height: 1.68; }
+.copy p { margin: 0 0 20px; }
+.copy p:last-child { margin-bottom: 0; }
+.copy p:first-of-type::first-letter {
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 3.1em;
+  line-height: 0.72;
+  float: left;
+  padding: 10px 12px 0 0;
+  color: var(--accent);
+}
 
 /* ---------- footer ---------- */
 .footer {
@@ -151,12 +163,12 @@
 .back { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); display: inline-block; margin-bottom: 30px; }
 .back:hover { color: var(--accent); }
 .aTitle {
-  font-family: var(--f-syne);
-  font-weight: 800;
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 700;
   font-size: clamp(34px, 6.4vw, 62px);
-  line-height: 0.98;
-  letter-spacing: -0.028em;
-  text-transform: uppercase;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   margin: 6px 0 12px;
 }
@@ -169,8 +181,9 @@
 .body { font-size: 20px; line-height: 1.68; }
 .body p { margin: 0 0 20px; }
 .body p:first-of-type::first-letter {
-  font-family: var(--f-syne);
-  font-weight: 800;
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 700;
   font-size: 3.1em;
   line-height: 0.72;
   float: left;
@@ -192,11 +205,11 @@
 .pagerLink { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); max-width: 45%; }
 .pagerNext { text-align: right; }
 .pagerLink:hover { color: var(--accent); }
-.pagerLink span { display: block; color: var(--ink); font-family: var(--f-syne); font-weight: 600; font-size: 16px; text-transform: none; letter-spacing: -0.01em; margin-top: 4px; line-height: 1.15; }
+.pagerLink span { display: block; color: var(--ink); font-family: var(--f-fraunces); font-optical-sizing: auto; font-weight: 600; font-size: 16px; text-transform: none; letter-spacing: -0.01em; margin-top: 4px; line-height: 1.15; }
 
 /* ---------- about ---------- */
 .about { max-width: 680px; margin: 0 auto; padding: 40px clamp(20px, 4vw, 40px) 0; }
-.aboutTitle { font-family: var(--f-syne); font-weight: 800; font-size: clamp(32px, 5.6vw, 56px); letter-spacing: -0.026em; text-transform: uppercase; line-height: 0.98; margin: 0 0 24px; }
+.aboutTitle { font-family: var(--f-fraunces); font-optical-sizing: auto; font-weight: 700; font-size: clamp(32px, 5.6vw, 56px); letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 24px; }
 .lede { font-family: var(--f-newsreader); font-style: italic; font-size: clamp(20px, 3vw, 26px); line-height: 1.4; margin: 0 0 26px; }
 .aboutBody { font-size: 19px; line-height: 1.7; }
 .aboutBody p { margin: 0 0 20px; }

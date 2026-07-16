@@ -77,19 +77,22 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
         </div>
         {reviews.map((r) => (
           <article key={r.slug} className={styles.plate}>
-            <div className={styles.plateNo}>{r.no}</div>
-            <div className={styles.plateArt}>
-              <a href={reviewHref(t, r.slug)} className={styles.figure}>
-                <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
-              </a>
-              <p className={styles.caption}>{r.credit}</p>
-            </div>
-            <div className={styles.plateBody}>
+            <div className={styles.plateHead}>
               <span className={styles.section}>{r.section}</span>
-              <a href={reviewHref(t, r.slug)} className={styles.title}>{r.title}</a>
-              <p className={styles.dek}>{r.dek}</p>
-              <PlateLedger review={r} />
-              <a href={reviewHref(t, r.slug)} className={styles.more}>Read the entry →</a>
+              <span className={styles.plateNo}>{r.no}</span>
+            </div>
+            <h2 className={styles.title}>{r.title}</h2>
+            <p className={styles.artwork}>
+              <span className={styles.artworkArtist}>{r.artist}</span>, <em>{r.artwork}</em>
+            </p>
+            <p className={styles.dek}>{r.dek}</p>
+            <PlateLedger review={r} />
+            <figure className={styles.plateArt}>
+              <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
+              <figcaption className={styles.caption}>{r.credit}</figcaption>
+            </figure>
+            <div className={styles.copy}>
+              {r.body.map((p, i) => <p key={i}>{p}</p>)}
             </div>
           </article>
         ))}
