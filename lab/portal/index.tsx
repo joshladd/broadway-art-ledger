@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import type { Review } from "@/content/reviews";
+import { Mark } from "@/components/Mark";
 import styles from "./styles.module.css";
 
 /* ------------------------------------------------------------------ *
@@ -65,6 +67,14 @@ function View({ reviews }: { reviews: Review[] }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollbarPad = useRef(0);
+
+  // Section chips are a DESIGNED (inert) filter slot — sections are derived
+  // from the collection so the chips read as real, but nothing is wired.
+  const sections = useMemo(() => {
+    const seen: string[] = [];
+    for (const r of reviews) if (r.section && !seen.includes(r.section)) seen.push(r.section);
+    return seen;
+  }, [reviews]);
 
   useEffect(() => {
     if (typeof window.matchMedia === "function") {
@@ -197,12 +207,11 @@ function View({ reviews }: { reviews: Review[] }) {
           <span className={styles.kickerDot} aria-hidden="true">/</span>
           <span>New York</span>
         </p>
-        <h1 className={styles.wordmark} aria-label="The Broadway Art & Ledger">
+        <h1 className={styles.wordmark} aria-label="The Broadway Art Ledger">
           <span className={styles.word}>The</span>{" "}
           <span className={styles.word}>Broadway</span>
           <span className={styles.wordBreak} aria-hidden="true" />
           <span className={styles.word}>Art</span>{" "}
-          <span className={`${styles.word} ${styles.amp}`} aria-hidden="true">&amp;</span>{" "}
           <span className={styles.word}>Ledger</span>
         </h1>
         <p className={styles.intro}>
@@ -210,6 +219,46 @@ function View({ reviews }: { reviews: Review[] }) {
           become the page you read.
         </p>
       </header>
+
+      {/* ARCHIVE INTERFACE — designed slots, deliberately inert (not wired). */}
+      <div className={styles.tools}>
+        <div className={styles.search} role="search">
+          <span className={styles.searchGlyph} aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" strokeLinecap="round" />
+            </svg>
+          </span>
+          <input
+            type="search"
+            className={styles.searchInput}
+            placeholder="Search reviews…"
+            aria-label="Search reviews"
+            disabled
+          />
+        </div>
+
+        <div className={styles.filters}>
+          <div className={styles.chips} role="group" aria-label="Filter by section">
+            <button type="button" className={`${styles.chip} ${styles.chipOn}`} aria-pressed="true" disabled>
+              All
+            </button>
+            {sections.map((s) => (
+              <button key={s} type="button" className={styles.chip} aria-pressed="false" disabled>
+                {s}
+              </button>
+            ))}
+          </div>
+          <label className={styles.sort}>
+            <span className={styles.sortLabel}>Sort</span>
+            <select className={styles.sortSelect} defaultValue="newest" aria-label="Sort reviews" disabled>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="section">Section</option>
+            </select>
+          </label>
+        </div>
+      </div>
 
       <section className={styles.gallery} aria-label="Reviews">
         {reviews.map((review, i) => (
@@ -228,8 +277,14 @@ function View({ reviews }: { reviews: Review[] }) {
                 else mediaRefs.current.delete(review.slug);
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={styles.cardImg} src={review.image} alt={review.alt} loading="lazy" />
+              <Image
+                className={styles.cardImg}
+                src={review.image}
+                alt={review.alt}
+                fill
+                sizes={i === 0 ? "100vw" : "(max-width: 860px) 100vw, 33vw"}
+                priority={i < 3}
+              />
               <span className={styles.cardScrim} aria-hidden="true" />
             </span>
             <span className={styles.cardText}>
@@ -248,8 +303,10 @@ function View({ reviews }: { reviews: Review[] }) {
       </section>
 
       <div className={styles.endMark}>
-        <span className={styles.endAmp} aria-hidden="true">&amp;</span>
-        <p className={styles.endText}>The Broadway Art &amp; Ledger &nbsp;·&nbsp; The Lab</p>
+        <span className={styles.endAmp} aria-hidden="true"><Mark /></span>
+        <p className={styles.endText}>
+          <span className={styles.markInline}><Mark /></span> The Broadway Art Ledger &nbsp;·&nbsp; The Lab
+        </p>
       </div>
 
       <div className={styles.switcherClearance} aria-hidden="true" />
@@ -271,8 +328,7 @@ function View({ reviews }: { reviews: Review[] }) {
             onTransitionEnd={onStageTransitionEnd}
             aria-hidden="true"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.stageImg} src={active.image} alt="" />
+            <Image className={styles.stageImg} src={active.image} alt="" fill sizes="100vw" priority />
             <span className={styles.stageScrim} />
           </div>
 

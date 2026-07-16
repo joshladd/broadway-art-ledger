@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Review } from "@/content/reviews";
+import { Mark } from "@/components/Mark";
 import styles from "./styles.module.css";
 
 /* ------------------------------------------------------------------ *
@@ -78,7 +79,9 @@ function Card({ review, index, total }: { review: Review; index: number; total: 
           <div className={styles.scrim} aria-hidden="true" />
 
           <div className={styles.coverChrome}>
-            <span className={styles.deckMark}>The Broadway Art &amp; Ledger</span>
+            <span className={styles.deckMark}>
+              <span className={styles.markInline}><Mark /></span> The Broadway Art Ledger
+            </span>
             <span className={styles.deckCount}>
               {String(index + 1).padStart(2, "0")} <span className={styles.deckSlash}>/</span> {String(total).padStart(2, "0")}
             </span>
@@ -160,7 +163,7 @@ function View({ reviews }: { reviews: Review[] }) {
   }
 
   return (
-    <main className={styles.deck} aria-label="The Broadway Art & Ledger — Flip, a deck of review covers">
+    <main className={styles.deck} aria-label="The Broadway Art Ledger — Flip, a deck of review covers">
       {reviews.map((review, i) => (
         <Card key={review.slug} review={review} index={i} total={reviews.length} />
       ))}

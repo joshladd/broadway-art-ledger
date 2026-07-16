@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Review } from "@/content/reviews";
+import { Mark } from "@/components/Mark";
 import styles from "./styles.module.css";
 
 /* ------------------------------------------------------------------ *
@@ -209,8 +210,10 @@ export default function View({ reviews }: { reviews: Review[] }) {
       </div>
 
       <div className={styles.endMark}>
-        <span className={styles.endAmp} aria-hidden="true">&amp;</span>
-        <p className={styles.endText}>The Broadway Art &amp; Ledger &nbsp;·&nbsp; The Lab</p>
+        <span className={styles.endAmp} aria-hidden="true"><Mark /></span>
+        <p className={styles.endText}>
+          <span className={styles.markInline}><Mark /></span> The Broadway Art Ledger &nbsp;·&nbsp; The Lab
+        </p>
       </div>
 
       <div className={styles.switcherClearance} aria-hidden="true" />

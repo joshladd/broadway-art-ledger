@@ -8,8 +8,6 @@ import type { Review } from "@/content/reviews";
 // BOTH client-component views (splash/flip/cutout/portal/stacks) and
 // server-component views (index) — the client/server boundary is respected.
 import Splash from "@/lab/splash";
-import Flip from "@/lab/flip";
-import Cutout from "@/lab/cutout";
 import Portal from "@/lab/portal";
 import Salon from "@/lab/salon";
 import IndexArchive from "@/lab/index";
@@ -17,16 +15,14 @@ import Stacks from "@/lab/stacks";
 
 const views: Record<string, ComponentType<{ reviews: Review[] }>> = {
   splash: Splash,
-  flip: Flip,
-  cutout: Cutout,
-  portal: Portal,
-  salon: Salon,
   index: IndexArchive,
   stacks: Stacks,
+  portal: Portal,
+  salon: Salon,
 };
 
-// ISR: prerendered at build, revalidated from Airtable every 60s.
-export const revalidate = 60;
+// ISR: prerendered at build, revalidated from Airtable every 15s (no redeploy).
+export const revalidate = 15;
 
 export function generateStaticParams() {
   return labs.map((l) => ({ design: l.key }));

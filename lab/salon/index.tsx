@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import type { Review } from "@/content/reviews";
 import styles from "./styles.module.css";
 
@@ -9,6 +10,13 @@ type Phase = "enter" | "exit";
 function View({ reviews }: { reviews: Review[] }) {
   const [active, setActive] = useState<Review | null>(null);
   const [phase, setPhase] = useState<Phase>("enter");
+
+  // Sections present on the wall, in first-seen order — for the archive filter chips.
+  const sections = useMemo(() => {
+    const seen: string[] = [];
+    for (const r of reviews) if (r.section && !seen.includes(r.section)) seen.push(r.section);
+    return seen;
+  }, [reviews]);
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -94,13 +102,77 @@ function View({ reviews }: { reviews: Review[] }) {
         <p className={styles.lede}>
           The season, hung as a wall. Step up to any work to read it in full.
         </p>
+
+        {/* ARCHIVE INTERFACE — designed locations, not wired. */}
+        <div className={styles.tools}>
+          <div className={styles.search} role="search">
+            <svg
+              className={styles.searchGlyph}
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" strokeLinecap="round" />
+            </svg>
+            <input
+              className={styles.searchInput}
+              type="search"
+              placeholder="Search reviews…"
+              aria-label="Search reviews"
+              disabled
+            />
+          </div>
+
+          <div className={styles.filters}>
+            <div className={styles.chips} role="group" aria-label="Filter by section">
+              <button
+                type="button"
+                className={`${styles.chip} ${styles.chipOn}`}
+                aria-pressed="true"
+                disabled
+              >
+                All
+              </button>
+              {sections.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed="false"
+                  disabled
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <label className={styles.sort}>
+              <span className={styles.sortLabel}>Sort</span>
+              <select
+                className={styles.sortSelect}
+                defaultValue="newest"
+                aria-label="Sort reviews"
+                disabled
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="section">Section</option>
+              </select>
+            </label>
+          </div>
+        </div>
       </header>
 
       {reviews.length === 0 ? (
         <p className={styles.empty}>Nothing on the wall just yet.</p>
       ) : (
         <ul className={styles.wall}>
-          {reviews.map((r) => (
+          {reviews.map((r, i) => (
             <li key={r.slug} className={styles.tile}>
               <button
                 type="button"
@@ -109,11 +181,13 @@ function View({ reviews }: { reviews: Review[] }) {
                 onClick={(e) => openReview(r, e)}
               >
                 <span className={styles.frame}>
-                  <img
+                  <Image
                     className={styles.img}
                     src={r.image}
                     alt={r.alt}
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 680px) 50vw, (max-width: 1320px) 33vw, 420px"
+                    priority={i < 2}
                   />
                   <span className={styles.cue} aria-hidden="true">
                     Step up to read
@@ -163,11 +237,16 @@ function View({ reviews }: { reviews: Review[] }) {
             </button>
 
             <figure className={styles.media}>
-              <img
-                className={styles.mediaImg}
-                src={active.image}
-                alt={active.alt}
-              />
+              <span className={styles.mediaFrame}>
+                <Image
+                  className={styles.mediaImg}
+                  src={active.image}
+                  alt={active.alt}
+                  fill
+                  sizes="(max-width: 860px) 100vw, 560px"
+                  priority
+                />
+              </span>
               <figcaption className={styles.artwork}>
                 <span className={styles.artistName}>{active.artist}</span>
                 <span className={styles.artworkTitle}>{active.artwork}</span>

@@ -12,10 +12,11 @@ export default function LabSwitcher({ designs }: { designs: Ref[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const current = pathname.match(/^\/lab\/([^/]+)/)?.[1];
-  const idx = Math.max(0, designs.findIndex((d) => d.key === current));
+  const idx = designs.findIndex((d) => d.key === current);
 
   const go = useCallback(
     (delta: number) => {
+      if (idx < 0) return;
       const d = designs[(idx + delta + designs.length) % designs.length];
       router.push(`/lab/${d.key}`);
     },
@@ -33,7 +34,7 @@ export default function LabSwitcher({ designs }: { designs: Ref[] }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
 
-  if (!current) return null;
+  if (!current || idx < 0) return null;
   const cur = designs[idx];
   return (
     <div className={styles.bar} role="group" aria-label="Lab design switcher">

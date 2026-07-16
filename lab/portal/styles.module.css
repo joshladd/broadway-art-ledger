@@ -54,15 +54,6 @@
   display: block;
   height: 0;
 }
-/* Swash-italic ampersand — the house signature, shared with Splash. */
-.amp {
-  font-style: italic;
-  font-weight: 500;
-  font-feature-settings: "swsh" 1, "ss01" 1;
-  color: var(--accent);
-  padding: 0 0.06em;
-}
-
 .intro {
   margin: clamp(18px, 3vw, 30px) 0 0;
   max-width: 40ch;
@@ -72,6 +63,120 @@
   line-height: 1.45;
   color: var(--ink);
 }
+
+/* ------------------------------------------------------------------ *
+ * ARCHIVE INTERFACE — a search + filters header band under the
+ * masthead. Designed to Portal's register but deliberately INERT: the
+ * controls are styled and derived-from-real-data, yet not wired.
+ * ------------------------------------------------------------------ */
+.tools {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(6px, 1.6vw, 14px) clamp(18px, 5vw, 72px) clamp(14px, 2vw, 22px);
+}
+.search {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+}
+.searchGlyph {
+  position: absolute;
+  left: 16px;
+  display: inline-flex;
+  color: var(--accent);
+  pointer-events: none;
+}
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--f-read);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 12px 18px 12px 44px;
+}
+.searchInput::placeholder { color: var(--muted); font-style: italic; }
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.searchInput:disabled { cursor: not-allowed; opacity: 0.85; }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-family: var(--f-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.chip:disabled { cursor: not-allowed; }
+.chipOn {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.chipOn::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.sortLabel {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sortSelect {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.sortSelect:disabled { cursor: not-allowed; }
+.sortSelect:focus { outline: none; border-color: var(--accent); }
 
 /* ------------------------------------------------------------------ *
  * GALLERY — the wall of covers. Considered grid on desktop, single
@@ -214,6 +319,14 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--muted);
+}
+/* House two-squares mark, inline before the sign-off line. */
+.markInline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+  color: var(--accent);
+  vertical-align: -0.1em;
 }
 
 /* Clearance for the fixed bottom Lab switcher. */

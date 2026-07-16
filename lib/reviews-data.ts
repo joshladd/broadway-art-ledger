@@ -6,7 +6,11 @@ import type { Review } from "@/content/reviews";
 const TOKEN = process.env.AIRTABLE_TOKEN;
 const BASE = process.env.AIRTABLE_BASE_ID;
 const TABLE = "Reviews";
-const REVALIDATE = 60;
+// How long a cached reviews fetch is served before it revalidates in the
+// background (ISR). Edits in Airtable appear within this window with NO rebuild
+// or redeploy. Lower = fresher/more "realtime"; higher = fewer Airtable calls.
+// (For truly instant updates, add on-demand revalidation — see /api/revalidate.)
+const REVALIDATE = 15;
 
 function str(v: unknown): string {
   return typeof v === "string" ? v : "";
@@ -39,7 +43,8 @@ export async function getReviews(): Promise<Review[]> {
 
     const res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${TOKEN}` },
-      next: { revalidate: REVALIDATE },
+      // Tagged so /api/revalidate can flush it on demand (instant updates).
+      next: { revalidate: REVALIDATE, tags: ["reviews"] },
     });
     if (!res.ok) {
       console.error("getReviews: Airtable fetch failed", res.status, await res.text());
@@ -55,7 +60,7 @@ export async function getReviews(): Promise<Review[]> {
       const photo = Array.isArray(f["Photo"]) && f["Photo"].length > 0;
       out.push({
         slug: rec.id,
-        no: formatNo(str(f["No"])),
+        no: "", // derived from position after the full list is assembled (below)
         date: displayDate(iso),
         iso,
         section: str(f["Section"]),
@@ -74,5 +79,11 @@ export async function getReviews(): Promise<Review[]> {
     }
     offset = data.offset;
   } while (offset);
+  // № is derived from row position (newest-first → highest number), so there's
+  // no manual "No" field to maintain in Airtable.
+  const total = out.length;
+  out.forEach((r, i) => {
+    r.no = formatNo(String(total - i));
+  });
   return out;
 }

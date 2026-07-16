@@ -273,6 +273,14 @@
   text-transform: uppercase;
   color: var(--muted);
 }
+/* House two-squares mark, inline before the sign-off line. */
+.markInline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+  color: var(--accent);
+  vertical-align: -0.1em;
+}
 
 /* Clearance for the fixed bottom Lab switcher (injected by layout). */
 .switcherClearance { height: 80px; }

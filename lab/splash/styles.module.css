@@ -12,56 +12,37 @@
 }
 
 /* ------------------------------------------------------------------ *
- * INTRO — masthead splash + reviews[0], sharing ONE persistent plate.
- * A tall section: the image column is sticky (the cover plate, present
- * from the very top), and the text column stacks the oversized masthead
- * ABOVE reviews[0]'s full review. Scrolling carries the masthead up and
- * out; the cover review reads in beside the same pinned plate, becoming
- * the first side-by-side moment. Grid areas place the three pieces so the
- * masthead + review share one column while the plate spans both rows.
+ * HERO — the oversized masthead ALONE. A full-width section held
+ * deliberately SHORTER than the viewport (~82vh) so the first feed
+ * COVER below peeks up from the bottom edge and invites the scroll —
+ * there is no scroll arrow. A small house mark up top, then a mono
+ * kicker, then the big two-line Fraunces masthead. No image lives in the
+ * hero. Words rise + fade in, staggered, on load.
  * ------------------------------------------------------------------ */
-.intro {
+.hero {
   box-sizing: border-box;
-  min-height: 180vh;
-  padding: clamp(20px, 4vw, 56px) clamp(18px, 5vw, 72px) clamp(56px, 11vh, 130px);
+  min-height: 82vh;
+  display: flex;
+  padding: clamp(20px, 4vw, 56px) clamp(18px, 5vw, 72px) clamp(40px, 8vh, 96px);
 }
 
-.introGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "mast   image"
-    "review image";
-  column-gap: clamp(24px, 4vw, 64px);
-  align-items: start;
+.heroInner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   max-width: 1240px;
   margin: 0 auto;
 }
 
-/* The persistent cover plate. Sticky on desktop so it stays in view as
-   the masthead scrolls away and reviews[0] reads in beside it. Spans both
-   grid rows on the image side; un-stuck on mobile (responsive block). */
-.introMedia {
-  grid-area: image;
-  position: sticky;
-  top: clamp(24px, 6vh, 56px);
-  align-self: start;
-  max-height: calc(100dvh - clamp(24px, 6vh, 56px) - 24px);
+/* Small vermilion house mark, above the kicker. Sizes via font-size
+   (the Mark svg is 1em) and colors via currentColor. */
+.heroMark {
+  display: inline-flex;
+  margin: 0 0 clamp(14px, 2.4vw, 22px);
+  font-size: clamp(30px, 3.4vw, 36px);
+  line-height: 1;
+  color: var(--accent);
 }
-
-/* Masthead splash — holds (roughly) the first screen above the review,
-   then scrolls out the top. Kicker up top, masthead centered, scroll cue
-   pushed to the bottom edge via the masthead's auto bottom margin. */
-.introMast {
-  grid-area: mast;
-  display: flex;
-  flex-direction: column;
-  min-height: min(84vh, 760px);
-  padding-bottom: clamp(24px, 5vh, 56px);
-}
-
-/* reviews[0]'s full review — reuses the shared moment text pieces. */
-.introText { grid-area: review; }
 
 .kicker {
   display: flex;
@@ -77,19 +58,18 @@
 }
 .kickerDot { color: var(--accent); }
 
-/* Oversized masthead. Words rise + fade in on load, staggered. Sized to
-   the text column (it now shares a row with the sticky plate), so the
-   Fraunces scale stays big without overrunning the column or the body. */
+/* Oversized masthead — full page width, big and bold. Words rise + fade
+   in on load, staggered. The mastBreak span forces two lines:
+   "The Broadway" / "Art Ledger". */
 .masthead {
   margin: 0 0 auto;
   font-family: var(--f-display);
   font-optical-sizing: auto;
   font-weight: 600;
-  font-size: clamp(44px, 7vw, 116px);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
+  font-size: clamp(56px, 12vw, 200px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
   color: var(--ink);
-  text-wrap: balance;
 }
 .word {
   display: inline-block;
@@ -99,25 +79,121 @@
   display: block;
   height: 0;
 }
-/* Featured swash-italic ampersand — the house signature. */
-.amp {
-  font-style: italic;
-  font-weight: 500;
-  font-feature-settings: "swsh" 1, "ss01" 1;
+
+/* The two-squares house Mark set BETWEEN "Art" and "Ledger" as a
+   vermilion accent — carrying the visual weight the old ampersand had.
+   Sized ~0.7em of the masthead and vertically centered on the line. */
+.mastMark {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.1em;
+  font-size: 0.7em;
   color: var(--accent);
-  padding: 0 0.06em;
 }
 
-/* Scroll cue — sits at the bottom of the masthead splash. */
-.scrollCue {
-  margin: clamp(20px, 4vh, 40px) 0 0;
+/* ------------------------------------------------------------------ *
+ * COVER — reviews[0] as the campaign lockup + full body. VISIBLE ON
+ * LOAD (no reveal-on-scroll hide): it is already painted and peeks up
+ * from under the masthead. A big marquee image beside the title lockup,
+ * then the review's body in a comfortable reading column.
+ * ------------------------------------------------------------------ */
+.cover {
+  padding: clamp(40px, 8vh, 96px) clamp(18px, 5vw, 72px) clamp(56px, 11vh, 130px);
+  border-top: 1px solid var(--line);
+}
+
+.campaign {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(20px, 3.5vw, 56px);
+  align-items: end;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.campaignMedia {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  aspect-ratio: 16 / 10;
+  background: var(--panel);
+  box-shadow: 0 1px 0 var(--line), 0 30px 60px -40px rgba(20, 18, 13, 0.5);
+}
+/* Oversized wrapper (inset past the frame edges) gives the parallax drift
+   room to move without exposing a gap. next/image `fill` fills it. */
+.campaignImgWrap {
+  position: absolute;
+  inset: -6% 0;
+}
+.campaignImg {
+  object-fit: cover;
+}
+
+.campaignText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: 4px;
+}
+.campaignLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-family: var(--f-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.campaignLabelStar { font-size: 10px; }
+.campaignSection {
+  margin: 0 0 10px;
   font-family: var(--f-mono);
   font-size: 12px;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--muted);
 }
-.scrollArrow { display: inline-block; color: var(--accent); }
+.campaignTitle {
+  margin: 0 0 14px;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(30px, 4.4vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.campaignDek {
+  margin: 0 0 18px;
+  font-family: var(--f-read);
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 22px);
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 34ch;
+}
+.campaignByline {
+  margin: 0;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+/* The cover's full body — a comfortable centered reading column below the
+   lockup. No image here: the marquee already appears once, in the lockup. */
+.coverBody {
+  max-width: 66ch;
+  margin: clamp(36px, 6vh, 64px) auto 0;
+}
 
 /* ------------------------------------------------------------------ *
  * STREAM — the choreographed reviews.
@@ -131,8 +207,8 @@
   padding: clamp(56px, 11vh, 130px) clamp(18px, 5vw, 72px);
   border-top: 1px solid var(--line);
 }
-/* The stream now starts at reviews[1]; its first moment keeps its
-   border-top as the divider between the intro and the rest of the feed. */
+/* The feed starts at reviews[1] (reviews[0] is the cover); the first
+   moment's border-top divides the cover from the start of the feed. */
 
 /* --- side-by-side moment: image column + text column --- */
 .splitGrid {
@@ -325,9 +401,8 @@
     animation: fadeUp 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
 
-  .scrollArrow { animation: bob 1.8s ease-in-out infinite; }
-
-  /* parallax drift on the big plates */
+  /* parallax drift on the big plates (cover lockup + feed) */
+  .campaignImgWrap,
   .plateImg {
     transform: translate3d(0, var(--shift, 0px), 0);
     will-change: transform;
@@ -365,10 +440,6 @@
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
-}
 
 /* ------------------------------------------------------------------ *
  * Focus + interactive niceties.
@@ -384,26 +455,16 @@
  * RESPONSIVE — stack to single column, lighten the motion.
  * ------------------------------------------------------------------ */
 @media (max-width: 880px) {
-  /* Intro stacks cleanly: masthead, then the cover plate (normal flow,
-     not sticky), then reviews[0]. No repeated image, no huge min-height. */
-  .intro { min-height: auto; }
-  .introGrid {
+  /* Cover stacks: image, then the title/label/dek/byline lockup, then the
+     body — still one image, still peeking. */
+  .campaign {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "mast"
-      "image"
-      "review";
-    gap: 28px;
+    gap: 22px;
+    align-items: start;
   }
-  .introMedia {
-    position: static;
-    top: auto;
-    max-height: none;
-  }
-  .introMast {
-    min-height: auto;
-    padding-bottom: 4px;
-  }
+  .campaignText { padding-bottom: 0; }
+  .coverBody { margin-top: clamp(28px, 5vh, 44px); }
+
   .splitGrid {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -431,4 +492,5 @@
   .moment { padding-top: 44px; padding-bottom: 44px; }
   .prose > p:first-child::first-letter { font-size: 3em; }
   .masthead { letter-spacing: -0.02em; }
+  .campaignMedia { aspect-ratio: 3 / 2; }
 }

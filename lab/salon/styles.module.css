@@ -44,6 +44,122 @@
   color: var(--muted);
 }
 
+/* ---- archive interface (designed, inert) ---------------------------- */
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 26px;
+  margin-top: clamp(22px, 3vw, 32px);
+}
+/* search — a framed slot echoing the works' mat + hairline frame */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 9px 13px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(20, 18, 13, 0.03);
+}
+.searchGlyph {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+}
+.searchInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--f-read);
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.searchInput::placeholder {
+  color: var(--muted);
+}
+.searchInput:disabled {
+  cursor: not-allowed;
+}
+.searchInput:focus {
+  outline: none;
+}
+
+/* filters — section chips + a small sort control */
+.filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 13px;
+  cursor: not-allowed;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+/* active chip — the gallery's "wet paint" vermilion */
+.chipOn {
+  color: var(--paper);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.chipOn:hover {
+  color: var(--paper);
+  border-color: var(--accent);
+}
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  cursor: not-allowed;
+}
+.sortLabel {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sortSelect {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: not-allowed;
+}
+.sortSelect:focus {
+  outline: none;
+}
+
 /* ---- the wall (mobile-first: tidy 2-up contact sheet) ---------------- */
 .wall {
   list-style: none;
@@ -300,12 +416,15 @@
   flex-direction: column;
   min-height: 0;
 }
-.mediaImg {
+.mediaFrame {
+  position: relative;
   display: block;
   width: 100%;
-  max-height: 42vh;
-  object-fit: cover;
+  height: 42vh;
   border-bottom: 1px solid var(--line);
+}
+.mediaImg {
+  object-fit: cover;
 }
 .artwork {
   padding: 12px 22px;
@@ -424,9 +543,9 @@
   .media {
     border-right: 1px solid var(--line);
   }
-  .mediaImg {
+  .mediaFrame {
     flex: 1 1 auto;
-    max-height: none;
+    height: auto;
     min-height: 0;
     border-bottom: 0;
   }

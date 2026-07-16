@@ -39,9 +39,10 @@
 .cardImg,
 .stageImg {
   object-fit: cover;
-  filter: grayscale(1) contrast(1.08) brightness(1.1);
+  /* keep most of the art's own tone — just enough desaturation to accept ink */
+  filter: grayscale(0.55) contrast(1.02) brightness(1.04);
 }
-/* shadows carry the blue ink */
+/* shadows carry the blue ink — a LIGHT pass so the art shows through */
 .duo::before {
   content: "";
   position: absolute;
@@ -49,10 +50,10 @@
   z-index: 1;
   background: var(--riso-blue);
   mix-blend-mode: multiply;
-  opacity: 0.9;
+  opacity: 0.22;
   pointer-events: none;
 }
-/* highlights carry the warm red ink, nudged off-register */
+/* highlights carry the warm red ink, nudged off-register — a faint second pass */
 .duo::after {
   content: "";
   position: absolute;
@@ -60,7 +61,7 @@
   z-index: 2;
   background: var(--riso-red);
   mix-blend-mode: screen;
-  opacity: 0.5;
+  opacity: 0.16;
   transform: translate(2px, -2px);
   pointer-events: none;
 }
@@ -216,20 +217,21 @@
 }
 
 /* ------------------------------------------------------------------ *
- * STACK — the wall of cards. Two columns on desktop, one on mobile.
- * The newest review (i===0, biggest №) leads full-width.
+ * STACK — the wall of cards. A uniform grid of equal-size plates:
+ * three columns on desktop, two on tablet, one on phone. The newest
+ * review simply sits first — no special featured treatment.
  * ------------------------------------------------------------------ */
 .stack {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(26px, 3.6vw, 52px);
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 44px);
   max-width: 1280px;
   margin: 0 auto;
   padding: clamp(26px, 3.4vw, 46px) clamp(18px, 5vw, 64px) 0;
 }
 
 /* Each card is a real button, dressed as a printed plate on a chunky
-   two-ink OFFSET stacked shadow. */
+   two-ink OFFSET stacked shadow. Every card is the same modest size. */
 .card {
   position: relative;
   display: flex;
@@ -241,12 +243,8 @@
   cursor: pointer;
   background: var(--panel);
   border: 2px solid var(--ink);
-  box-shadow: 7px 7px 0 var(--riso-red), 13px 13px 0 var(--riso-blue);
+  box-shadow: 6px 6px 0 var(--riso-red), 11px 11px 0 var(--riso-blue);
   -webkit-tap-highlight-color: transparent;
-}
-.card[data-featured="true"] {
-  grid-column: 1 / -1;
-  box-shadow: 10px 10px 0 var(--riso-red), 18px 18px 0 var(--riso-blue);
 }
 
 .cardMedia {
@@ -257,15 +255,12 @@
   border-bottom: 2px solid var(--ink);
   overflow: hidden;
 }
-.card[data-featured="true"] .cardMedia {
-  aspect-ratio: 16 / 9;
-}
 
 .cardBody {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: clamp(16px, 2vw, 26px);
+  padding: clamp(14px, 1.6vw, 22px);
 }
 .cardMeta {
   display: flex;
@@ -290,16 +285,12 @@
   font-family: var(--f-display);
   font-optical-sizing: auto;
   font-weight: 700;
-  font-size: clamp(26px, 3vw, 38px);
-  line-height: 1.02;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.04;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--ink);
   text-wrap: balance;
-}
-.card[data-featured="true"] .cardTitle {
-  font-size: clamp(34px, 5.4vw, 68px);
-  max-width: 18ch;
 }
 .cardVenue {
   font-family: var(--f-read);
@@ -344,6 +335,14 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
+}
+/* House two-squares mark, inline before the colophon line. */
+.markInline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+  color: var(--accent);
+  vertical-align: -0.1em;
 }
 
 /* Clearance for the fixed bottom Lab switcher. */
@@ -552,11 +551,7 @@
   .card:hover,
   .card:focus-visible {
     transform: translate(-3px, -3px);
-    box-shadow: 10px 10px 0 var(--riso-red), 17px 17px 0 var(--riso-blue);
-  }
-  .card[data-featured="true"]:hover,
-  .card[data-featured="true"]:focus-visible {
-    box-shadow: 13px 13px 0 var(--riso-red), 22px 22px 0 var(--riso-blue);
+    box-shadow: 9px 9px 0 var(--riso-red), 15px 15px 0 var(--riso-blue);
   }
   .card:hover .cardImg,
   .card:focus-visible .cardImg { transform: scale(1.04); }
@@ -613,17 +608,19 @@
 /* ------------------------------------------------------------------ *
  * RESPONSIVE — single column, lighter type.
  * ------------------------------------------------------------------ */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .stack {
-    grid-template-columns: 1fr;
-    gap: 34px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(22px, 3vw, 40px);
   }
-  .card[data-featured="true"] .cardMedia { aspect-ratio: 4 / 3; }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
+  .stack {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
   .card { box-shadow: 5px 5px 0 var(--riso-red), 9px 9px 0 var(--riso-blue); }
-  .card[data-featured="true"] { box-shadow: 6px 6px 0 var(--riso-red), 11px 11px 0 var(--riso-blue); }
   .ledeTitle { font-size: clamp(36px, 11vw, 60px); }
   .prose > p:first-child::first-letter { font-size: 3em; }
 }

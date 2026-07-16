@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Review } from "@/content/reviews";
 import Image from "next/image";
+import { Mark } from "@/components/Mark";
 import styles from "./styles.module.css";
 
 /* ------------------------------------------------------------------ *
@@ -242,12 +243,11 @@ export default function View({ reviews }: { reviews: Review[] }) {
       </header>
 
       <section className={styles.stack} aria-label="Reviews">
-        {reviews.map((review, i) => (
+        {reviews.map((review) => (
           <button
             key={review.slug}
             type="button"
             className={styles.card}
-            data-featured={i === 0 ? "true" : undefined}
             aria-label={`Open ${review.title}`}
             onClick={(e) => open(review, e.currentTarget)}
           >
@@ -286,7 +286,9 @@ export default function View({ reviews }: { reviews: Review[] }) {
 
       <div className={styles.colophon}>
         <span className={styles.colophonMark} aria-hidden="true">▚</span>
-        <p className={styles.colophonText}>The Broadway Art &amp; Ledger &nbsp;·&nbsp; Printed in two inks</p>
+        <p className={styles.colophonText}>
+          <span className={styles.markInline}><Mark /></span> The Broadway Art Ledger &nbsp;·&nbsp; Printed in two inks
+        </p>
       </div>
 
       <div className={styles.switcherClearance} aria-hidden="true" />

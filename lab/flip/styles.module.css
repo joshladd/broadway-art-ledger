@@ -99,6 +99,15 @@
 }
 .deckSlash { color: var(--accent); }
 
+/* House two-squares mark, inline before the deck wordmark. */
+.markInline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+  color: var(--accent);
+  vertical-align: -0.1em;
+}
+
 .coverBody {
   position: absolute;
   left: 0;

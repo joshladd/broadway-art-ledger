@@ -1,7 +1,7 @@
 import { getReviews } from "@/lib/reviews-data";
 import Archive from "./Archive";
 
-export const revalidate = 60;
+export const revalidate = 15;
 
 export const metadata = { title: "Archive — The Broadway Art Ledger" };
 
