@@ -173,7 +173,7 @@
 }
 .moment:first-child { border-top: none; }
 
-/* --- variant: split (image left, text right) --- */
+/* --- side-by-side moment: image column + text column --- */
 .splitGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -182,66 +182,24 @@
   max-width: 1240px;
   margin: 0 auto;
 }
-.splitMedia { position: sticky; top: 40px; }
 
-/* --- variant: full (full-bleed image, overlaid title, body below) --- */
-.v_full { padding-left: 0; padding-right: 0; }
-.fullMedia {
-  position: relative;
-  height: clamp(58vh, 78vh, 88vh);
-  overflow: hidden;
-  background: var(--ink);
-}
-.fullMedia .plate {
-  position: absolute;
-  inset: 0;
-  aspect-ratio: auto;
-  border-radius: 0;
-  box-shadow: none;
-}
-.fullMedia .plateImg { border-radius: 0; box-shadow: none; }
-.fullScrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(20, 18, 13, 0.82) 0%,
-    rgba(20, 18, 13, 0.34) 34%,
-    rgba(20, 18, 13, 0.05) 62%,
-    rgba(20, 18, 13, 0.12) 100%
-  );
-  pointer-events: none;
-}
-.fullOverlay {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  box-sizing: border-box;
-  padding: clamp(24px, 5vw, 72px);
-  color: var(--paper);
-}
-.fullOverlay .sectionTag { color: rgba(241, 239, 233, 0.72); }
-.fullOverlay .sectionTag .no { color: var(--paper); }
-.fullOverlay .mTitle { color: var(--paper); max-width: 16ch; }
-.fullOverlay .mDek { color: rgba(241, 239, 233, 0.9); }
-.fullBody {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: clamp(40px, 6vw, 72px) clamp(18px, 5vw, 24px) 0;
-}
+/* Alternating image side for rhythm (desktop). DOM order is media→text;
+   `order` swaps the columns without touching the markup. */
+.imgLeft .splitMedia { order: 1; }
+.imgLeft .splitText { order: 2; }
+.imgRight .splitMedia { order: 2; }
+.imgRight .splitText { order: 1; }
 
-/* --- variant: text (text-forward, smaller plate aside) --- */
-.textGrid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: clamp(24px, 4vw, 64px);
-  align-items: start;
-  max-width: 1180px;
-  margin: 0 auto;
+/* Sticky marquee image while the text column scrolls past (desktop only;
+   un-stuck on mobile in the responsive block). align-self keeps the box
+   hugging the image, and max-height caps it so a plate taller than the
+   viewport can never trap the scroll. */
+.splitMedia {
+  position: sticky;
+  top: clamp(24px, 6vh, 56px);
+  align-self: start;
+  max-height: calc(100dvh - clamp(24px, 6vh, 56px) - 24px);
 }
-.textAside { position: sticky; top: 40px; }
-.textAside .plate { aspect-ratio: 4 / 5; }
 
 /* ------------------------------------------------------------------ *
  * Shared moment pieces.
@@ -262,8 +220,6 @@
   object-fit: cover;
   display: block;
 }
-.fullMedia .plateImg { inset: -9% 0; height: 118%; }
-
 .sectionTag {
   display: flex;
   align-items: center;
@@ -432,17 +388,13 @@
     transform: none;
   }
   /* gentle intra-moment stagger between media + text */
-  .reveal .splitText,
-  .reveal .fullBody,
-  .reveal .textMain {
+  .reveal .splitText {
     opacity: 0;
     transform: translateY(26px);
     transition: opacity 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s,
       transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s;
   }
-  .reveal.inView .splitText,
-  .reveal.inView .fullBody,
-  .reveal.inView .textMain {
+  .reveal.inView .splitText {
     opacity: 1;
     transform: none;
   }
@@ -474,24 +426,34 @@
 /* ------------------------------------------------------------------ *
  * RESPONSIVE — stack to single column, lighten the motion.
  * ------------------------------------------------------------------ */
-@media (max-width: 900px) {
+@media (max-width: 880px) {
   .campaign {
     grid-template-columns: 1fr;
     gap: 22px;
     align-items: start;
   }
   .campaignText { padding-bottom: 0; }
-  .splitGrid,
-  .textGrid {
+  .splitGrid {
     grid-template-columns: 1fr;
     gap: 28px;
   }
-  .splitMedia,
-  .textAside { position: static; top: auto; }
-  .textAside { max-width: 420px; }
-  .splitMedia { order: -1; }
-  .textAside { order: -1; }
-  .fullMedia { height: clamp(52vh, 66vh, 74vh); }
+  /* Not sticky on mobile: the image sits above the text in normal flow,
+     regardless of the desktop alternation. */
+  .splitMedia {
+    position: static;
+    top: auto;
+    max-height: none;
+  }
+  .imgLeft .splitMedia,
+  .imgRight .splitMedia { order: -1; }
+  .imgLeft .splitText,
+  .imgRight .splitText { order: 0; }
+}
+
+/* Keep motion light on mobile: shorter reveal travel. */
+@media (max-width: 880px) and (prefers-reduced-motion: no-preference) {
+  .reveal { transform: translateY(24px); }
+  .reveal .splitText { transform: translateY(14px); }
 }
 
 @media (max-width: 560px) {

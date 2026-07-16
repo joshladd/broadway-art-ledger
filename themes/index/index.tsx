@@ -7,7 +7,7 @@ import styles from "./styles.module.css";
 function Header({ t, active }: { t: string; active: string }) {
   const items = [
     { label: "Index", href: tHref(t) },
-    { label: "Archive", href: tHref(t) },
+    { label: "Archive", href: `/archive?from=${t}` },
     { label: "About", href: tHref(t, "about") },
     { label: "Submit", href: tHref(t, "submit") },
   ];

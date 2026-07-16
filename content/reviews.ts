@@ -30,7 +30,7 @@ export type Review = {
 export const reviews: Review[] = [
   {
     slug: "toulouse-lautrec-night-work",
-    no: "1", date: "07.11.26", iso: "2026-07-11", section: "Painting",
+    no: "8", date: "07.11.26", iso: "2026-07-11", section: "Painting",
     title: "Toulouse-Lautrec: Night Work",
     venue: "The Morgan Library & Museum", hood: "Murray Hill", by: "Coleman Reyes",
     dek: "The green-lit face shoved to the edge is the whole argument.",
@@ -46,7 +46,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "van-gogh-in-arles",
-    no: "2", date: "07.04.26", iso: "2026-07-04", section: "Painting",
+    no: "7", date: "07.04.26", iso: "2026-07-04", section: "Painting",
     title: "Van Gogh in Arles",
     venue: "The Metropolitan Museum of Art", hood: "Upper East Side", by: "June Tanaka",
     dek: "A room painted by someone desperate to believe in rest.",
@@ -62,7 +62,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "the-face-in-the-glass",
-    no: "3", date: "06.27.26", iso: "2026-06-27", section: "Portraiture",
+    no: "6", date: "06.27.26", iso: "2026-06-27", section: "Portraiture",
     title: "The Face in the Glass",
     venue: "Brooklyn Museum", hood: "Prospect Heights", by: "Marcus Bell",
     dek: "Thirty self-portraits in two years; this is the one that stops lying.",
@@ -78,7 +78,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "renoir-on-the-terrace",
-    no: "4", date: "06.20.26", iso: "2026-06-20", section: "Painting",
+    no: "5", date: "06.20.26", iso: "2026-06-20", section: "Painting",
     title: "Renoir: On the Terrace",
     venue: "The Metropolitan Museum of Art", hood: "Upper East Side", by: "Priya Anand",
     dek: "Sweetness this aggressive is a position, not an accident.",
@@ -94,7 +94,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "whistler-nocturnes",
-    no: "5", date: "06.13.26", iso: "2026-06-13", section: "Painting",
+    no: "4", date: "06.13.26", iso: "2026-06-13", section: "Painting",
     title: "Whistler: Nocturnes",
     venue: "The Frick Collection", hood: "Upper East Side", by: "Dov Frankel",
     dek: "A painting that dares you to admit almost nothing is happening.",
@@ -110,7 +110,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "the-painted-curtain",
-    no: "6", date: "06.06.26", iso: "2026-06-06", section: "Old Masters",
+    no: "3", date: "06.06.26", iso: "2026-06-06", section: "Old Masters",
     title: "The Painted Curtain",
     venue: "The Leiden Collection", hood: "Upper East Side", by: "Alina Costa",
     dek: "The blue curtain is the painting; the flowers are the excuse.",
@@ -126,7 +126,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "hokusai-thirty-six-views",
-    no: "7", date: "05.30.26", iso: "2026-05-30", section: "Prints",
+    no: "2", date: "05.30.26", iso: "2026-05-30", section: "Prints",
     title: "Hokusai: Thirty-Six Views",
     venue: "Japan Society", hood: "Turtle Bay", by: "Hana Okafor",
     dek: "The most reproduced image on earth, seen as if for the first time.",
@@ -142,7 +142,7 @@ export const reviews: Review[] = [
   },
   {
     slug: "stieglitz-hand-of-man",
-    no: "8", date: "05.23.26", iso: "2026-05-23", section: "Photography",
+    no: "1", date: "05.23.26", iso: "2026-05-23", section: "Photography",
     title: "Stieglitz: The Hand of Man",
     venue: "International Center of Photography", hood: "Essex Crossing", by: "Sam Whitfield",
     dek: "Stieglitz argued photography was art by photographing a train.",

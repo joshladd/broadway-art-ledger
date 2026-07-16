@@ -100,86 +100,54 @@ function Meta({ review }: { review: Review }) {
   );
 }
 
-const VARIANTS = ["split", "full", "text"] as const;
-type Variant = (typeof VARIANTS)[number];
-
+// One consistent composition: a side-by-side moment (image column +
+// text column). The image side ALTERNATES by index for rhythm — the
+// first full moment (index 0, the cover) puts art on the right, the
+// next on the left, and so on. The image column is sticky on desktop
+// (see CSS) so the marquee plate stays in view while its text scrolls.
 function Moment({ review, index }: { review: Review; index: number }) {
-  const variant: Variant = VARIANTS[index % VARIANTS.length];
+  const imageRight = index % 2 === 0;
   const { ref, inView } = useInView<HTMLElement>();
   const plateRef = useParallax<HTMLImageElement>();
 
-  const heading = (
-    <>
-      <p className={styles.sectionTag}>
-        <span className={styles.no}>{review.no}</span>
-        <span>{review.section}</span>
-      </p>
-      <h2 className={styles.mTitle}>{review.title}</h2>
-      <p className={styles.mDek}>{review.dek}</p>
-    </>
-  );
-
-  const bodyCol = (
-    <div className={styles.reading}>
-      <Meta review={review} />
-      <p className={styles.byline}>By {review.by}</p>
-      <div className={styles.prose}>
-        {review.body.map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
-      </div>
-      <p className={styles.credit}>{review.credit}</p>
-    </div>
-  );
-
-  const plate = (
-    <div className={styles.plate}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img ref={plateRef} className={styles.plateImg} src={review.image} alt={review.alt} loading="lazy" />
-    </div>
-  );
-
   const className = [
     styles.moment,
-    styles[`v_${variant}` as keyof typeof styles],
     styles.reveal,
     inView ? styles.inView : "",
   ]
     .filter(Boolean)
     .join(" ");
 
+  const gridClassName = [styles.splitGrid, imageRight ? styles.imgRight : styles.imgLeft].join(" ");
+
   return (
-    <article ref={ref} className={className} data-variant={variant}>
-      {variant === "split" && (
-        <div className={styles.splitGrid}>
-          <div className={styles.splitMedia}>{plate}</div>
-          <div className={styles.splitText}>
-            {heading}
-            {bodyCol}
+    <article ref={ref} className={className} data-side={imageRight ? "right" : "left"}>
+      <div className={gridClassName}>
+        <div className={styles.splitMedia}>
+          <div className={styles.plate}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img ref={plateRef} className={styles.plateImg} src={review.image} alt={review.alt} loading="lazy" />
           </div>
         </div>
-      )}
-
-      {variant === "full" && (
-        <>
-          <div className={styles.fullMedia}>
-            {plate}
-            <div className={styles.fullScrim} aria-hidden="true" />
-            <div className={styles.fullOverlay}>{heading}</div>
+        <div className={styles.splitText}>
+          <p className={styles.sectionTag}>
+            <span className={styles.no}>{review.no}</span>
+            <span>{review.section}</span>
+          </p>
+          <h2 className={styles.mTitle}>{review.title}</h2>
+          <p className={styles.mDek}>{review.dek}</p>
+          <div className={styles.reading}>
+            <Meta review={review} />
+            <p className={styles.byline}>By {review.by}</p>
+            <div className={styles.prose}>
+              {review.body.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+            <p className={styles.credit}>{review.credit}</p>
           </div>
-          <div className={styles.fullBody}>{bodyCol}</div>
-        </>
-      )}
-
-      {variant === "text" && (
-        <div className={styles.textGrid}>
-          <div className={styles.textMain}>
-            {heading}
-            {bodyCol}
-          </div>
-          <aside className={styles.textAside}>{plate}</aside>
         </div>
-      )}
+      </div>
     </article>
   );
 }
@@ -239,14 +207,17 @@ function View({ reviews }: { reviews: Review[] }) {
     return <main className={styles.page} />;
   }
 
-  const [featured, ...rest] = reviews;
+  const [featured] = reviews;
 
   return (
     <main className={styles.page}>
       <Hero featured={featured} />
 
+      {/* The cover (reviews[0]) intentionally reappears here as the first
+          full feed moment: the "This Week's Cover" teaser scrolls into
+          the cover review in full, then reviews[1], reviews[2], … */}
       <div className={styles.stream}>
-        {rest.map((review, i) => (
+        {reviews.map((review, i) => (
           <Moment key={review.slug} review={review} index={i} />
         ))}
       </div>
