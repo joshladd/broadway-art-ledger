@@ -177,7 +177,7 @@ export const facts = [
 export const motto = "King Kong died here, and it’s where the best art lives.";
 
 export const about = {
-  title: "About & Submissions",
+  title: "About",
   lede:
     "A publication solely focused on art criticism in the New York metropolitan area, with all reviews between 200 and 400 words.",
   body: [

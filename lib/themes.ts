@@ -23,6 +23,7 @@ import indexTheme from "@/themes/index";
 import marquee from "@/themes/marquee";
 import plate from "@/themes/plate";
 import riso from "@/themes/riso";
+import folio from "@/themes/folio";
 
 export const themeModules: Record<string, ThemeModule> = {
   ledger,
@@ -33,6 +34,7 @@ export const themeModules: Record<string, ThemeModule> = {
   marquee,
   plate,
   riso,
+  folio,
 };
 
 export const themes: ThemeMeta[] = Object.values(themeModules).map((m) => m.meta);

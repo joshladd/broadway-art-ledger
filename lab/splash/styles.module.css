@@ -395,6 +395,8 @@
   .word:nth-child(4) { animation-delay: 0.28s; }
   .word:nth-child(5) { animation-delay: 0.42s; }
   .word:nth-child(6) { animation-delay: 0.5s; }
+  /* The house mark rises WITH "Art" (not as a late pop after the words). */
+  .word.mastMark { animation-delay: 0.28s; }
 
   .kicker {
     opacity: 0;
