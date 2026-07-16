@@ -179,11 +179,14 @@
   position: sticky;
   top: 0;
   align-self: start;
-  height: 100dvh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 12px;
+  /* Promote to its own compositor layer so the sticky pin doesn't sub-pixel
+     jitter as the text column scrolls past. */
+  will-change: transform;
 }
 
 /* ------------------------------------------------------------------ *
@@ -198,6 +201,8 @@
   border-radius: 3px;
   background: var(--panel);
   box-shadow: 0 1px 0 var(--line), 0 40px 70px -50px rgba(22, 19, 16, 0.55);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .plateImg {
   display: block;
@@ -666,7 +671,9 @@
  * arc-prefixed so they never collide with the feed's own pieces.
  * ================================================================== */
 .archive {
-  max-width: 1100px;
+  /* match the nav's 1240 max-width so the "Archive" title's left edge aligns
+     with the top-nav wordmark. */
+  max-width: 1240px;
   margin: 0 auto;
   padding: clamp(20px, 4vh, 40px) clamp(18px, 5vw, 72px) 0;
 }

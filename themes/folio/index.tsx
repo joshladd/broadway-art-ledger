@@ -25,7 +25,7 @@ import ArchiveList from "./archive-list";
 // inner pages a compact wordmark anchors the left.
 function TopNav({ t, active, home = false }: { t: string; active: string; home?: boolean }) {
   const items = [
-    { label: "Current", href: tHref(t) },
+    { label: "Feed", href: tHref(t) },
     { label: "Archive", href: tHref(t, "archive") },
     { label: "About", href: tHref(t, "about") },
     { label: "Submit", href: tHref(t, "submit") },
@@ -103,7 +103,7 @@ function Colophon() {
 function Home({ reviews, t }: { reviews: Review[]; t: string }) {
   return (
     <main className={styles.page}>
-      <TopNav t={t} active="Current" home />
+      <TopNav t={t} active="Feed" home />
       <Masthead />
       <Stream reviews={reviews} />
       <Colophon />
@@ -140,7 +140,7 @@ function ReviewPageImage({ review }: { review: Review }) {
 function ReviewPage({ review, prev, next, t }: { review: Review; prev: Review | null; next: Review | null; t: string }) {
   return (
     <main className={styles.page}>
-      <TopNav t={t} active="Current" />
+      <TopNav t={t} active="Feed" />
       <article className={styles.article}>
         <a href={tHref(t)} className={styles.back}>← The feed</a>
         <p className={styles.sectionTag}>
