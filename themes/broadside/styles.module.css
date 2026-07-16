@@ -395,6 +395,17 @@
   font-style: italic;
   font-size: 20px;
 }
+.error {
+  border: 1px solid #a5201a;
+  border-left-width: 4px;
+  background: #fff;
+  padding: 20px 22px;
+  margin-bottom: 32px;
+  font-family: var(--f-newsreader);
+  font-style: italic;
+  font-size: 20px;
+  color: #a5201a;
+}
 .form { display: flex; flex-direction: column; gap: 24px; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .flabel {

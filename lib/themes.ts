@@ -10,7 +10,7 @@ export type ThemeModule = {
   Home: ComponentType<{ reviews: Review[]; t: string }>;
   ReviewPage: ComponentType<{ review: Review; prev: Review | null; next: Review | null; t: string }>;
   About: ComponentType<{ about: AboutContent; t: string }>;
-  Submit: ComponentType<{ fields: SubmitField[]; t: string; sent: boolean }>;
+  Submit: ComponentType<{ fields: SubmitField[]; t: string; sent: boolean; error: boolean }>;
 };
 
 // Theme registry. Each theme is a self-contained folder under themes/<key>/

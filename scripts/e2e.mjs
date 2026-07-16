@@ -26,6 +26,9 @@ check(await page.getByText(/solely focused on art criticism/i).first().isVisible
 await page.goto(`${BASE}/t/index/submit`, { waitUntil: "load" });
 check(await page.locator("form[action='/api/pitch']").isVisible(), "Submit form renders");
 
+await page.goto(`${BASE}/t/index/submit?error=1`, { waitUntil: "load" });
+check(await page.getByRole("alert").filter({ hasText: /didn.t send|went wrong/i }).first().isVisible(), "error state renders when the write fails (?error=1)");
+
 console.log("Flow 2 — submission journey (writes to Airtable)");
 await page.fill("input[name='show']", TEST_SHOW);
 await page.fill("input[name='venue']", "Test Gallery, Test Hood");

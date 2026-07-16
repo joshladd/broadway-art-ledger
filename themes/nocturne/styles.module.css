@@ -209,6 +209,16 @@
   font-size: 20px;
   color: var(--ivory);
 }
+.error {
+  border: 1px solid #c9694a;
+  background: rgba(201, 90, 74, 0.1);
+  padding: 20px 22px;
+  margin-bottom: 32px;
+  font-family: var(--f-newsreader);
+  font-style: italic;
+  font-size: 20px;
+  color: #f0cfc6;
+}
 .form { display: flex; flex-direction: column; gap: 24px; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .flabel { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ivory-dim); }

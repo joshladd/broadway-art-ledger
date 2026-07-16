@@ -227,6 +227,17 @@
   font-style: italic;
   font-size: 20px;
 }
+.error {
+  border: 1px solid #9c3b1e;
+  border-left-width: 3px;
+  background: #f6efe9;
+  padding: 20px 22px;
+  margin-bottom: 30px;
+  font-family: var(--f-newsreader);
+  font-style: italic;
+  font-size: 20px;
+  color: #9c3b1e;
+}
 .form { display: flex; flex-direction: column; gap: 22px; }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .flabel { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }

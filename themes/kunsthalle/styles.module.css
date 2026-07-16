@@ -289,6 +289,15 @@
   font-size: 19px;
   letter-spacing: -0.01em;
 }
+.error {
+  border-top: 1px solid #992d22;
+  border-bottom: 1px solid #992d22;
+  padding: 20px 0;
+  margin-bottom: 44px;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  color: #992d22;
+}
 .form { display: flex; flex-direction: column; gap: 34px; }
 .field { display: flex; flex-direction: column; gap: 10px; }
 .flabel {

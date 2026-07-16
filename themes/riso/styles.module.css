@@ -336,6 +336,17 @@
   font-size: 20px;
   color: var(--blue);
 }
+.error {
+  border: 2px solid var(--red);
+  box-shadow: 5px 5px 0 var(--blue);
+  background: var(--paper);
+  padding: 20px 22px;
+  margin-bottom: 34px;
+  font-family: var(--f-newsreader);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--red);
+}
 .form { display: flex; flex-direction: column; gap: 24px; }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .flabel { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }

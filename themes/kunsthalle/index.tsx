@@ -131,7 +131,7 @@ function About({ about, t }: { about: AboutContent; t: string }) {
   );
 }
 
-function Submit({ fields, t, sent }: { fields: SubmitField[]; t: string; sent: boolean }) {
+function Submit({ fields, t, sent, error }: { fields: SubmitField[]; t: string; sent: boolean; error: boolean }) {
   return (
     <div className={styles.root}>
       <Header t={t} active="Submit" />
@@ -142,6 +142,9 @@ function Submit({ fields, t, sent }: { fields: SubmitField[]; t: string; sent: b
         </p>
         {sent && (
           <div className={styles.sent}>Received. Your pitch is in the queue, and we read every one.</div>
+        )}
+        {error && (
+          <div className={styles.error} role="alert">That didn’t send. Please try again.</div>
         )}
         <form className={styles.form} action="/api/pitch" method="post">
           <input type="hidden" name="theme" value={t} />

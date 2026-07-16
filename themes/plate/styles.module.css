@@ -418,6 +418,16 @@
   font-style: italic;
   font-size: 20px;
 }
+.error {
+  border: 1px solid #9c3b1e;
+  background: var(--panel);
+  padding: 20px 22px;
+  margin-bottom: 30px;
+  font-family: var(--f-fraunces);
+  font-style: italic;
+  font-size: 20px;
+  color: #9c3b1e;
+}
 .form { display: flex; flex-direction: column; gap: 24px; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .flabel {
