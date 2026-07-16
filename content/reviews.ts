@@ -1,5 +1,12 @@
-// Shared content layer — every theme reads from here. This is the "backend" for now;
-// swap for a real DB/CMS later without touching any theme.
+// Shared content layer. The static chrome below (nav, strap, facts, motto,
+// about, submitFields) is what every theme reads at runtime.
+//
+// The `reviews[]` array is NOT a runtime source — the live feed comes from the
+// Airtable "Reviews" table via lib/reviews-data.ts#getReviews(), and marquee
+// images come from each record's uploaded Photo attachment through /api/photo.
+// This array is the original seed that populated Airtable (one-off, via
+// scripts/airtable-reviews-migrate.mts); its /art/art-0X.jpg paths reference the
+// real CC0 originals in public/art that were uploaded as those attachments.
 
 export type Review = {
   slug: string;

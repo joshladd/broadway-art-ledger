@@ -24,10 +24,12 @@ Copy `.env.example` → `.env.local` and fill in the Airtable vars: `AIRTABLE_TO
     every 60s, so edits go live within a minute with no redeploy. The `Published` field gates
     visibility.
   - **Pitches** table → blind, anonymous submissions from the site's form via `/api/pitch`
-    (Status = New); reviewed and approved in Airtable.
-- **Marquee images:** uploaded to a review's `Photo` attachment in Airtable and served through
-  `/api/photo/[id]` — a stable, edge-cached proxy (resized, robust to Airtable's expiring
-  URLs). The seeded reviews fall back to the CC0 images in `public/art/`.
+    (Status = New). Triaged in Airtable through `New → Under Review → Accepted / Rejected`;
+    accepted pitches flow to the **Accepted** table (the commissioning queue).
+- **Marquee images:** each review carries one uploaded `Photo` attachment in Airtable, served
+  through `/api/photo/[id]` — a stable, edge-cached proxy (resized, robust to Airtable's
+  expiring URLs). The runtime never reads a bundled path; `public/art/` holds only the CC0
+  originals that seeded those attachments.
 - **Static chrome** (masthead/nav/about text/submit fields) lives in `content/reviews.ts`.
 - **Designs (themes):** `themes/<key>/` — each exports a `ThemeModule` with its own
   `styles.module.css`, all consuming the shared `Review` shape. Registered in `lib/themes.ts`.

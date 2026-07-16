@@ -15,10 +15,6 @@ function displayDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[2]}.${m[3]}.${m[1].slice(2)}` : iso;
 }
-function normImage(img: string): string {
-  if (!img) return "";
-  return img.startsWith("/") || img.startsWith("http") ? img : `/art/${img}`;
-}
 
 export async function getReviews(): Promise<Review[]> {
   if (!TOKEN || !BASE) {
@@ -47,8 +43,9 @@ export async function getReviews(): Promise<Review[]> {
     for (const rec of data.records as Array<{ id: string; fields: Record<string, unknown> }>) {
       const f = rec.fields || {};
       const iso = str(f["Date"]);
-      // Uploaded photo (attachment) wins; served via our stable proxy. Else the
-      // text Image path (the repo /art samples).
+      // The marquee image is the uploaded Photo attachment, served through our
+      // stable /api/photo proxy (robust to Airtable's expiring URLs). Every
+      // published review is expected to carry one.
       const photo = Array.isArray(f["Photo"]) && f["Photo"].length > 0;
       out.push({
         slug: rec.id,
@@ -62,7 +59,7 @@ export async function getReviews(): Promise<Review[]> {
         by: str(f["Byline"]),
         dek: str(f["Dek"]),
         body: str(f["Body"]).split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
-        image: photo ? `/api/photo/${rec.id}` : normImage(str(f["Image"])),
+        image: photo ? `/api/photo/${rec.id}` : "",
         artist: str(f["Artist"]),
         artwork: str(f["Artwork"]),
         credit: str(f["Credit"]),
