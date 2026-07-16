@@ -1,45 +1,69 @@
-import { createReader } from "@keystatic/core/reader";
-import keystaticConfig from "@/keystatic.config";
 import type { Review } from "@/content/reviews";
 
-// The site reads the committed content files (works in both local and github storage).
-const reader = createReader(process.cwd(), keystaticConfig);
+// Reviews now come from the Airtable "Reviews" table. `next: { revalidate }`
+// means the fetch runs at build (pages are prerendered/SSG) and then refreshes
+// every 60s — so Bryan's edits go live within a minute, no redeploy, pages stay fast.
+const TOKEN = process.env.AIRTABLE_TOKEN;
+const BASE = process.env.AIRTABLE_BASE_ID;
+const TABLE = "Reviews";
+const REVALIDATE = 60;
 
 function displayDate(iso: string): string {
-  // "2026-07-11" -> "07.11.26"
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[2]}.${m[3]}.${m[1].slice(2)}` : iso;
 }
-
-function normImage(img: string | null | undefined): string {
+function normImage(img: string): string {
   if (!img) return "";
-  return img.startsWith("/") ? img : `/art/${img.replace(/^.*[\\/]/, "")}`;
+  return img.startsWith("/") || img.startsWith("http") ? img : `/art/${img}`;
 }
 
 export async function getReviews(): Promise<Review[]> {
-  const entries = await reader.collections.reviews.all();
-  const list: Review[] = entries.map((e) => {
-    const r = e.entry as Record<string, string | null>;
-    const iso = (r.date as string) || "";
-    return {
-      slug: e.slug,
-      no: (r.no as string) || "",
-      date: displayDate(iso),
-      iso,
-      section: (r.section as string) || "",
-      title: (r.title as string) || "",
-      venue: (r.venue as string) || "",
-      hood: (r.hood as string) || "",
-      by: (r.by as string) || "",
-      dek: (r.dek as string) || "",
-      body: ((r.body as string) || "").split(/\n+/).map((s) => s.trim()).filter(Boolean),
-      image: normImage(r.image as string),
-      artist: (r.artist as string) || "",
-      artwork: (r.artwork as string) || "",
-      credit: (r.credit as string) || "",
-      alt: (r.alt as string) || (r.title as string) || "",
-    };
-  });
-  list.sort((a, b) => (a.iso < b.iso ? 1 : a.iso > b.iso ? -1 : 0)); // newest first
-  return list;
+  if (!TOKEN || !BASE) {
+    console.warn("getReviews: AIRTABLE_TOKEN / AIRTABLE_BASE_ID not set — returning no reviews.");
+    return [];
+  }
+  const out: Review[] = [];
+  let offset: string | undefined;
+  do {
+    const url = new URL(`https://api.airtable.com/v0/${BASE}/${TABLE}`);
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("filterByFormula", "{Published}=1");
+    url.searchParams.set("sort[0][field]", "Date");
+    url.searchParams.set("sort[0][direction]", "desc");
+    if (offset) url.searchParams.set("offset", offset);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+      next: { revalidate: REVALIDATE },
+    });
+    if (!res.ok) {
+      console.error("getReviews: Airtable fetch failed", res.status, await res.text());
+      break;
+    }
+    const data = await res.json();
+    for (const rec of data.records as Array<{ id: string; fields: Record<string, string> }>) {
+      const f = rec.fields || {};
+      const iso = f["Date"] || "";
+      out.push({
+        slug: rec.id,
+        no: f["No"] || "",
+        date: displayDate(iso),
+        iso,
+        section: f["Section"] || "",
+        title: f["Title"] || "",
+        venue: f["Venue"] || "",
+        hood: f["Hood"] || "",
+        by: f["Byline"] || "",
+        dek: f["Dek"] || "",
+        body: String(f["Body"] || "").split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
+        image: normImage(f["Image"] || ""),
+        artist: f["Artist"] || "",
+        artwork: f["Artwork"] || "",
+        credit: f["Credit"] || "",
+        alt: f["Alt"] || f["Title"] || "",
+      });
+    }
+    offset = data.offset;
+  } while (offset);
+  return out;
 }

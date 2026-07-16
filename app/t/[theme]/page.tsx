@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { getTheme } from "@/lib/themes";
 import { getReviews } from "@/lib/reviews-data";
 
+// ISR: prerendered at build, revalidated from Airtable every 60s.
+export const revalidate = 60;
+
 export default async function ThemeHome({ params }: { params: Promise<{ theme: string }> }) {
   const { theme: t } = await params;
   const theme = getTheme(t);
