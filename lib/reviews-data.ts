@@ -15,6 +15,12 @@ function displayDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[2]}.${m[3]}.${m[1].slice(2)}` : iso;
 }
+// Airtable stores a raw issue number (e.g. 7). The "№ 007" presentation is the
+// app's job — tolerant of a bare number or an already-formatted value.
+function formatNo(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  return digits ? `№ ${digits.padStart(3, "0")}` : raw;
+}
 
 export async function getReviews(): Promise<Review[]> {
   if (!TOKEN || !BASE) {
@@ -49,7 +55,7 @@ export async function getReviews(): Promise<Review[]> {
       const photo = Array.isArray(f["Photo"]) && f["Photo"].length > 0;
       out.push({
         slug: rec.id,
-        no: str(f["No"]),
+        no: formatNo(str(f["No"])),
         date: displayDate(iso),
         iso,
         section: str(f["Section"]),
