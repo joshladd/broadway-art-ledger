@@ -50,20 +50,37 @@ export const REVIEW_SLUGS_QUERY = defineQuery(`
   }
 `);
 
-// The archive's search index: no portable text, no full-size images. pt::text()
-// flattens the body to a plain string server-side. The raw hero asset URL is
-// carried once and the client derives both a thumbnail (shown) and the
-// full-size marquee URL (prefetched on hover) from it.
-export const ARCHIVE_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
-    "slug": slug.current,
-    headline,
-    showName,
-    tagline,
-    startDate,
-    endDate,
-    "bodyText": pt::text(body),
-    "imageUrl": heroImage.asset->url
+// The archive's compact index row: no portable text, no full-size images.
+// pt::text() flattens the body to a plain string server-side; the raw hero asset
+// URL is carried once and the client derives a thumbnail (shown) and the marquee
+// URL (prefetched on hover) from it.
+const ARCHIVE_FIELDS = `
+  "slug": slug.current,
+  headline,
+  showName,
+  tagline,
+  startDate,
+  endDate,
+  "bodyText": pt::text(body),
+  "imageUrl": heroImage.asset->url
+`;
+
+// One page of the archive browse list, newest first — bounded so the client
+// never receives the whole index at once.
+export const ARCHIVE_PAGE_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
+    ${ARCHIVE_FIELDS}
+  }
+`);
+
+// Server-side search: match the term against headline, show name, and the body
+// text, newest first. Runs in the Content Lake, so no corpus ships to the
+// client. $q carries the user's term with a trailing * for prefix matching.
+export const ARCHIVE_SEARCH_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**")) && (
+    headline match $q || showName match $q || pt::text(body) match $q
+  )] | order(publishedAt desc) [0...$limit] {
+    ${ARCHIVE_FIELDS}
   }
 `);
 

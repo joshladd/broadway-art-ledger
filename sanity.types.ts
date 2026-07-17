@@ -379,9 +379,23 @@ export type REVIEW_SLUGS_QUERY_RESULT = Array<{
 }>;
 
 // Source: sanity/queries.ts
-// Variable: ARCHIVE_QUERY
-// Query: *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {    "slug": slug.current,    headline,    showName,    tagline,    startDate,    endDate,    "bodyText": pt::text(body),    "imageUrl": heroImage.asset->url  }
-export type ARCHIVE_QUERY_RESULT = Array<{
+// Variable: ARCHIVE_PAGE_QUERY
+// Query: *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {      "slug": slug.current,  headline,  showName,  tagline,  startDate,  endDate,  "bodyText": pt::text(body),  "imageUrl": heroImage.asset->url  }
+export type ARCHIVE_PAGE_QUERY_RESULT = Array<{
+  slug: string;
+  headline: string;
+  showName: string;
+  tagline: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  bodyText: string;
+  imageUrl: string | null;
+}>;
+
+// Source: sanity/queries.ts
+// Variable: ARCHIVE_SEARCH_QUERY
+// Query: *[_type == "review" && !(_id in path("drafts.**")) && (    headline match $q || showName match $q || pt::text(body) match $q  )] | order(publishedAt desc) [0...$limit] {      "slug": slug.current,  headline,  showName,  tagline,  startDate,  endDate,  "bodyText": pt::text(body),  "imageUrl": heroImage.asset->url  }
+export type ARCHIVE_SEARCH_QUERY_RESULT = Array<{
   slug: string;
   headline: string;
   showName: string;
@@ -481,7 +495,8 @@ declare module "@sanity/client" {
     '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEWS_PAGE_QUERY_RESULT;
     '\n  *[_type == "review" && slug.current == $slug && !(_id in path("drafts.**"))][0] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEW_BY_SLUG_QUERY_RESULT;
     '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...$limit] {\n    "slug": slug.current\n  }\n': REVIEW_SLUGS_QUERY_RESULT;
-    '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {\n    "slug": slug.current,\n    headline,\n    showName,\n    tagline,\n    startDate,\n    endDate,\n    "bodyText": pt::text(body),\n    "imageUrl": heroImage.asset->url\n  }\n': ARCHIVE_QUERY_RESULT;
+    '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  tagline,\n  startDate,\n  endDate,\n  "bodyText": pt::text(body),\n  "imageUrl": heroImage.asset->url\n\n  }\n': ARCHIVE_PAGE_QUERY_RESULT;
+    '\n  *[_type == "review" && !(_id in path("drafts.**")) && (\n    headline match $q || showName match $q || pt::text(body) match $q\n  )] | order(publishedAt desc) [0...$limit] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  tagline,\n  startDate,\n  endDate,\n  "bodyText": pt::text(body),\n  "imageUrl": heroImage.asset->url\n\n  }\n': ARCHIVE_SEARCH_QUERY_RESULT;
     '\n  *[_type == "siteSettings" && _id == "siteSettings"][0] { strap }\n': SITE_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "aboutPage" && _id == "aboutPage"][0] {\n    title,\n    body,\n    image {\n      alt,\n      asset->{ url, "dimensions": metadata.dimensions }\n    }\n  }\n': ABOUT_QUERY_RESULT;
     '\n  *[_type == "submitPage" && _id == "submitPage"][0] { body, formUrl, blurb }\n': SUBMIT_QUERY_RESULT;

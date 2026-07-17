@@ -4,7 +4,8 @@ import {
   REVIEWS_PAGE_QUERY,
   REVIEW_BY_SLUG_QUERY,
   REVIEW_SLUGS_QUERY,
-  ARCHIVE_QUERY,
+  ARCHIVE_PAGE_QUERY,
+  ARCHIVE_SEARCH_QUERY,
 } from "@/sanity/queries";
 import { sanityFetch } from "./sanity-fetch";
 import {
@@ -62,9 +63,36 @@ export const getReviewSlugs = cache(async (limit: number = PRERENDER_LIMIT): Pro
   return (rows ?? []).map((r) => r.slug).filter((s): s is string => Boolean(s));
 });
 
-// The archive's compact search index (plain body text + thumbnails), so the
-// client never receives portable text or full-size images.
-export const getArchiveItems = cache(async (): Promise<ArchiveItem[]> => {
-  const rows = await sanityFetch<ArchiveRow[]>(ARCHIVE_QUERY, {}, "reviews");
+// How many archive rows the browse list shows per page.
+export const ARCHIVE_PAGE_SIZE = 20;
+
+// One page of the archive browse list (compact rows: plain text + thumbnails),
+// so the client never receives the whole index or any portable text.
+export async function getArchivePage(
+  offset: number,
+  limit: number = ARCHIVE_PAGE_SIZE,
+): Promise<ArchiveItem[]> {
+  const rows = await sanityFetch<ArchiveRow[]>(
+    ARCHIVE_PAGE_QUERY,
+    { start: offset, end: offset + limit },
+    "reviews",
+  );
   return mapArchiveRows(rows);
-});
+}
+
+const ARCHIVE_SEARCH_LIMIT = 40;
+
+// Server-side search — the match runs in the Content Lake, so no corpus ships to
+// the client. Each term is prefix-matched. The term is passed as a parameter, so
+// it can't inject into the query.
+export async function searchArchive(query: string): Promise<ArchiveItem[]> {
+  const terms = query.trim().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return [];
+  const pattern = terms.map((w) => `${w}*`).join(" ");
+  const rows = await sanityFetch<ArchiveRow[]>(
+    ARCHIVE_SEARCH_QUERY,
+    { q: pattern, limit: ARCHIVE_SEARCH_LIMIT },
+    "reviews",
+  );
+  return mapArchiveRows(rows);
+}

@@ -1,64 +1,107 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Fuse, { type FuseResultMatch, type RangeTuple } from "fuse.js";
 import type { ArchiveItem } from "@/lib/map-review";
 import { formatRange } from "@/lib/format-date";
 import { marqueePrefetchUrl } from "@/lib/sanity-image";
+import { loadMoreArchive, runArchiveSearch } from "@/app/(site)/archive-actions";
 import styles from "./site.module.css";
 
-/* The interactive half of the Archive. Its job is to find a review without the
- * raw scroll, so search is its reason to exist. Rows link to each review's own
- * page (/reviews/<slug>) — a writer can share that link. The server hands us a
- * compact index (plain body text + thumbnails), already flattened in GROQ, so
- * no portable text or full-size images reach the client. */
+/* The interactive half of the Archive. Search runs server-side (the Content Lake
+ * matches the term — no corpus ships to the client); the no-query browse list is
+ * paginated. Rows link to each review's own page. The server hands us the first
+ * browse page. */
 
-type MatchMap = Record<string, ReadonlyArray<RangeTuple>>;
-type Entry = { r: ArchiveItem; matches: MatchMap };
-
-// Keys map to the index fields. headline dominates; body barely registers.
-const FUSE_KEYS = [
-  { name: "headline", weight: 0.5 },
-  { name: "showName", weight: 0.28 },
-  { name: "tagline", weight: 0.12 },
-  { name: "bodyText", weight: 0.1 },
-];
-
-// Render `text` with Fuse's matched ranges wrapped in <mark>. Fuse hands back
-// non-overlapping ranges, but sort defensively and never emit a zero-length or
-// backwards slice.
-function highlight(text: string, ranges?: ReadonlyArray<RangeTuple>): React.ReactNode {
-  if (!ranges || ranges.length === 0) return text;
-  const sorted = [...ranges].sort((a, b) => a[0] - b[0]);
-  const out: React.ReactNode[] = [];
-  let cursor = 0;
-  sorted.forEach(([start, end], i) => {
-    const s = Math.max(start, cursor);
-    const e = end + 1; // Fuse ranges are inclusive
-    if (e <= s) return;
-    if (s > cursor) out.push(text.slice(cursor, s));
-    out.push(
+// Wrap each occurrence of a search term in <mark>. Terms are escaped so a query
+// like "c++" can't break the regex.
+function highlight(text: string, terms: string[]): React.ReactNode {
+  const escaped = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).filter(Boolean);
+  if (escaped.length === 0) return text;
+  const parts = text.split(new RegExp(`(${escaped.join("|")})`, "gi"));
+  // split with one capture group -> odd indices are the matches.
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
       <mark key={i} className={styles.hl}>
-        {text.slice(s, e)}
-      </mark>,
-    );
-    cursor = e;
-  });
-  if (cursor < text.length) out.push(text.slice(cursor));
-  return out;
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
 }
 
-export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
+export default function ArchiveList({
+  initialItems,
+  initialHasMore,
+}: {
+  initialItems: ArchiveItem[];
+  initialHasMore: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
+
+  // Browse list (no query): accumulates pages.
+  const [browse, setBrowse] = useState<ArchiveItem[]>(initialItems);
+  const [offset, setOffset] = useState(initialItems.length);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Search results (a query is active).
+  const [results, setResults] = useState<ArchiveItem[] | null>(null);
+  const [searching, setSearching] = useState(false);
+
   const prefetched = useRef<Set<string>>(new Set());
 
-  // Route data is already prefetched by <Link>; the review's marquee image is
-  // not. On hover/focus of a row, prefetch that image so the review page paints
-  // it instantly on click. Deduped per review, and only fires on real intent
-  // (hover/focus) rather than eagerly for every row, to bound the bandwidth.
+  const terms = debounced.trim().split(/\s+/).filter(Boolean);
+  const isSearching = terms.length > 0;
+  const items = isSearching ? results ?? [] : browse;
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(query), 200);
+    return () => clearTimeout(id);
+  }, [query]);
+
+  // Data-fetching effect: run the server-side search when the debounced query
+  // changes, and clear back to browse when it's emptied. This is a legitimate
+  // effect (synchronizing with an external system — the search API); the eager
+  // setSearching drives the loading label. `active` guards out-of-order results.
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const q = debounced.trim();
+    if (!q) {
+      setResults(null);
+      setSearching(false);
+      return;
+    }
+    let active = true;
+    setSearching(true);
+    runArchiveSearch(q).then((r) => {
+      if (active) {
+        setResults(r);
+        setSearching(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [debounced]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await loadMoreArchive(offset);
+      setBrowse((b) => [...b, ...res.items]);
+      setOffset(res.nextOffset);
+      setHasMore(res.hasMore);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
   function prefetchHero(item: ArchiveItem) {
     if (!item.heroUrl || prefetched.current.has(item.slug)) return;
     prefetched.current.add(item.slug);
@@ -69,42 +112,11 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
     document.head.appendChild(link);
   }
 
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(query), 120);
-    return () => clearTimeout(id);
-  }, [query]);
-
-  const searching = debounced.trim().length > 0;
-
-  const fuse = useMemo(
-    () =>
-      new Fuse(items, {
-        keys: FUSE_KEYS,
-        includeMatches: true,
-        ignoreLocation: true,
-        threshold: 0.38,
-        minMatchCharLength: 2,
-      }),
-    [items],
-  );
-
-  // Empty query -> every review, newest-first as delivered. Otherwise Fuse
-  // results ranked by relevance, carrying their match ranges.
-  const list = useMemo<Entry[]>(() => {
-    const q = debounced.trim();
-    if (!q) return items.map((r) => ({ r, matches: {} }));
-    return fuse.search(q).map((res) => {
-      const matches: MatchMap = {};
-      for (const m of (res.matches ?? []) as ReadonlyArray<FuseResultMatch>) {
-        if (m.key && !(m.key in matches)) matches[m.key] = m.indices;
-      }
-      return { r: res.item as ArchiveItem, matches };
-    });
-  }, [debounced, fuse, items]);
-
-  if (items.length === 0) {
-    return <p className={styles.arcEmpty}>No reviews yet.</p>;
-  }
+  const status = searching
+    ? "Searching…"
+    : isSearching
+      ? `${items.length} result${items.length === 1 ? "" : "s"}`
+      : " ";
 
   return (
     <>
@@ -139,14 +151,16 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
       </div>
 
       <p className={styles.arcStatus} role="status" aria-live="polite">
-        {searching ? `${list.length} of ${items.length}` : " "}
+        {status}
       </p>
 
-      {list.length === 0 ? (
+      {isSearching && !searching && items.length === 0 ? (
         <p className={styles.arcEmpty}>No reviews match that search.</p>
+      ) : items.length === 0 && !isSearching ? (
+        <p className={styles.arcEmpty}>No reviews yet.</p>
       ) : (
         <div className={styles.arcRows}>
-          {list.map(({ r, matches }) => {
+          {items.map((r) => {
             const range = formatRange(r.startDate, r.endDate);
             return (
               <div key={r.slug} className={styles.arcRow}>
@@ -169,11 +183,9 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
                   </span>
 
                   <span>
-                    <span className={styles.arcRowTitle}>
-                      {highlight(r.headline, matches.headline)}
-                    </span>
+                    <span className={styles.arcRowTitle}>{highlight(r.headline, terms)}</span>
                     <span className={styles.arcRowMeta}>
-                      {highlight(r.showName, matches.showName)}
+                      {highlight(r.showName, terms)}
                       {range ? `, ${range}` : ""}
                     </span>
                   </span>
@@ -185,6 +197,19 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!isSearching && hasMore && (
+        <div className={styles.feedSentinel}>
+          <button
+            type="button"
+            className={styles.loadMore}
+            onClick={loadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading…" : "Load more"}
+          </button>
         </div>
       )}
     </>

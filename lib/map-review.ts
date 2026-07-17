@@ -1,5 +1,5 @@
 import type { Review } from "@/content/review";
-import type { REVIEW_BY_SLUG_QUERY_RESULT, ARCHIVE_QUERY_RESULT } from "@/sanity.types";
+import type { REVIEW_BY_SLUG_QUERY_RESULT, ARCHIVE_PAGE_QUERY_RESULT } from "@/sanity.types";
 import { sanityImageUrl, MARQUEE_WIDTH } from "./sanity-image";
 
 // The Sanity -> Review mapping, kept pure and separate from the fetch so it can
@@ -134,5 +134,5 @@ type _ReviewRowBinding = Assert<
   NonNullable<REVIEW_BY_SLUG_QUERY_RESULT> extends ReviewRow ? true : false
 >;
 type _ArchiveRowBinding = Assert<
-  ARCHIVE_QUERY_RESULT[number] extends ArchiveRow ? true : false
+  ARCHIVE_PAGE_QUERY_RESULT[number] extends ArchiveRow ? true : false
 >;
