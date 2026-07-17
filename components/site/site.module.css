@@ -84,10 +84,16 @@
 .entry { padding: 120px 0 0; }
 .entry:first-child { padding-top: 84px; }
 
-.figure { display: block; margin: 0; }
+/* The figure shrink-wraps the image so the caption stays aligned to it even
+   when a tall image is capped narrower than the column. */
+.figure { display: block; margin: 0; width: fit-content; max-width: 100%; }
 .img {
-  width: 100%;
+  /* Fill the column when wide, but cap height at ~90vh so tall/vertical images
+     stay on screen. Aspect ratio preserved; never upscaled and no min height. */
+  width: auto;
   height: auto;
+  max-width: 100%;
+  max-height: 90vh;
   display: block;
   background: #e9e5d8;
 }
