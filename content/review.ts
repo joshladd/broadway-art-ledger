@@ -15,7 +15,7 @@ export type ReviewImage = {
 };
 
 export type Review = {
-  slug: string;        // identity key only — NOT a URL. There are no review pages.
+  slug: string;        // identity key AND the review's URL: /reviews/<slug>
   headline: string;    // the review's own editorial title
   showName: string;    // free-text dateline label (gallery, institution, or show)
   startDate: string;   // ISO YYYY-MM-DD

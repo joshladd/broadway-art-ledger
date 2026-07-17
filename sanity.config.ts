@@ -5,6 +5,7 @@ import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { apiVersion, dataset, projectId } from "./sanity/env";
 import { schema } from "./sanity/schema";
+import { structure } from "./sanity/structure";
 
 // Studio is embedded in the Next app at /studio, so Bryan edits at
 // <domain>/studio with no separate deploy. It reads the same
@@ -15,5 +16,5 @@ export default defineConfig({
   projectId,
   dataset,
   schema,
-  plugins: [structureTool(), visionTool({ defaultApiVersion: apiVersion })],
+  plugins: [structureTool({ structure }), visionTool({ defaultApiVersion: apiVersion })],
 });

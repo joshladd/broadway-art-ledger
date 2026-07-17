@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Review } from "@/content/review";
 import { client } from "@/sanity/client";
 import { REVIEWS_QUERY } from "@/sanity/queries";
@@ -16,11 +17,21 @@ import { mapReviewRows, type ReviewRow } from "./map-review";
 // the revalidate window is only the fallback if the webhook ever misses.
 const REVALIDATE = 60;
 
-export async function getReviews(): Promise<Review[]> {
+// React-cached so the feed, the archive, and a solo page's generateMetadata +
+// render all share one fetch within a request. The named tag still lets
+// /api/revalidate flush it on publish.
+export const getReviews = cache(async (): Promise<Review[]> => {
   const rows = await client.fetch<ReviewRow[]>(
     REVIEWS_QUERY,
     {},
     { next: { revalidate: REVALIDATE, tags: ["reviews"] } },
   );
   return mapReviewRows(rows);
-}
+});
+
+// One review by slug, or null. Backed by getReviews so it rides the same cached
+// fetch — cheap at this volume, and there's no separate query to keep in sync.
+export const getReview = cache(async (slug: string): Promise<Review | null> => {
+  const reviews = await getReviews();
+  return reviews.find((r) => r.slug === slug) ?? null;
+});

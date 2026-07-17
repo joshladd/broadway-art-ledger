@@ -1,6 +1,10 @@
 /* Minimal reset — theme stylesheets layer on top of this.
    Font CSS variables (--f-fraunces, --f-newsreader, --f-archivo, --f-mono)
-   are provided by next/font on <html> (see lib/fonts.ts), self-hosted. */
+   are provided by next/font on <html> (see lib/fonts.ts), self-hosted.
+
+   This file is imported by app/(site)/layout.tsx, NOT the root layout, so these
+   bare element selectors never reach the embedded Sanity Studio at /studio.
+   (`svg { max-width: 100% }` in particular was collapsing Sanity's icons.) */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; }

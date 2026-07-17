@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Header } from "@/components/site/Header";
-import { aboutStatement, PUBLICATION } from "@/content/site";
+import { PortableCopy } from "@/components/site/PortableCopy";
+import { getAboutContent } from "@/lib/site-content";
 import styles from "@/components/site/site.module.css";
 
 export const metadata: Metadata = { title: "About — The Broadway Art Ledger" };
 
-// Bryan italicizes the publication's name in his running prose (CMOS for a
-// publication title). Reproduce that rather than flattening his formatting.
-function withEmphasis(text: string): React.ReactNode {
-  const parts = text.split(PUBLICATION);
-  if (parts.length === 1) return text;
-  return parts.flatMap((part, i) =>
-    i === 0 ? [part] : [<em key={i}>{PUBLICATION}</em>, part],
-  );
-}
+// About copy is editable in Sanity (aboutPage singleton), with content/site.ts
+// as the fallback. Bryan's publication-name italics live in the copy itself now
+// — as real emphasis marks — so there's no withEmphasis() string-splitting here.
+export default async function AboutPage() {
+  const about = await getAboutContent();
 
-export default function AboutPage() {
   return (
     <main className={styles.root}>
       <Header active="About" />
@@ -37,11 +33,9 @@ export default function AboutPage() {
           />
         </figure>
 
-        <h1 className={styles.readerTitle}>{aboutStatement.title}</h1>
+        <h1 className={styles.readerTitle}>{about.title}</h1>
         <div className={styles.readerBody}>
-          {aboutStatement.body.map((p, i) => (
-            <p key={i}>{withEmphasis(p)}</p>
-          ))}
+          <PortableCopy value={about.body} />
         </div>
       </div>
     </main>

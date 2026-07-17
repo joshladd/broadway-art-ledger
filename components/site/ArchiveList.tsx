@@ -2,18 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Fuse, { type FuseResultMatch, type RangeTuple } from "fuse.js";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { Review } from "@/content/review";
 import { formatRange } from "@/lib/format-date";
-import { Body } from "./Body";
-import { Dateline } from "./Dateline";
 import styles from "./site.module.css";
 
-/* The interactive half of the Archive. The Archive's job is to find a review
- * without the raw scroll, so search is its reason to exist. Rows expand inline
- * because the site has no review pages. The route stays a server component and
- * hands us the reviews. */
+/* The interactive half of the Archive. Its job is to find a review without the
+ * raw scroll, so search is its reason to exist. Rows link to each review's own
+ * page (/reviews/<slug>) — a writer can share that link. The route stays a
+ * server component and hands us the reviews. */
 
 type MatchMap = Record<string, ReadonlyArray<RangeTuple>>;
 type Entry = { r: Review; matches: MatchMap };
@@ -70,7 +69,6 @@ function highlight(text: string, ranges?: ReadonlyArray<RangeTuple>): React.Reac
 export default function ArchiveList({ reviews }: { reviews: Review[] }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(query), 120);
@@ -109,11 +107,6 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
       return { r: res.item as Review, matches };
     });
   }, [debounced, fuse, reviews]);
-
-  // One row open at a time; re-clicking the open row closes it.
-  function toggle(slug: string) {
-    setOpenSlug((cur) => (cur === slug ? null : slug));
-  }
 
   if (reviews.length === 0) {
     return <p className={styles.arcEmpty}>No reviews yet.</p>;
@@ -160,22 +153,12 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
       ) : (
         <div className={styles.arcRows}>
           {list.map(({ r, matches }) => {
-            const isOpen = openSlug === r.slug;
-            const panelId = `arc-panel-${r.slug}`;
             const range = formatRange(r.startDate, r.endDate);
             return (
-              <div key={r.slug} className={styles.arcRow} data-open={isOpen ? "" : undefined}>
-                <button
-                  type="button"
-                  className={styles.arcSummary}
-                  aria-expanded={isOpen}
-                  aria-controls={panelId}
-                  onClick={() => toggle(r.slug)}
-                >
-                  {/* Collapsed thumbnail, cropped. Hidden while open — the full
-                      image lives in the panel below. */}
+              <div key={r.slug} className={styles.arcRow}>
+                <Link href={`/reviews/${r.slug}`} className={styles.arcSummary}>
                   <span className={styles.arcPlate}>
-                    {!isOpen && r.image.url && (
+                    {r.image.url && (
                       <Image
                         className={styles.arcPlateImg}
                         src={r.image.url}
@@ -197,36 +180,9 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
                   </span>
 
                   <span className={styles.arcCue} aria-hidden="true">
-                    {isOpen ? "Close" : "Read"}
+                    Read
                   </span>
-                </button>
-
-                {/* Accordion reveal via CSS grid-rows. Content stays in the DOM
-                    but is inert while collapsed. */}
-                <div className={styles.arcPanelClip} id={panelId} inert={!isOpen}>
-                  <div className={styles.arcPanelInner}>
-                    <div className={styles.arcPanel}>
-                      {r.image.url && (
-                        <figure className={styles.arcFigure}>
-                          <Image
-                            className={styles.arcExpandImg}
-                            src={r.image.url}
-                            alt={r.image.alt}
-                            width={r.image.width}
-                            height={r.image.height}
-                            sizes="(max-width: 820px) 100vw, 560px"
-                          />
-                          {r.image.caption && (
-                            <figcaption className={styles.caption}>{r.image.caption}</figcaption>
-                          )}
-                        </figure>
-                      )}
-                      <Dateline review={r} />
-                      {r.tagline?.trim() ? <p className={styles.tagline}>{r.tagline}</p> : null}
-                      <Body value={r.body} />
-                    </div>
-                  </div>
-                </div>
+                </Link>
               </div>
             );
           })}

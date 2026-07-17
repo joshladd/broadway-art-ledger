@@ -1,4 +1,5 @@
-import { strap, wordmark } from "@/content/site";
+import { wordmark } from "@/content/site";
+import { getStrap } from "@/lib/site-content";
 import styles from "./site.module.css";
 
 // Bryan: 'Instead of "Current," let's do "Reviews" for now, then shift to
@@ -13,7 +14,10 @@ const NAV = [
   { label: "Submit", href: "/submit" },
 ];
 
-export function Header({ active }: { active: string }) {
+// Async server component: the tagline is editable in Sanity, so the Header
+// fetches it (getStrap is React-cached, so multiple renders share one request).
+export async function Header({ active }: { active: string }) {
+  const strap = await getStrap();
   return (
     <header className={styles.header}>
       <div className={styles.headBar}>

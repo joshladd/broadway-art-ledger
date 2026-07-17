@@ -25,3 +25,26 @@ export const REVIEWS_QUERY = defineQuery(`
     }
   }
 `);
+
+// The copy singletons. Each has a fixed _id, so we fetch by id and take the
+// published doc (never the drafts.* copy). Coalescing to the known id keeps the
+// query returning at most one row.
+export const SITE_SETTINGS_QUERY = defineQuery(`
+  *[_type == "siteSettings" && _id == "siteSettings"][0] { strap }
+`);
+
+export const ABOUT_QUERY = defineQuery(`
+  *[_type == "aboutPage" && _id == "aboutPage"][0] { title, body }
+`);
+
+export const SUBMIT_QUERY = defineQuery(`
+  *[_type == "submitPage" && _id == "submitPage"][0] {
+    pitchGuideTitle,
+    intro,
+    guidelinesTitle,
+    guidelinesIntro,
+    guidelines,
+    formUrl,
+    outro
+  }
+`);
