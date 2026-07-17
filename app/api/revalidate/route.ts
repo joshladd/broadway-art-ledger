@@ -25,12 +25,14 @@ function handle(req: Request): NextResponse {
   if (given !== secret) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  // Flush the tagged reviews data, then regenerate the route tree.
-  // Next 16 takes a cache-life profile as the second argument; "max" purges
-  // every entry carrying the tag regardless of its own profile.
+  // Flush both tagged datasets — reviews and the editable copy singletons —
+  // then regenerate the route tree. Next 16 takes a cache-life profile as the
+  // second argument; "max" purges every entry carrying the tag regardless of
+  // its own profile. One webhook fires for either kind of edit, so flush both.
   revalidateTag("reviews", "max");
+  revalidateTag("copy", "max");
   revalidatePath("/", "layout");
-  return NextResponse.json({ ok: true, revalidated: "reviews" });
+  return NextResponse.json({ ok: true, revalidated: ["reviews", "copy"] });
 }
 
 export async function POST(req: Request) {
