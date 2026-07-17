@@ -1,14 +1,16 @@
-// Bryan's copy, verbatim. Sources (both committed at the repo root):
-//   - The Broadway Art Ledger.md   (tagline, About statement, About image)
-//   - Submission Instructions.md   (submission guide + review guidelines)
+// Bryan's copy, verbatim — the FALLBACK for the editable Sanity singletons
+// (siteSettings / aboutPage / submitPage). Bryan now controls this copy in the
+// Studio; lib/site-content.ts reads the singletons and falls back to these
+// values per-field, so nothing renders blank before they're seeded, and a
+// fresh clone looks correct with no CMS content at all.
 //
 // The rule for this site: only copy Bryan wrote reaches the surface. Do not
 // paraphrase, trim, or "improve" any string in this file. Functional microcopy
 // (buttons, empty states, search placeholder) is ours and lives at its use site.
 //
-// In his source, the publication's name is italicized wherever it appears in
-// running prose (CMOS for a publication title). `PUBLICATION` is exported so the
-// About renderer can reproduce that emphasis rather than flattening it.
+// The publication's name is italicized wherever it appears in running prose
+// (CMOS for a publication title). `PUBLICATION` is exported so the About
+// renderer can reproduce that emphasis rather than flattening it.
 
 export const wordmark = "The Broadway Art Ledger";
 export const PUBLICATION = "The Broadway Art Ledger";

@@ -4,11 +4,9 @@ import { Dateline } from "./Dateline";
 import { Body } from "./Body";
 import styles from "./site.module.css";
 
-// Order follows Kunsthalle (the design Bryan called perfect):
-//   image -> caption -> headline -> dateline -> [tagline] -> body
-//
-// No byline, no issue number, no separate credit line — none were called out,
-// and they're parked in docs/IDEAS.md.
+// Reading order: image -> caption -> headline -> dateline -> [tagline] -> body.
+// No byline, no issue number, no separate credit line — only what the editor
+// asked to show reaches the surface.
 export function ReviewArticle({
   review,
   priority = false,

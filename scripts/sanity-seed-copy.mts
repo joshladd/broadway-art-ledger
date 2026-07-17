@@ -7,7 +7,6 @@
 // what the fallback already renders. Idempotent: fixed _ids replace in place.
 //
 // Run: node --env-file=.env.local --import tsx scripts/sanity-seed-copy.mts
-import { readFileSync } from "node:fs";
 import { createClient } from "@sanity/client";
 import { strap, aboutStatement, SUBMIT_FORM_URL } from "../content/site";
 import {
@@ -34,13 +33,8 @@ const client = createClient({
   useCdn: false,
 });
 
-// Seed the About page with the current (low-res) image so it lives in Sanity;
-// Bryan can replace it with a hi-res one from the Studio. Sanity dedupes assets
-// by content hash, so re-running is idempotent.
-const aboutAsset = await client.assets.upload("image", readFileSync("public/about.png"), {
-  filename: "about.png",
-});
-
+// Seeds only the text copy. The About image is uploaded by the editor in the
+// Studio — the page renders no image until one exists (see app/(site)/about).
 const docs = [
   {
     _id: "siteSettings",
@@ -52,11 +46,6 @@ const docs = [
     _type: "aboutPage",
     title: aboutStatement.title,
     body: aboutBodyBlocks(),
-    image: {
-      _type: "image",
-      asset: { _type: "reference", _ref: aboutAsset._id },
-      alt: "",
-    },
   },
   {
     _id: "submitPage",
