@@ -1,12 +1,18 @@
-// Shared content layer. The static chrome below (nav, strap, facts, motto,
-// about, submitFields) is what every theme reads at runtime.
+// FROZEN — the design exploration's content layer. Belongs to /designs,
+// /t/<theme>, and /lab only. The live site does NOT use this file.
 //
-// The `reviews[]` array is NOT a runtime source — the live feed comes from the
-// Airtable "Reviews" table via lib/reviews-data.ts#getReviews(), and marquee
-// images come from each record's uploaded Photo attachment through /api/photo.
-// This array is the original seed that populated Airtable (one-off, via
-// scripts/airtable-reviews-migrate.mts); its /art/art-0X.jpg paths reference the
-// real CC0 originals in public/art that were uploaded as those attachments.
+// This `Review` type and the `reviews[]` array below are deliberately frozen.
+// 38 exploration files reference fields the live model dropped (no, exhibition,
+// venue, by, dek, artist, artwork, credit) and 19 consume `body` as string[],
+// which Portable Text breaks. Rather than rewrite nine themes and seven lab
+// designs that exist purely as reference art, the exploration keeps this shape
+// and renders `reviews[]` statically.
+//
+// Do not "unify" this with content/review.ts. They are different things: this is
+// frozen exploration data; that is the live content contract served from Sanity.
+//
+// The live site's model lives in  content/review.ts
+// The live site's data source is  lib/reviews-source.ts  (Sanity)
 
 export type Review = {
   slug: string;
