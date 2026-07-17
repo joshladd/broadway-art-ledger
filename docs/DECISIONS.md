@@ -50,6 +50,25 @@ to serve those prototype forms. All of it was deleted once the Sanity site becam
 the final design. `/submit` links out to the editor's Airtable form; the app
 makes no Airtable API calls.
 
+## Scaling for a large review count
+
+The publication expects a large number of reviews over time. Two surfaces are
+O(N) in review count and are being moved to bounded patterns. Measured against a
+500-review dev seed: the feed query is ~1.4 MB (~2.8 KB/review) and the archive
+index ~1 MB (~2.2 KB/review), both linear — roughly ~12 MB and ~9 MB at 4,500.
+
+- **Feed (`/`)** — keep the full-text reading experience, but paginate: server-
+  render the newest ~15, then infinite-scroll the rest from a paginated GROQ
+  slice (`| order(publishedAt desc) [start...end]`). Bounds payload and DOM.
+- **Archive (`/archive`)** — server-side search (GROQ `match`, scored) instead of
+  shipping the whole corpus to the client for Fuse; the no-query browse list is a
+  virtualized/windowed list of compact rows over a paginated index.
+- **Build** — cap `generateStaticParams` to the recent N and enable on-demand ISR
+  (`dynamicParams`) for older reviews, so the build never prerenders thousands of
+  pages.
+
+Review pages (`/reviews/[slug]`) are O(1) and need no change.
+
 ## Security posture
 
 Shipped: baseline headers (HSTS, `X-Frame-Options`, `nosniff`, Referrer-Policy,
