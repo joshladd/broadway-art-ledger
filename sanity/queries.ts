@@ -22,12 +22,13 @@ const REVIEW_FIELDS = `
   }
 `;
 
-// Newest first — Bryan: "Make sure that the most recent review is always at the
-// top." Drafts are excluded: Sanity keeps them as a parallel doc whose _id is
-// prefixed `drafts.`, so without this filter unpublished edits would leak onto
-// the live feed. Used by the home feed only.
-export const REVIEWS_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
+// One page of the feed, newest first — Bryan: "Make sure that the most recent
+// review is always at the top." The [$start...$end] slice bounds the payload so
+// the feed doesn't fetch every review at once. Drafts are excluded: Sanity keeps
+// them as a parallel `drafts.`-prefixed doc that would otherwise leak onto the
+// live feed.
+export const REVIEWS_PAGE_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
     ${REVIEW_FIELDS}
   }
 `);

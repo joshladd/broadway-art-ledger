@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { Review } from "@/content/review";
 import {
-  REVIEWS_QUERY,
+  REVIEWS_PAGE_QUERY,
   REVIEW_BY_SLUG_QUERY,
   REVIEW_SLUGS_QUERY,
   ARCHIVE_QUERY,
@@ -22,12 +22,22 @@ import {
 // so it can be unit-tested without a dataset. Everything here is tagged
 // "reviews" so /api/revalidate flushes it the moment Bryan publishes.
 
-// React-cached so the feed, the archive, and a solo page's generateMetadata +
-// render all share one fetch within a request.
-export const getReviews = cache(async (): Promise<Review[]> => {
-  const rows = await sanityFetch<ReviewRow[]>(REVIEWS_QUERY, {}, "reviews");
+// How many reviews the feed shows per page (initial render and each load-more).
+export const FEED_PAGE_SIZE = 10;
+
+// One page of the feed. The [start...end) slice keeps the payload bounded no
+// matter how many reviews exist; the feed loads more on scroll.
+export async function getReviewPage(
+  offset: number,
+  limit: number = FEED_PAGE_SIZE,
+): Promise<Review[]> {
+  const rows = await sanityFetch<ReviewRow[]>(
+    REVIEWS_PAGE_QUERY,
+    { start: offset, end: offset + limit },
+    "reviews",
+  );
   return mapReviewRows(rows);
-});
+}
 
 // One review by slug — fetches only its own document, so a review page (and its
 // ISR regeneration) never pulls the whole dataset. Returns null if missing or

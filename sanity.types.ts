@@ -292,9 +292,9 @@ export type AllSanitySchemaTypes =
   | Geopoint;
 
 // Source: sanity/queries.ts
-// Variable: REVIEWS_QUERY
-// Query: *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {      "slug": slug.current,  headline,  showName,  startDate,  endDate,  showUrl,  tagline,  body,  publishedAt,  heroImage {    alt,    caption,    asset->{      url,      "dimensions": metadata.dimensions    }  }  }
-export type REVIEWS_QUERY_RESULT = Array<{
+// Variable: REVIEWS_PAGE_QUERY
+// Query: *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {      "slug": slug.current,  headline,  showName,  startDate,  endDate,  showUrl,  tagline,  body,  publishedAt,  heroImage {    alt,    caption,    asset->{      url,      "dimensions": metadata.dimensions    }  }  }
+export type REVIEWS_PAGE_QUERY_RESULT = Array<{
   slug: string;
   headline: string;
   showName: string;
@@ -478,7 +478,7 @@ export type SUBMIT_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEWS_QUERY_RESULT;
+    '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEWS_PAGE_QUERY_RESULT;
     '\n  *[_type == "review" && slug.current == $slug && !(_id in path("drafts.**"))][0] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEW_BY_SLUG_QUERY_RESULT;
     '\n  *[_type == "review" && !(_id in path("drafts.**"))]{ "slug": slug.current }\n': REVIEW_SLUGS_QUERY_RESULT;
     '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {\n    "slug": slug.current,\n    headline,\n    showName,\n    tagline,\n    startDate,\n    endDate,\n    "bodyText": pt::text(body),\n    "imageUrl": heroImage.asset->url\n  }\n': ARCHIVE_QUERY_RESULT;
