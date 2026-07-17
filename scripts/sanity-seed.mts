@@ -23,10 +23,31 @@ if (!projectId || !dataset || !token) {
   );
 }
 
-if (dataset === "production") {
+// Seeding production is possible but must be a deliberate act, never a slip of
+// the env var — hence an explicit flag rather than a bare check.
+const allowProduction = process.argv.includes("--allow-production");
+
+if (dataset === "production" && !allowProduction) {
   throw new Error(
     "Refusing to seed fabricated reviews into production.\n" +
-      "Set NEXT_PUBLIC_SANITY_DATASET=development in .env.local first.",
+      "Either set NEXT_PUBLIC_SANITY_DATASET=development, or pass\n" +
+      "--allow-production if you genuinely intend to (e.g. a demo).",
+  );
+}
+
+if (dataset === "production") {
+  console.warn(
+    [
+      "",
+      "  !! SEEDING FABRICATED REVIEWS INTO PRODUCTION !!",
+      `     project ${projectId} / dataset ${dataset}`,
+      "",
+      "  These are invented reviews of real museums, with fabricated run dates",
+      "  and no real author. They must be purged before the site is public:",
+      "",
+      "      node --env-file=<env> --import tsx scripts/sanity-purge-seed.mts",
+      "",
+    ].join("\n"),
   );
 }
 
