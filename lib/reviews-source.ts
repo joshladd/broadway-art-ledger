@@ -47,9 +47,18 @@ export const getReview = cache(async (slug: string): Promise<Review | null> => {
   return row && isRenderable(row) ? mapReviewRow(row) : null;
 });
 
-// Slugs only — for generateStaticParams. Tiny payload vs. the full dataset.
-export const getReviewSlugs = cache(async (): Promise<string[]> => {
-  const rows = await sanityFetch<{ slug: string | null }[]>(REVIEW_SLUGS_QUERY, {}, "reviews");
+// How many review pages generateStaticParams prerenders at build. The rest
+// generate on demand via ISR (dynamicParams), so the build stays flat no matter
+// how many reviews exist.
+export const PRERENDER_LIMIT = 50;
+
+// The most-recent `limit` slugs — for generateStaticParams.
+export const getReviewSlugs = cache(async (limit: number = PRERENDER_LIMIT): Promise<string[]> => {
+  const rows = await sanityFetch<{ slug: string | null }[]>(
+    REVIEW_SLUGS_QUERY,
+    { limit },
+    "reviews",
+  );
   return (rows ?? []).map((r) => r.slug).filter((s): s is string => Boolean(s));
 });
 

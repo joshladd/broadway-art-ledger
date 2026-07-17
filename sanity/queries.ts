@@ -42,8 +42,12 @@ export const REVIEW_BY_SLUG_QUERY = defineQuery(`
 `);
 
 // Slugs only — for generateStaticParams, which needs nothing else.
+// The most-recent N slugs — for generateStaticParams, which prerenders only the
+// recent reviews; older ones generate on demand via ISR.
 export const REVIEW_SLUGS_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))]{ "slug": slug.current }
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...$limit] {
+    "slug": slug.current
+  }
 `);
 
 // The archive's search index: no portable text, no full-size images. pt::text()

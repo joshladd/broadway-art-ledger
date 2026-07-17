@@ -373,7 +373,7 @@ export type REVIEW_BY_SLUG_QUERY_RESULT = {
 
 // Source: sanity/queries.ts
 // Variable: REVIEW_SLUGS_QUERY
-// Query: *[_type == "review" && !(_id in path("drafts.**"))]{ "slug": slug.current }
+// Query: *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...$limit] {    "slug": slug.current  }
 export type REVIEW_SLUGS_QUERY_RESULT = Array<{
   slug: string;
 }>;
@@ -480,7 +480,7 @@ declare module "@sanity/client" {
   interface SanityQueries {
     '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEWS_PAGE_QUERY_RESULT;
     '\n  *[_type == "review" && slug.current == $slug && !(_id in path("drafts.**"))][0] {\n    \n  "slug": slug.current,\n  headline,\n  showName,\n  startDate,\n  endDate,\n  showUrl,\n  tagline,\n  body,\n  publishedAt,\n  heroImage {\n    alt,\n    caption,\n    asset->{\n      url,\n      "dimensions": metadata.dimensions\n    }\n  }\n\n  }\n': REVIEW_BY_SLUG_QUERY_RESULT;
-    '\n  *[_type == "review" && !(_id in path("drafts.**"))]{ "slug": slug.current }\n': REVIEW_SLUGS_QUERY_RESULT;
+    '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...$limit] {\n    "slug": slug.current\n  }\n': REVIEW_SLUGS_QUERY_RESULT;
     '\n  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {\n    "slug": slug.current,\n    headline,\n    showName,\n    tagline,\n    startDate,\n    endDate,\n    "bodyText": pt::text(body),\n    "imageUrl": heroImage.asset->url\n  }\n': ARCHIVE_QUERY_RESULT;
     '\n  *[_type == "siteSettings" && _id == "siteSettings"][0] { strap }\n': SITE_SETTINGS_QUERY_RESULT;
     '\n  *[_type == "aboutPage" && _id == "aboutPage"][0] {\n    title,\n    body,\n    image {\n      alt,\n      asset->{ url, "dimensions": metadata.dimensions }\n    }\n  }\n': ABOUT_QUERY_RESULT;
