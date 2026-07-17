@@ -48,9 +48,8 @@ function Footer() {
 function PlateLedger({ review }: { review: Review }) {
   const rows: [string, string][] = [
     ["Plate", review.no],
-    ["Section", review.section],
     ["Date", review.date],
-    ["Venue", `${review.venue}, ${review.hood}`],
+    ["Venue", `${review.exhibition}, ${review.venue}`],
     ["Artist", review.artist],
     ["Critic", review.by],
   ];
@@ -78,7 +77,6 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
         {reviews.map((r) => (
           <article key={r.slug} className={styles.plate}>
             <div className={styles.plateHead}>
-              <span className={styles.section}>{r.section}</span>
               <span className={styles.plateNo}>{r.no}</span>
             </div>
             <h2 className={styles.title}>{r.title}</h2>
@@ -110,7 +108,6 @@ function ReviewPage({ review, prev, next, t }: { review: Review; prev: Review | 
         <a href={tHref(t)} className={styles.back}>← Return to the plates</a>
         <div className={styles.entryHead}>
           <span className={styles.entryNo}>{review.no}</span>
-          <span className={styles.entrySection}>{review.section}</span>
         </div>
         <h1 className={styles.aTitle}>{review.title}</h1>
         <p className={styles.artwork}>

@@ -39,14 +39,13 @@ function useInView<T extends Element>(): { ref: React.RefObject<T | null>; inVie
   return { ref, inView };
 }
 
-// Meta line: venue · hood · date. Leads the text column; the section is not
-// shown (it stays in the data, just not on screen).
+// Meta line: exhibition · venue · date. Leads the text column.
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
-      <span className={styles.metaSection}>{review.venue}</span>
+      <span className={styles.metaSection}>{review.exhibition}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.hood}</span>
+      <span>{review.venue}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>

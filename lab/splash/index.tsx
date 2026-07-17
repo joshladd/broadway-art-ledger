@@ -102,11 +102,9 @@ function useParallax<T extends HTMLElement>(): React.RefObject<T | null> {
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
-      <span className={styles.metaSection}>{review.section}</span>
+      <span className={styles.metaSection}>{review.exhibition}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span>{review.venue}</span>
-      <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.hood}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>
@@ -144,7 +142,6 @@ function Moment({ review, index }: { review: Review; index: number }) {
         <div className={styles.splitText}>
           <p className={styles.sectionTag}>
             <span className={styles.no}>{review.no}</span>
-            <span>{review.section}</span>
           </p>
           <h2 className={styles.mTitle}>{review.title}</h2>
           <p className={styles.mDek}>{review.dek}</p>
@@ -230,12 +227,12 @@ function Cover({ review }: { review: Review }) {
             This Week&rsquo;s Cover
           </p>
           <p className={styles.campaignSection}>
-            {review.no} &nbsp;·&nbsp; {review.section}
+            {review.no}
           </p>
           <h2 id="cover-title" className={styles.campaignTitle}>{review.title}</h2>
           <p className={styles.campaignDek}>{review.dek}</p>
           <p className={styles.campaignByline}>
-            By {review.by} &nbsp;·&nbsp; {review.venue}, {review.hood}
+            By {review.by} &nbsp;·&nbsp; {review.exhibition}, {review.venue}
           </p>
         </div>
       </div>

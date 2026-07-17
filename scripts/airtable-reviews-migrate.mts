@@ -7,15 +7,12 @@ const base = process.env.AIRTABLE_BASE_ID;
 if (!token || !base) { console.error("✗ Missing AIRTABLE_TOKEN / AIRTABLE_BASE_ID"); process.exit(1); }
 const H = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
-const sectionChoices = ["Painting", "Sculpture", "Photography", "Prints", "Installation", "Old Masters", "Portraiture", "Group Show", "Other"].map((name) => ({ name }));
-
 const fields = [
   { name: "Title", type: "singleLineText" },
   { name: "No", type: "singleLineText" },
   { name: "Date", type: "date", options: { dateFormat: { name: "iso" } } },
-  { name: "Section", type: "singleSelect", options: { choices: sectionChoices } },
+  { name: "Exhibition", type: "singleLineText" },
   { name: "Venue", type: "singleLineText" },
-  { name: "Hood", type: "singleLineText" },
   { name: "Byline", type: "singleLineText" },
   { name: "Dek", type: "singleLineText" },
   { name: "Body", type: "multilineText" },
@@ -53,7 +50,7 @@ if (existing.records?.length) {
 
 const records = reviews.map((r) => ({
   fields: {
-    Title: r.title, No: r.no, Date: r.iso, Section: r.section, Venue: r.venue, Hood: r.hood,
+    Title: r.title, No: r.no, Date: r.iso, Exhibition: r.exhibition, Venue: r.venue,
     Byline: r.by, Dek: r.dek, Body: r.body.join("\n\n"), Image: r.image, Artist: r.artist,
     Artwork: r.artwork, Credit: r.credit, Alt: r.alt, Published: true,
   },

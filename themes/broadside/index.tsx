@@ -64,7 +64,6 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
             className={`${styles.entry} ${i % 2 === 1 ? styles.entryFlip : ""}`}
           >
             <div className={styles.meta}>
-              <span className={styles.metaSection}>{r.section}</span>
               <span className={styles.metaDate}>{r.date}</span>
               <span className={styles.metaNo}>{r.no}</span>
             </div>
@@ -72,7 +71,7 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
               {r.title}
             </h2>
             <p className={styles.byline}>
-              {r.venue}, {r.hood} — by <b>{r.by}</b>
+              {r.exhibition}, {r.venue} — by <b>{r.by}</b>
             </p>
             <p className={styles.dek}>{r.dek}</p>
             <figure className={styles.marquee}>
@@ -113,13 +112,12 @@ function ReviewPage({
         <div className={styles.aHead}>
           <div className={styles.aHeadText}>
             <div className={styles.meta}>
-              <span className={styles.metaSection}>{review.section}</span>
               <span className={styles.metaDate}>{review.date}</span>
               <span className={styles.metaNo}>{review.no}</span>
             </div>
             <h1 className={styles.aTitle}>{review.title}</h1>
             <p className={styles.venue}>
-              {review.venue}, {review.hood}
+              {review.exhibition}, {review.venue}
             </p>
             <p className={styles.artByline}>by {review.by}</p>
           </div>

@@ -137,10 +137,9 @@ export default function Archive({
                     </span>
                     <span className={styles.cMeta}>
                       <span className={styles.cVenue}>
-                        <span className={styles.vName}>{r.venue}</span>
-                        <span className={styles.vHood}>{r.hood}</span>
+                        <span className={styles.vName}>{r.exhibition}</span>
+                        <span className={styles.vHood}>{r.venue}</span>
                       </span>
-                      <span className={styles.cSection}>{r.section}</span>
                       <span className={styles.cDate}>{r.date}</span>
                     </span>
                     <span className={styles.cMark} aria-hidden="true">
@@ -161,8 +160,6 @@ export default function Archive({
                       <p className={styles.dek}>{r.dek}</p>
                       <p className={styles.byline}>
                         <span className={styles.byName}>By {r.by}</span>
-                        <span className={styles.bySep}>·</span>
-                        <span>{r.section}</span>
                         <span className={styles.bySep}>·</span>
                         <span>{r.date}</span>
                       </p>

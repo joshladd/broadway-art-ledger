@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Review } from "@/content/reviews";
 import { Mark } from "@/components/Mark";
@@ -39,11 +39,9 @@ function collapsedTransform(rect: DOMRect): string {
 function Meta({ review, light }: { review: Review; light?: boolean }) {
   return (
     <p className={light ? styles.metaLineLight : styles.metaLine}>
-      <span className={styles.metaSection}>{review.section}</span>
+      <span className={styles.metaSection}>{review.exhibition}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span>{review.venue}</span>
-      <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.hood}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>
@@ -67,14 +65,6 @@ function View({ reviews }: { reviews: Review[] }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollbarPad = useRef(0);
-
-  // Section chips are a DESIGNED (inert) filter slot — sections are derived
-  // from the collection so the chips read as real, but nothing is wired.
-  const sections = useMemo(() => {
-    const seen: string[] = [];
-    for (const r of reviews) if (r.section && !seen.includes(r.section)) seen.push(r.section);
-    return seen;
-  }, [reviews]);
 
   useEffect(() => {
     if (typeof window.matchMedia === "function") {
@@ -243,11 +233,6 @@ function View({ reviews }: { reviews: Review[] }) {
             <button type="button" className={`${styles.chip} ${styles.chipOn}`} aria-pressed="true" disabled>
               All
             </button>
-            {sections.map((s) => (
-              <button key={s} type="button" className={styles.chip} aria-pressed="false" disabled>
-                {s}
-              </button>
-            ))}
           </div>
           <label className={styles.sort}>
             <span className={styles.sortLabel}>Sort</span>
@@ -290,8 +275,6 @@ function View({ reviews }: { reviews: Review[] }) {
             <span className={styles.cardText}>
               <span className={styles.cardLabel}>
                 <span className={styles.no}>{review.no}</span>
-                <span className={styles.cardLabelSep} aria-hidden="true">·</span>
-                <span>{review.section}</span>
               </span>
               <span className={styles.cardTitle}>{review.title}</span>
               <span className={styles.cardCta} aria-hidden="true">
@@ -342,8 +325,6 @@ function View({ reviews }: { reviews: Review[] }) {
               <header className={styles.lede}>
                 <p className={styles.ledeLabel}>
                   <span className={styles.no}>{active.no}</span>
-                  <span className={styles.cardLabelSep} aria-hidden="true">·</span>
-                  <span>{active.section}</span>
                 </p>
                 <h2 id="portal-title" className={styles.ledeTitle}>
                   {active.title}

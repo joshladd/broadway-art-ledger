@@ -125,12 +125,10 @@ export default function View({ reviews }: { reviews: Review[] }) {
                     <span className={styles.rowNo}>{r.no}</span>
                   </span>
 
-                  <span className={styles.rowSection}>{r.section}</span>
-
                   <span className={styles.rowMain}>
                     <span className={styles.rowTitle}>{r.title}</span>
                     <span className={styles.rowVenue}>
-                      {r.venue}, {r.hood}
+                      {r.exhibition}, {r.venue}
                     </span>
                   </span>
 

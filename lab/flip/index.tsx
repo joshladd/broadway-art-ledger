@@ -29,11 +29,9 @@ function figure(no: string): string {
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
-      <span className={styles.metaSection}>{review.section}</span>
+      <span className={styles.metaSection}>{review.exhibition}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span>{review.venue}</span>
-      <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.hood}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>
@@ -90,8 +88,6 @@ function Card({ review, index, total }: { review: Review; index: number; total: 
           <div className={styles.coverBody}>
             <p className={styles.coverTag}>
               <span className={styles.coverNo}>{figure(review.no)}</span>
-              <span className={styles.tagDot} aria-hidden="true">·</span>
-              <span>{review.section}</span>
             </p>
             <h2 className={styles.coverTitle}>{review.title}</h2>
             <p className={styles.coverDek}>{review.dek}</p>
@@ -135,8 +131,6 @@ function Card({ review, index, total }: { review: Review; index: number; total: 
           <div className={styles.backScroll} ref={backRef}>
             <p className={styles.backTag}>
               <span className={styles.backNo}>{figure(review.no)}</span>
-              <span className={styles.tagDot} aria-hidden="true">·</span>
-              <span>{review.section}</span>
             </p>
             <h3 className={styles.backTitle} id={titleId}>{review.title}</h3>
             <p className={styles.backDek}>{review.dek}</p>

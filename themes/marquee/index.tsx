@@ -64,12 +64,11 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
         {reviews.map((r) => (
           <article key={r.slug} className={styles.entry}>
             <div className={styles.meta}>
-              <span className={styles.metaSection}>{r.section}</span>
               <span>{r.date}</span>
               <span className={styles.metaNo}>{r.no}</span>
             </div>
             <h2 className={styles.title}>{r.title}</h2>
-            <div className={styles.byline}>{r.venue}, {r.hood} — by <b>{r.by}</b></div>
+            <div className={styles.byline}>{r.exhibition}, {r.venue} — by <b>{r.by}</b></div>
             <p className={styles.dek}>{r.dek}</p>
             <figure className={styles.figure}>
               <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
@@ -93,12 +92,11 @@ function ReviewPage({ review, prev, next, t }: { review: Review; prev: Review | 
       <article className={styles.article}>
         <a href={tHref(t)} className={styles.back}>← All reviews</a>
         <div className={styles.meta}>
-          <span className={styles.metaSection}>{review.section}</span>
           <span>{review.date}</span>
           <span className={styles.metaNo}>{review.no}</span>
         </div>
         <h1 className={styles.aTitle}>{review.title}</h1>
-        <p className={styles.venue}>{review.venue}, {review.hood}</p>
+        <p className={styles.venue}>{review.exhibition}, {review.venue}</p>
         <p className={styles.artByline}>by {review.by}</p>
         <p className={styles.aDek}>{review.dek}</p>
         <figure className={styles.heroFig}>

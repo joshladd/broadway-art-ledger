@@ -58,11 +58,10 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
             <div className={styles.entryText}>
               <div className={styles.meta}>
                 <span>{r.no}</span>
-                <span>{r.section}</span>
                 <span>{r.date}</span>
               </div>
               <h2 className={styles.title}>{r.title}</h2>
-              <p className={styles.venue}>{r.venue}, {r.hood}</p>
+              <p className={styles.venue}>{r.exhibition}, {r.venue}</p>
               <p className={styles.dek}>{r.dek}</p>
               <p className={styles.byline}>By {r.by}</p>
             </div>
@@ -90,11 +89,10 @@ function ReviewPage({ review, prev, next, t }: { review: Review; prev: Review | 
         <div className={styles.articleHead}>
           <div className={styles.meta}>
             <span>{review.no}</span>
-            <span>{review.section}</span>
             <span>{review.date}</span>
           </div>
           <h1 className={styles.aTitle}>{review.title}</h1>
-          <p className={styles.aVenue}>{review.venue}, {review.hood}</p>
+          <p className={styles.aVenue}>{review.exhibition}, {review.venue}</p>
           <p className={styles.aByline}>By {review.by}</p>
         </div>
         <p className={styles.aDek}>{review.dek}</p>

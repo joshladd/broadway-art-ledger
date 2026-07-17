@@ -13,10 +13,9 @@ export type Review = {
   no: string;
   date: string;      // display, e.g. "07.11.26"
   iso: string;       // sortable
-  section: string;   // Painting, Prints, Photography, Old Masters, Portraiture
   title: string;     // the show / gallery title (big + bold)
+  exhibition: string;
   venue: string;
-  hood: string;
   by: string;        // author byline
   dek: string;       // one-line summary
   body: string[];    // paragraphs
@@ -32,9 +31,9 @@ export type Review = {
 export const reviews: Review[] = [
   {
     slug: "toulouse-lautrec-night-work",
-    no: "8", date: "07.11.26", iso: "2026-07-11", section: "Painting",
+    no: "8", date: "07.11.26", iso: "2026-07-11",
     title: "Toulouse-Lautrec: Night Work",
-    venue: "The Morgan Library & Museum", hood: "Murray Hill", by: "Coleman Reyes",
+    exhibition: "The Morgan Library & Museum", venue: "Murray Hill", by: "Coleman Reyes",
     dek: "The green-lit face shoved to the edge is the whole argument.",
     body: [
       "Everyone remembers the crowd, but the painting belongs to the woman shoved half out of the frame at right, her face lit acid green by unseen footlights. She is the reason to make the trip. Lautrec painted Montmartre from the inside — he practically lived at the Moulin Rouge — and he refuses to sell it to us as spectacle. The dancers are off the clock. The drinkers look bored. The artist himself turns up in the back, a top-hatted dwarf beside his towering cousin, too honest to leave himself out of the transaction.",
@@ -48,9 +47,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "van-gogh-in-arles",
-    no: "7", date: "07.04.26", iso: "2026-07-04", section: "Painting",
+    no: "7", date: "07.04.26", iso: "2026-07-04",
     title: "Van Gogh in Arles",
-    venue: "The Metropolitan Museum of Art", hood: "Upper East Side", by: "June Tanaka",
+    exhibition: "The Metropolitan Museum of Art", venue: "Upper East Side", by: "June Tanaka",
     dek: "A room painted by someone desperate to believe in rest.",
     body: [
       "The tilt is the tell. The floor pitches forward, the back wall refuses to meet its neighbors at any angle a builder would recognize, the two chairs sit at odds like people who have quarreled — and yet Van Gogh insisted, in letter after letter, that this picture was about rest. “Looking at the picture ought to rest the brain,” he wrote. It is the most strenuous calm ever committed to canvas.",
@@ -64,9 +63,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "the-face-in-the-glass",
-    no: "6", date: "06.27.26", iso: "2026-06-27", section: "Portraiture",
+    no: "6", date: "06.27.26", iso: "2026-06-27",
     title: "The Face in the Glass",
-    venue: "Brooklyn Museum", hood: "Prospect Heights", by: "Marcus Bell",
+    exhibition: "Brooklyn Museum", venue: "Prospect Heights", by: "Marcus Bell",
     dek: "Thirty self-portraits in two years; this is the one that stops lying.",
     body: [
       "Van Gogh painted himself compulsively — more than thirty times in two years — for the least romantic of reasons: models cost money and a mirror is free. Keep that in mind at the Brooklyn Museum, where the 1887 head hangs among four centuries of people arranging their own faces for posterity. It cuts through the room like a slap.",
@@ -80,9 +79,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "renoir-on-the-terrace",
-    no: "5", date: "06.20.26", iso: "2026-06-20", section: "Painting",
+    no: "5", date: "06.20.26", iso: "2026-06-20",
     title: "Renoir: On the Terrace",
-    venue: "The Metropolitan Museum of Art", hood: "Upper East Side", by: "Priya Anand",
+    exhibition: "The Metropolitan Museum of Art", venue: "Upper East Side", by: "Priya Anand",
     dek: "Sweetness this aggressive is a position, not an accident.",
     body: [
       "It is easy to dismiss Renoir as the painter of the chocolate box, and “Two Sisters” hands the skeptic every weapon in the drawer: the rosy cheeks, the basket of wool spilling like fallen fruit, the wall of foliage doing frantic Impressionist somersaults behind two impossibly wholesome girls. Half the visitors will coo. The other half will smirk. Both are missing how hard the picture is working.",
@@ -96,9 +95,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "whistler-nocturnes",
-    no: "4", date: "06.13.26", iso: "2026-06-13", section: "Painting",
+    no: "4", date: "06.13.26", iso: "2026-06-13",
     title: "Whistler: Nocturnes",
-    venue: "The Frick Collection", hood: "Upper East Side", by: "Dov Frankel",
+    exhibition: "The Frick Collection", venue: "Upper East Side", by: "Dov Frankel",
     dek: "A painting that dares you to admit almost nothing is happening.",
     body: [
       "Whistler borrowed the word “nocturne” from music because music had a permission painting did not: to be about nothing but mood. No story, no moral, no anecdote — just a key, a tempo, a feeling held in the air. This blue-and-gold twilight over Southampton Water is his argument’s best witness, and the Frick has hung it exactly as such a picture wants to be hung: low, alone, and gently lit.",
@@ -112,9 +111,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "the-painted-curtain",
-    no: "3", date: "06.06.26", iso: "2026-06-06", section: "Old Masters",
+    no: "3", date: "06.06.26", iso: "2026-06-06",
     title: "The Painted Curtain",
-    venue: "The Leiden Collection", hood: "Upper East Side", by: "Alina Costa",
+    exhibition: "The Leiden Collection", venue: "Upper East Side", by: "Alina Costa",
     dek: "The blue curtain is the painting; the flowers are the excuse.",
     body: [
       "Van der Spelt paints a garland of flowers, ripe and Dutch and slightly overblown, and then he paints a blue silk curtain drawn halfway across it — a curtain that is, of course, also paint. Your hand twitches. You want to pull the cloth aside to see the bouquet it is hiding, and for a half-second, before the mind catches up with the eye, you believe you could.",
@@ -128,9 +127,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "hokusai-thirty-six-views",
-    no: "2", date: "05.30.26", iso: "2026-05-30", section: "Prints",
+    no: "2", date: "05.30.26", iso: "2026-05-30",
     title: "Hokusai: Thirty-Six Views",
-    venue: "Japan Society", hood: "Turtle Bay", by: "Hana Okafor",
+    exhibition: "Japan Society", venue: "Turtle Bay", by: "Hana Okafor",
     dek: "The most reproduced image on earth, seen as if for the first time.",
     body: [
       "You have seen “The Great Wave” on tote bags, phone cases, socks, shower curtains, and the inside of your own eyelids, and that ubiquity is precisely the problem this show has to solve. How do you actually look at the most reproduced image on earth? Japan Society’s answer is disarmingly simple: hang it small, hang it in sequence, and let the logo become a print again.",
@@ -144,9 +143,9 @@ export const reviews: Review[] = [
   },
   {
     slug: "stieglitz-hand-of-man",
-    no: "1", date: "05.23.26", iso: "2026-05-23", section: "Photography",
+    no: "1", date: "05.23.26", iso: "2026-05-23",
     title: "Stieglitz: The Hand of Man",
-    venue: "International Center of Photography", hood: "Essex Crossing", by: "Sam Whitfield",
+    exhibition: "International Center of Photography", venue: "Essex Crossing", by: "Sam Whitfield",
     dek: "Stieglitz argued photography was art by photographing a train.",
     body: [
       "In 1902 the question that mattered was whether a machine could make art, and Alfred Stieglitz answered it, with characteristic nerve, by photographing another machine. “The Hand of Man” is a locomotive steaming into a rail yard — all haze, wet track, and industrial melancholy — and it is also a manifesto in a trench coat, an argument for photography’s soul disguised as a moody picture of a train.",

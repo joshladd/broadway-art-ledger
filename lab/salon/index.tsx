@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Review } from "@/content/reviews";
 import styles from "./styles.module.css";
@@ -10,13 +10,6 @@ type Phase = "enter" | "exit";
 function View({ reviews }: { reviews: Review[] }) {
   const [active, setActive] = useState<Review | null>(null);
   const [phase, setPhase] = useState<Phase>("enter");
-
-  // Sections present on the wall, in first-seen order — for the archive filter chips.
-  const sections = useMemo(() => {
-    const seen: string[] = [];
-    for (const r of reviews) if (r.section && !seen.includes(r.section)) seen.push(r.section);
-    return seen;
-  }, [reviews]);
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -139,17 +132,6 @@ function View({ reviews }: { reviews: Review[] }) {
               >
                 All
               </button>
-              {sections.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={styles.chip}
-                  aria-pressed="false"
-                  disabled
-                >
-                  {s}
-                </button>
-              ))}
             </div>
             <label className={styles.sort}>
               <span className={styles.sortLabel}>Sort</span>
@@ -199,7 +181,6 @@ function View({ reviews }: { reviews: Review[] }) {
                     <span className={styles.partist}>{r.artist}</span>
                     <span className={styles.ptitle}>{r.title}</span>
                   </span>
-                  <span className={styles.psection}>{r.section}</span>
                 </span>
               </button>
             </li>
@@ -257,7 +238,6 @@ function View({ reviews }: { reviews: Review[] }) {
               <div className={styles.readInner}>
                 <p className={styles.reyebrow}>
                   <span className={styles.raccent}>{active.no}</span>
-                  <span>{active.section}</span>
                 </p>
                 <h2 id="salon-title" className={styles.rtitle}>
                   {active.title}
@@ -268,7 +248,7 @@ function View({ reviews }: { reviews: Review[] }) {
                 <p className={styles.rmeta}>
                   <span className={styles.rby}>{active.by}</span>
                   <span className={styles.rvenue}>
-                    {active.venue} · {active.hood} · {active.date}
+                    {active.exhibition} · {active.venue} · {active.date}
                   </span>
                 </p>
                 <div className={styles.rbody}>

@@ -59,7 +59,6 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
             <div className={styles.gutter}>
               <span className={styles.gNo}>{r.no}</span>
               <span className={styles.gDate}>{r.date}</span>
-              <span className={styles.gSection}>{r.section}</span>
               <span className={styles.gBy}>by {r.by}</span>
             </div>
             <div className={styles.entryMain}>
@@ -68,7 +67,7 @@ function Home({ reviews, t }: { reviews: Review[]; t: string }) {
               </h2>
               <p className={styles.entryDek}>{r.dek}</p>
               <p className={styles.entryVenue}>
-                {r.venue}, {r.hood}
+                {r.exhibition}, {r.venue}
               </p>
               <figure className={styles.figure}>
                 <img className={styles.img} src={r.image} alt={r.alt} loading="lazy" />
@@ -110,14 +109,13 @@ function ReviewPage({
           ← Back to the index
         </a>
         <div className={styles.aMeta}>
-          <span className={styles.aSection}>{review.section}</span>
           <span>{review.date}</span>
           <span className={styles.aNo}>{review.no}</span>
         </div>
         <h1 className={styles.aTitle}>{review.title}</h1>
         <p className={styles.dek}>{review.dek}</p>
         <p className={styles.venue}>
-          {review.venue}, {review.hood}
+          {review.exhibition}, {review.venue}
         </p>
         <p className={styles.artByline}>by {review.by}</p>
         <figure className={styles.figure}>

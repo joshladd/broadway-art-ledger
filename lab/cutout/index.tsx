@@ -96,11 +96,9 @@ function useTitlePan<T extends HTMLElement>(): React.RefObject<T | null> {
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
-      <span className={styles.metaSection}>{review.section}</span>
+      <span className={styles.metaSection}>{review.exhibition}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span>{review.venue}</span>
-      <span className={styles.dot} aria-hidden="true">·</span>
-      <span>{review.hood}</span>
       <span className={styles.dot} aria-hidden="true">·</span>
       <span className={styles.metaDate}>{review.date}</span>
     </p>
@@ -131,8 +129,6 @@ function ReviewMoment({ review, index }: { review: Review; index: number }) {
 
         <p className={styles.coverLabel}>
           <span className={styles.no}>{review.no}</span>
-          <span className={styles.labelDot} aria-hidden="true">·</span>
-          <span>{review.section}</span>
         </p>
 
         <div className={styles.titleWrap}>

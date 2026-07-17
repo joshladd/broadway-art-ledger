@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Review } from "@/content/reviews";
 import Image from "next/image";
 import { Mark } from "@/components/Mark";
@@ -57,14 +57,6 @@ export default function View({ reviews }: { reviews: Review[] }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollbarPad = useRef(0);
-
-  // Section chips are a DESIGNED (inert) filter slot — sections are derived
-  // from the collection so the chips read as real, but nothing is wired.
-  const sections = useMemo(() => {
-    const seen: string[] = [];
-    for (const r of reviews) if (r.section && !seen.includes(r.section)) seen.push(r.section);
-    return seen;
-  }, [reviews]);
 
   useEffect(() => {
     if (typeof window.matchMedia === "function") {
@@ -224,11 +216,6 @@ export default function View({ reviews }: { reviews: Review[] }) {
               <button type="button" className={`${styles.chip} ${styles.chipOn}`} aria-pressed="true">
                 All
               </button>
-              {sections.map((s) => (
-                <button key={s} type="button" className={styles.chip} aria-pressed="false">
-                  {s}
-                </button>
-              ))}
             </div>
             <label className={styles.sort}>
               <span className={styles.sortLabel}>Sort</span>
@@ -271,11 +258,9 @@ export default function View({ reviews }: { reviews: Review[] }) {
             <span className={styles.cardBody}>
               <span className={styles.cardMeta}>
                 <span className={styles.no}>{review.no}</span>
-                <span className={styles.metaSep} aria-hidden="true">·</span>
-                <span className={styles.section}>{review.section}</span>
               </span>
               <span className={styles.cardTitle}>{review.title}</span>
-              <span className={styles.cardVenue}>{review.venue}</span>
+              <span className={styles.cardVenue}>{review.exhibition}</span>
               <span className={styles.cardCta} aria-hidden="true">
                 Open <span className={styles.cardCtaGlyph}>↗</span>
               </span>
@@ -327,8 +312,6 @@ export default function View({ reviews }: { reviews: Review[] }) {
                 <p className={styles.ledeMeta}>
                   <span className={styles.no}>{active.no}</span>
                   <span className={styles.metaSep} aria-hidden="true">·</span>
-                  <span>{active.section}</span>
-                  <span className={styles.metaSep} aria-hidden="true">·</span>
                   <span>{active.date}</span>
                 </p>
                 <h2 id="stacks-title" className={styles.ledeTitle}>
@@ -336,7 +319,7 @@ export default function View({ reviews }: { reviews: Review[] }) {
                 </h2>
                 <p className={styles.ledeDek}>{active.dek}</p>
                 <p className={styles.ledeVenue}>
-                  {active.venue}, {active.hood}
+                  {active.exhibition}, {active.venue}
                 </p>
                 <p className={styles.ledeByline}>By {active.by}</p>
                 <p className={styles.scrollCue} aria-hidden="true">

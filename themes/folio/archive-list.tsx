@@ -27,10 +27,9 @@ type Entry = { r: Review; matches: MatchMap };
 const FUSE_KEYS = [
   { name: "title", weight: 0.35 },
   { name: "artist", weight: 0.2 },
-  { name: "venue", weight: 0.12 },
-  { name: "section", weight: 0.1 },
+  { name: "exhibition", weight: 0.12 },
   { name: "by", weight: 0.08 },
-  { name: "hood", weight: 0.05 },
+  { name: "venue", weight: 0.05 },
   { name: "artwork", weight: 0.05 },
   { name: "dek", weight: 0.03 },
   { name: "bodyText", weight: 0.02 },
@@ -219,8 +218,8 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
                             {" · "}
                           </>
                         )}
-                        {highlight(r.venue, matches.venue)}
-                        {`, ${r.hood}`}
+                        {highlight(r.exhibition, matches.exhibition)}
+                        {`, ${r.venue}`}
                       </span>
                     </span>
 
