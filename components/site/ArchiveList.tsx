@@ -6,13 +6,8 @@ import Link from "next/link";
 import Fuse, { type FuseResultMatch, type RangeTuple } from "fuse.js";
 import type { ArchiveItem } from "@/lib/map-review";
 import { formatRange } from "@/lib/format-date";
+import { marqueePrefetchUrl } from "@/lib/sanity-image";
 import styles from "./site.module.css";
-
-// next/image's default device widths; the review marquee displays at ~888px
-// (see ReviewArticle's sizes). We prefetch the width the browser will actually
-// request for the viewer's pixel density, so the hover prefetch is a cache hit.
-const DEVICE_SIZES = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
-const HERO_DISPLAY_WIDTH = 888;
 
 /* The interactive half of the Archive. Its job is to find a review without the
  * raw scroll, so search is its reason to exist. Rows link to each review's own
@@ -67,13 +62,10 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
   function prefetchHero(item: ArchiveItem) {
     if (!item.heroUrl || prefetched.current.has(item.slug)) return;
     prefetched.current.add(item.slug);
-    const dpr = window.devicePixelRatio || 1;
-    const target = Math.ceil(HERO_DISPLAY_WIDTH * dpr);
-    const w = DEVICE_SIZES.find((s) => s >= target) ?? DEVICE_SIZES[DEVICE_SIZES.length - 1];
     const link = document.createElement("link");
     link.rel = "prefetch";
     link.as = "image";
-    link.href = `/_next/image?url=${encodeURIComponent(item.heroUrl)}&w=${w}&q=75`;
+    link.href = marqueePrefetchUrl(item.heroUrl, window.devicePixelRatio || 1);
     document.head.appendChild(link);
   }
 

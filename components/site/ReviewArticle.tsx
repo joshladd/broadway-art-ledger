@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Review } from "@/content/review";
+import { MARQUEE_SIZES } from "@/lib/sanity-image";
 import { Dateline } from "./Dateline";
 import { Body } from "./Body";
 import styles from "./site.module.css";
@@ -26,7 +27,7 @@ export function ReviewArticle({
           alt={review.image.alt}
           width={review.image.width}
           height={review.image.height}
-          sizes="(max-width: 820px) 100vw, 888px"
+          sizes={MARQUEE_SIZES}
           priority={priority}
         />
         {review.image.caption && (
