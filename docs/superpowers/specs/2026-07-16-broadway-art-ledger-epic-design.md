@@ -643,18 +643,27 @@ duplicate-project risk that was flagged before the integration was installed.
   deploying per-project.
 - The seed script refuses any dataset named `production`, in either project.
 
-#### ⚠️ Open risk of this split: can Bryan log into the production Studio?
+#### RESOLVED: Josh IS the admin of production — under his .edu identity
 
-`bnbcebcv`'s only human member is **`pw8xaHgNK`** — neither of Josh's identities
-(Google `gA9Goao8t`, GitHub `gWejjEkFi`). The embedded Studio authenticates against
-Sanity, so **only a member of `bnbcebcv` can write reviews in production.** Josh
-cannot invite Bryan to a project he isn't a member of.
+`bnbcebcv`'s administrator `pw8xaHgNK` is **joshua.ladd@colorado.edu** (org
+`oCJNMzdPm` = "joshladd's projects"). It was never a permissions problem — the
+Sanity CLI logins used `ladd6531@gmail.com`, which is a *different* Sanity user
+(`gA9Goao8t`) that owns nothing.
 
-**Must be verified before launch:** deploy, open `/studio` on the Vercel URL, and
-confirm (a) Josh can get in — likely via the Vercel dashboard's Sanity integration,
-which should federate his Vercel identity — and (b) Bryan can be invited from
-there. If neither works, production has a CMS nobody can write to, and
-`6vag9i62` becomes the better canonical choice after all.
+**To administer production:** sanity.io/manage → sign in with Google as
+**joshua.ladd@colorado.edu** (not the gmail). From there: invite Bryan (Members →
+Invite → role `editor`), manage datasets, create the revalidation webhook.
+
+**Studio access:** the deployed `/studio` authenticates against Sanity, so Josh
+signs in with the .edu account and Bryan with whatever address he's invited under.
+
+Identity map, so this never confuses anyone again:
+
+| Sanity user | Email | Owns |
+|---|---|---|
+| `pw8xaHgNK` | joshua.ladd@colorado.edu | **`bnbcebcv` (production)** — administrator |
+| `gWejjEkFi` | ladd6531@gmail.com (GitHub login) | `6vag9i62` (dev) |
+| `gA9Goao8t` | ladd6531@gmail.com (Google login) | nothing |
 
 ### Blocked on Bryan (blocks nothing shipped)
 - Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
