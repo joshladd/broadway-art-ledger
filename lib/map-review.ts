@@ -79,3 +79,50 @@ export function mapReviewRow(row: ReviewRow): Review {
 export function mapReviewRows(rows: ReviewRow[] | null): Review[] {
   return (rows ?? []).filter(isRenderable).map(mapReviewRow);
 }
+
+// The archive's lightweight search item: plain body text (flattened in GROQ)
+// and a small thumbnail, never the portable text or the full-size image.
+export type ArchiveItem = {
+  slug: string;
+  headline: string;
+  showName: string;
+  tagline: string;
+  startDate: string;
+  endDate: string;
+  bodyText: string;
+  thumbUrl: string;
+};
+
+export type ArchiveRow = {
+  slug: string | null;
+  headline: string | null;
+  showName: string | null;
+  tagline: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  bodyText: string | null;
+  thumbUrl: string | null;
+};
+
+const ARCHIVE_THUMB_WIDTH = 160; // ~2x the 64px display slot, for retina
+
+function sizedThumbUrl(assetUrl: string): string {
+  if (!assetUrl) return "";
+  const sep = assetUrl.includes("?") ? "&" : "?";
+  return `${assetUrl}${sep}w=${ARCHIVE_THUMB_WIDTH}&fit=max&auto=format`;
+}
+
+export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
+  return (rows ?? [])
+    .filter((r) => Boolean(r?.slug))
+    .map((r) => ({
+      slug: s(r.slug),
+      headline: s(r.headline),
+      showName: s(r.showName),
+      tagline: s(r.tagline),
+      startDate: s(r.startDate),
+      endDate: s(r.endDate),
+      bodyText: s(r.bodyText),
+      thumbUrl: sizedThumbUrl(s(r.thumbUrl)),
+    }));
+}
