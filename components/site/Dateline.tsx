@@ -1,5 +1,6 @@
 import type { Review } from "@/content/review";
 import { formatRange } from "@/lib/format-date";
+import { safeHref } from "@/lib/safe-href";
 import styles from "./site.module.css";
 
 // Bryan: "The location will be the institution title plus running dates i.e.,
@@ -13,12 +14,13 @@ export function Dateline({ review }: { review: Review }) {
   const text = [review.showName, range].filter(Boolean).join(", ");
   if (!text.trim()) return null;
 
+  const href = safeHref(review.showUrl);
   return (
     <p className={styles.dateline}>
-      {review.showUrl ? (
+      {href ? (
         <a
           className={styles.datelineLink}
-          href={review.showUrl}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
         >

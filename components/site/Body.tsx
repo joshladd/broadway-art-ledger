@@ -1,15 +1,18 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
+import { safeHref, isExternal } from "@/lib/safe-href";
 import styles from "./site.module.css";
 
 // Sanity's default block content. Bryan's "just hyperlink and italicize really"
 // described a hypothetical hand-rolled CMS; with Sanity we take the defaults.
-// Only links need a custom component, so external URLs get target/rel.
+// Only links need a custom component, so external URLs get target/rel. Hrefs are
+// scheme-checked (safeHref) — a `javascript:` link renders as plain text.
 const components: PortableTextComponents = {
   marks: {
     link: ({ value, children }) => {
-      const href = String(value?.href ?? "");
-      const external = /^https?:\/\//i.test(href);
+      const href = safeHref(value?.href);
+      if (!href) return <>{children}</>;
+      const external = isExternal(href);
       return (
         <a
           href={href}

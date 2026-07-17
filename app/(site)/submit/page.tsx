@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/site/Header";
 import { PortableCopy } from "@/components/site/PortableCopy";
 import { getSubmitContent } from "@/lib/site-content";
+import { safeHref } from "@/lib/safe-href";
 import styles from "@/components/site/site.module.css";
 
 export const metadata: Metadata = { title: "Submit — The Broadway Art Ledger" };
@@ -15,6 +16,7 @@ export const metadata: Metadata = { title: "Submit — The Broadway Art Ledger" 
 // Sanity (submitPage singleton), with content/site.ts as the fallback.
 export default async function SubmitPage() {
   const submit = await getSubmitContent();
+  const formUrl = safeHref(submit.formUrl);
 
   return (
     <main className={styles.root}>
@@ -25,15 +27,18 @@ export default async function SubmitPage() {
         </div>
 
         {/* Outbound handoff to Bryan's Airtable form. New tab: it's a different
-            product, and a writer shouldn't hit a dead end. */}
-        <a
-          className={styles.formLink}
-          href={submit.formUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open the pitch form
-        </a>
+            product, and a writer shouldn't hit a dead end. Rendered only when the
+            configured URL is a safe http(s) link. */}
+        {formUrl && (
+          <a
+            className={styles.formLink}
+            href={formUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open the pitch form
+          </a>
+        )}
 
         {/* The little blurb under the button — the contact line. */}
         <div className={styles.readerBody}>
