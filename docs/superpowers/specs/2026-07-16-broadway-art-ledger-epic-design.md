@@ -1,8 +1,9 @@
 # The Broadway Art Ledger — Master Spec (Epic)
 
 - **Date:** 2026-07-16
-- **Status:** **Built 2026-07-16.** Phases 0/1/3/4/5 shipped; Phase 2 (Sanity) shipped except the
-  seed, which is blocked on one manual step (see §12).
+- **Status:** **Built 2026-07-17. All phases complete.** Reviews render from Sanity
+  end-to-end against 8 seeded reviews. One decision is open: which Sanity project is
+  canonical (see §12).
 - **Owner:** Josh (build), Bryan (editorial/design sign-off)
 
 This is the single master spec for the whole epic. It is intentionally
@@ -618,36 +619,61 @@ where noted.
 
 ## 12. Still open
 
-**Blocked on a manual step (Josh) — the only thing standing between us and a
-fully seeded Sanity)**
-1. **Create the `development` dataset.** Verified: the `SANITY_API_WRITE_TOKEN`
-   is a project token that lacks the `sanity.project.datasets/create` grant
-   (HTTP 401), so this cannot be scripted. Either sanity.io/manage → project
-   `bnbcebcv` → Datasets → Add, or `npx sanity login && npx sanity dataset create
-   development`. Then set `NEXT_PUBLIC_SANITY_DATASET=development` in
-   `.env.local` and run:
-   `node --env-file=.env.local --import tsx scripts/sanity-seed.mts`
-   (The seed script refuses to run against `production` — verified.)
+### ⚠️ DECISION NEEDED: there are TWO Sanity projects
 
-**Blocked on Bryan (does not block anything shipped)**
-2. Convert `Writer Email` from `aiText` → plain text field. Gates *our own*
-   submit form only; `/submit` ships as his copy + a link to his form.
+Discovered 2026-07-17 while trying to create the `development` dataset. This is
+exactly the duplicate-project risk flagged before the integration was installed.
 
-**Manual, at deploy time**
-3. Add `REVALIDATE_SECRET` (already generated into `.env.local`) to Vercel's env
-   vars.
-4. Create the Sanity webhook: sanity.io/manage → `bnbcebcv` → API → Webhooks →
-   URL `https://<domain>/api/revalidate?secret=<REVALIDATE_SECRET>`, dataset
-   `production`, filter `_type == "review"`.
+| Project | Name | Org | Created by | Josh's access |
+|---|---|---|---|---|
+| `bnbcebcv` | broadway-art-ledger | `oCJNMzdPm` | Vercel integration | **none** — 401 on every call |
+| `6vag9i62` | **BroadwayArtLedgerCMS** | `ovGIJzIlS` | Josh (GitHub login) | **owner/admin** |
 
-**Deferred by decision**
-5. **Domain** and **email at the domain** — parked. Orientation when it matters:
-   Cloudflare Email Routing (free forward → Gmail + "send as") for a single
-   contact address; Zoho free tier; Fastmail ~$3–5/user/mo; Google Workspace
-   ~$7/user/mo for real mailboxes.
-6. **Our own on-site pitch form** — its own epic, after (2).
-7. **Current/Archive rename**, **byline**, **photo credit**, **the Mark** — all in
-   `docs/IDEAS.md` awaiting Bryan.
+`bnbcebcv` is what the Vercel integration injected into `.env.local` and into
+Vercel's env vars — but Josh **cannot administer it**. Its members are
+`pw8xaHgNK` (an identity that is neither of Josh's logins) plus the two robot
+tokens the integration made. His Google identity is `gA9Goao8t`; his GitHub
+identity is `gWejjEkFi`. Neither is a member, so he cannot create datasets,
+invite Bryan, or manage the project that his publication depends on.
+
+**Current state:** local `.env.local` points at **`6vag9i62` / `development`**
+(the old Vercel values are preserved as comments, so reverting is trivial).
+The 8 fakes are seeded there and the site renders from them.
+
+**Recommendation: make `6vag9i62` canonical.** Josh owns it, can create datasets
+(verified: HTTP 201), and can invite Bryan — all things `bnbcebcv` cannot do for
+him. The integration's only real value was env-var injection and billing; that is
+three variables set by hand against a project he actually controls. A CMS the
+owner cannot administer is not viable for a publication Bryan will run for years.
+
+**If `6vag9i62` is chosen, the follow-through is:**
+1. Create its `production` dataset content home (it already has `production`).
+2. Set `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` /
+   `SANITY_API_READ_TOKEN` in Vercel to `6vag9i62` values.
+3. Remove or ignore the Vercel Sanity integration so it stops re-injecting
+   `bnbcebcv` (it will otherwise fight the manual vars).
+4. Point the revalidation webhook at `6vag9i62`.
+
+**If `bnbcebcv` must be kept**, Josh needs whoever/whatever `pw8xaHgNK` is to add
+his account as an administrator — reachable via the Vercel dashboard's Sanity
+integration.
+
+### Blocked on Bryan (blocks nothing shipped)
+- Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
+  form only; `/submit` ships as his copy + a link to his form.
+
+### Manual, at deploy time
+- Add `REVALIDATE_SECRET` (already in `.env.local`) to Vercel's env vars.
+- Create the Sanity webhook → `https://<domain>/api/revalidate?secret=<secret>`,
+  dataset `production`, filter `_type == "review"`.
+
+### Deferred by decision
+- **Domain** and **email at the domain**. Orientation: Cloudflare Email Routing
+  (free forward → Gmail + "send as") for a single contact address; Zoho free tier;
+  Fastmail ~$3–5/user/mo; Google Workspace ~$7/user/mo for real mailboxes.
+- **Our own on-site pitch form** — its own epic.
+- **Current/Archive rename**, **byline**, **photo credit**, **the Mark** — all in
+  `docs/IDEAS.md` awaiting Bryan.
 
 ---
 
@@ -664,6 +690,12 @@ fully seeded Sanity)**
 - **`@sanity/image-url` v2** deprecated its default export and moved
   `SanityImageSource` to the package root; the documented
   `lib/types/types` subpath no longer exists.
+- **`next/image` rejected every Sanity URL.** `cdn.sanity.io` was not in
+  `next.config.mjs` `images.remotePatterns`, so each review threw "Invalid src
+  prop … hostname is not configured" and the feed rendered **nothing**. Invisible
+  until real Sanity URLs replaced the local `/art` fixture — and invisible to
+  `curl`, because the RSC flight payload still contains the content. Only a real
+  browser caught it. Lesson: grep on the flight payload is not proof of render.
 - **`npm run lint` is broken** (pre-existing): it calls `next lint`, which Next 16
   removed. Not fixed — out of scope, but it means lint is not a real gate.
 
