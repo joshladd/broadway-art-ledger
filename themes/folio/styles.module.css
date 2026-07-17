@@ -630,6 +630,16 @@
  * the motion. No horizontal body scroll.
  * ------------------------------------------------------------------ */
 @media (max-width: 880px) {
+  /* On mobile the desktop "peek" (bottom-justified masthead in a tall hero) just
+     strands the title at the bottom with dead space above. Sit it up near the
+     nav and let the hero be only as tall as its content. */
+  .hero {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: clamp(20px, 5vh, 44px);
+    padding-bottom: clamp(28px, 5vh, 48px);
+    gap: 16px;
+  }
   .splitGrid {
     grid-template-columns: 1fr;
     gap: 28px;
