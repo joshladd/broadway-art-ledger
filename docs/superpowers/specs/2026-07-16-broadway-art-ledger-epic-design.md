@@ -1,7 +1,7 @@
 # The Broadway Art Ledger — Master Spec (Epic)
 
 - **Date:** 2026-07-16
-- **Status:** Draft for review → `/grill-me` → implementation
+- **Status:** **Grilled 2026-07-16** — decisions resolved; ready for implementation planning
 - **Owner:** Josh (build), Bryan (editorial/design sign-off)
 
 This is the single master spec for the whole epic. It is intentionally
@@ -9,8 +9,10 @@ comprehensive and phased. Each phase can spin off its own implementation plan
 (via the writing-plans skill) at build time, but the design decisions,
 architecture, and the content contract live here.
 
-Sections marked **⟢ GRILL** collect the decisions still owed by the human. They
-are gathered in §12 for the `/grill-me` pass.
+**This spec has been grilled** (2026-07-16). Every decision needed to build is
+resolved and recorded in §11; §12 lists only what is deferred or blocked on
+Bryan. Findings verified against the live codebase, the Sanity project, and
+Bryan's Airtable are marked as such.
 
 ---
 
@@ -27,12 +29,12 @@ single-identity site**:
 - **One finalized design** at `/` — Bryan's chosen direction: **Kunsthalle's
   layout, recolored to Broadside's warm-paper + ink-blue palette**, plus his
   eight specific tweaks.
-- **Reviews sourced from Sanity CMS** (lightweight — Bryan pastes finished
-  reviews in; he specifically wants hyperlink + italic support). Airtable stops
-  being the review store.
-- **Pitches captured by our own on-site form** that writes a row into **Bryan's
-  existing "Pitch Submissions" Airtable base** — we do not use Airtable's own
-  form, and we do not modify his base structure.
+- **Reviews sourced from Sanity CMS** — Bryan pastes finished reviews into a
+  Studio embedded at `/studio`. Airtable stops being the review store, and the
+  app ends up with **no Airtable dependency at all**.
+- **`/submit` = Bryan's copy + a link to his existing Airtable form.** Our own
+  on-site form is deferred (blocked on his `aiText` email field). We do not
+  modify his base.
 - **The design exploration moves to `/designs`**; `/` becomes the real site.
 - Deployed on **Vercel**, with Sanity connected via the Vercel Marketplace
   integration.
@@ -53,8 +55,11 @@ single-identity site**:
   it.
 
 **Non-goals (for this epic)**
-- The Current/Archive nav split (future — launch nav is just **Reviews**).
-- Search / fuzzy archive (Folio learning; revisit when volume warrants).
+- Renaming Reviews → **Current** (Bryan's future step; the *Archive itself ships
+  now* — only the "Current" label is deferred).
+- **Individual review pages / permalinks.** The site has exactly four surfaces:
+  Reviews, Archive, About, Submit. Reviews are read in the feed or expanded
+  inline in the Archive — never on their own page.
 - Any editing UI beyond Sanity Studio itself.
 - Modifying Bryan's Airtable base schema (we adapt to it; the one exception is
   the `aiText` email-field snag — see §8, and it's *his* change to make, not a
@@ -75,7 +80,7 @@ Two independent data planes meet in the Next.js app on Vercel.
    • review docs       │  Portable Text render (italic + link)   │
    • hero images ──────▶  @sanity/image-url (CDN, natural aspect) │
    • Studio at /studio │                                         │
-        │              │  /  /about  /submit  /reviews/[slug]    │
+        │              │  /   /archive   /about   /submit        │
         │ publish       │  /designs (+ /t/[theme]) = exploration  │
         ▼              │                                         │
   Sanity webhook ──────▶  /api/revalidate (revalidateTag)        │
@@ -106,34 +111,41 @@ still being set up.
 
 | Field | Type | Notes |
 |---|---|---|
-| `slug` | string | stable URL id (`/reviews/<slug>`) |
-| `headline` | string | the review's own title — big, bold ⟢ GRILL: is this distinct from the show name, or do pieces get titled by the show? |
-| `showName` | string | exhibition/institution as shown in the dateline (e.g. "Alex Berns") |
+| `slug` | string | stable identity key — used for React keys, archive rows, and Sanity doc identity. **Not** a URL (no review pages). |
+| `headline` | string | the review's own editorial title — big, bold. Distinct from `showName` (seed confirms, e.g. "The Face in the Glass"). Rendered one step smaller per Bryan. |
+| `showName` | string | **single free-text** dateline label — whatever Bryan types (usually the gallery/institution, sometimes an artist-show label). No gallery/artist/neighborhood sub-structure. |
 | `startDate` | ISO date | show run start |
 | `endDate` | ISO date | show run end |
 | `showUrl` | url | link target for the dateline (may be empty → dateline renders unlinked) |
-| `writer` | string | byline ("By …") |
-| `body` | Portable Text | paragraphs + **italic** + **links** (Bryan's stated needs); optional `strong` |
-| `heroImage` | object | `{ asset, alt, caption, credit }` — one marquee image per review |
-| `dek` | string? | optional teaser — **not rendered by default**, kept for future |
-| `publishedAt` | ISO datetime | ordering key; newest first |
+| `body` | Portable Text | Sanity **default block content** (standard styles/marks/lists) + a link annotation; rendered with `@portabletext/react`. Bryan's "just italic + link" was about a hypothetical hand-rolled CMS — with Sanity we take its defaults. |
+| `heroImage` | object | `{ asset, alt, caption }` — one marquee image; `caption` is writer-provided and **aligns to the image**; `alt` is a11y-only (not visible copy) |
+| `tagline` | string? | optional teaser — **renders if and only if non-empty**. Blank (the default, and Bryan's stated preference) → nothing renders. He opts in per-review by typing one; no toggle, no deploy, no dead code. |
+| `publishedAt` | ISO datetime | ordering key; newest first ("most recent at top") |
+
+**Not on the app surface (parked in `docs/IDEAS.md`):** writer **byline** and a
+separate photo **credit** line. Bryan did not call these out. The rendered app
+carries only fields he explicitly requested; ideas graduate to the surface only
+with his sign-off.
 
 **Dateline render:** `{showName}, {formatRange(startDate, endDate)}`, hyperlinked
 to `showUrl` (Bryan's choice: link the dateline itself). Example:
 `Alex Berns, May 15–June 13, 2026`.
 
-**`formatRange` rule:** en dash between dates; show the year once at the end when
-both dates share a year (`May 15–June 13, 2026`); include both years when they
-differ; drop the repeated month when start/end share one (`May 15–27, 2026`).
-⟢ GRILL: confirm the exact date style (CMOS-friendly).
+**`formatRange` rule — resolved: CMOS** (Bryan's guidelines state "We follow
+CMOS"). En dash (`–`), no surrounding spaces:
+
+| Case | Render |
+|---|---|
+| Same year (his example) | `May 15–June 13, 2026` |
+| Same month **and** year | `May 15–27, 2026` (CMOS collapses the repeated month) |
+| Spanning years | `December 10, 2025–January 20, 2026` |
 
 **Changed from the current model:**
-- **Dropped:** `no` (№ — Bryan: no issue number), `date`/`iso` single date →
-  replaced by `startDate`/`endDate`, `exhibition`/`venue` → replaced by
-  `showName` + dates + `showUrl`, `artist`/`artwork` → folded into
-  `heroImage.caption`, plain-string `body` → Portable Text.
-- **Kept but demoted:** `dek` (exists as an optional field/component, off by
-  default).
+- **Dropped:** `no` (№ — no issue number), `date`/`iso` single date →
+  `startDate`/`endDate`, `exhibition`/`venue` → single free-text `showName` +
+  dates + `showUrl`, `artist`/`artwork`/`credit` → gone (caption covers it),
+  `by`/byline → parked in `docs/IDEAS.md`, `dek` → renamed `tagline`, plain-string
+  `body` → Portable Text.
 - **Added:** `showUrl`, `startDate`, `endDate`, `heroImage.caption`,
   `publishedAt`.
 
@@ -144,18 +156,47 @@ differ; drop the repeated month when start/end share one (`May 15–27, 2026`).
 Each phase is independently shippable. Order chosen so Bryan sees the finished
 design fast (Phase 1 runs on mock data), with Sanity and the form following.
 
-### Phase 0 — Content model + scaffolding
-- Define the new `Review` TS type (§4) and a small **mock fixture** conforming to
-  it (3–4 entries) so the theme renders before Sanity exists.
-- **Done when:** the type compiles and the fixture drives a page.
+### Phase 0 — Content model + **freezing the exploration**
+- Define the new model (§4) in a **new module** the real site imports. Do **not**
+  modify `content/reviews.ts`'s existing `Review` type.
+- **Freeze `/designs` on the legacy type + static seed** (decision — see below).
+- Add a small **mock fixture** on the new model (3–4 entries) so the finalized
+  design renders before Sanity is wired.
+- **Done when:** the new type compiles, the fixture drives a page, and the whole
+  exploration still builds untouched.
+
+#### Why the freeze (load-bearing)
+Measured 2026-07-16: **38 files** reference fields the new model drops
+(`no`/`exhibition`/`venue`/`by`/`dek`/`artist`/`artwork`/`credit`) and **19**
+consume `body` as `string[]`, which Portable Text breaks. All of them are
+exploration: 9 themes, 7 lab designs, the shared archive. Under TS strict, editing
+the shared `Review` type **fails the build across the entire exploration** and
+holds Bryan's finalized design hostage to rewriting 38 files of frozen reference
+art.
+
+**The freeze:**
+- `content/reviews.ts` — its `Review` type and its **vestigial static `reviews[]`
+  seed** (currently dead migration residue) stay exactly as they are and become
+  the exploration's data source.
+- Exploration routes **stop calling `getReviews()`** → `/designs` touches neither
+  Sanity nor Airtable. It becomes **fully static**, which is correct for frozen
+  reference art.
+- Consequence: **no future change to the live model can ever break `/designs`.**
+- Accepted cost: two `Review` types coexist. Honest — they are different things:
+  frozen exploration data vs. a live content contract.
 
 ### Phase 1 — Finalized design at first-class routes; exploration → `/designs`
 - Build the finalized theme (§6): Kunsthalle layout + Broadside palette + the 8
   tweaks; feed = full essays inline (newest first); dateline linked.
-- Promote the real site to **first-class routes**: `/` (feed), `/about`,
-  `/submit`, `/reviews/[slug]`. ⟢ GRILL: first-class routes vs. a `/` theme
-  module — recommended: first-class (cleaner Sanity wiring + metadata; no
-  `/t/[theme]` indirection for the product).
+- Promote the real site to **first-class routes** — exactly four surfaces:
+  **`/` (Reviews feed), `/archive`, `/about`, `/submit`**. No `/reviews/[slug]`
+  (resolved: no individual review pages).
+- **Archive** carries over Folio's proven pattern (`themes/folio/archive-list.tsx`):
+  compact ruled index + **fuzzy search (fuse.js)** + **inline accordion expand**
+  (CSS grid-rows 0fr→1fr) to read the full review in place. Search is the
+  archive's *reason to exist* — find a review without the raw scroll.
+- Fuse keys must be re-mapped to the new model (old keys reference dropped
+  fields): `headline`, `showName`, `tagline`, `bodyText`.
 - Move the current exploration homepage (`app/page.tsx`: 8 themes + Lab) to
   **`/designs`**; keep individual previews at `/t/[theme]` (linked from
   `/designs`).
@@ -168,28 +209,47 @@ design fast (Phase 1 runs on mock data), with Sanity and the form following.
   billing); scaffold `next-sanity`.
 - Author the Sanity **`review` schema** to match §4; embed **Studio at
   `/studio`**.
-- **Seed** 3–4 reviews in Sanity to prove the contract (mirror the mock
-  fixture).
+- **Seed the 8 existing fake CC0 reviews into `development`** via a script using
+  `SANITY_API_WRITE_TOKEN` (no hand-typing). Porting them requires **fabricating**
+  `startDate`/`endDate`/`showUrl` (the old model has only a single date) and
+  folding `artist`/`artwork`/`credit` into `heroImage.caption`. This is dev-only
+  data and never touches `production`.
+- Uploading the 8 `public/art/*.jpg` originals as Sanity image assets is part of
+  the seed script (proves the image pipeline end-to-end).
 - Add the Sanity client + typed **GROQ** query; render `body` via Portable Text;
   serve `heroImage` via `@sanity/image-url` (natural aspect via asset metadata).
 - Replace `lib/reviews-data.ts` (Airtable read) with the Sanity read; tag the
   fetch and wire a **Sanity webhook → `/api/revalidate`** for publish-time
   updates.
-- **Done when:** `/` and `/reviews/[slug]` render from Sanity; publishing in
+- **Done when:** `/` and `/archive` render from Sanity; publishing in
   Studio updates the live site within the revalidation window.
 
-### Phase 3 — Pitch intake (our form → Bryan's Airtable base)
-- Simplify `/submit` to the four real fields (§8): Writer Name, Writer Email,
-  Pitch, Attachment(s).
-- Repoint `/api/pitch` at **"Pitch Submissions"** (`appi8Pjrcq4G6Lz8p`,
-  `Table 1`), mapping to `Writer Name` / `Writer Email` / `Pitches` /
-  `Attachments`, with `Status` left unset (Bryan triages).
-- Resolve the **`aiText` email snag** (§8) — Bryan converts `Writer Email` to a
-  plain text field, or we capture email inside `Pitches`.
-- Handle attachment upload (Airtable attachments need a public URL or upload
-  flow). ⟢ GRILL: attachment mechanics (see §8).
-- **Done when:** a site submission creates a row in Bryan's base with the pitch
-  and (if resolved) a working email + attachment.
+### Phase 3 — Submit page: **Bryan's copy + a link to his Airtable form**
+**Resolved:** this epic does **not** build our own form. `/submit` = Bryan's
+"Anonymous Pitch Guide" + Review Guidelines copy, plus an outbound **link to his
+existing Airtable submission form**.
+
+- His form view is confirmed: **"The Broadway Art Ledger Submission"**
+  (`viwp8fcRdPjTirQkF`) on `Table 1` / `appi8Pjrcq4G6Lz8p`.
+- **Share URL:** `https://airtable.com/appi8Pjrcq4G6Lz8p/shrEAVG242D5A34Hk`
+  (public share link — not a secret; safe to commit. Store as a constant, not an
+  env var.)
+- Link opens in a **new tab** (`target="_blank" rel="noopener noreferrer"`) — it's
+  an outbound handoff to another product; no dead end for the writer.
+- ✅ **Verified public** (2026-07-16): the link renders the form for a logged-out
+  visitor in an incognito window. (An unauthenticated GET returns HTTP 200 but the
+  form is client-rendered, so this could only be confirmed in a browser.)
+- No `/api/pitch` changes, no attachment mechanics, no `aiText` dependency.
+  Writers can submit **today**, through the form Bryan already built.
+- **Done when:** `/submit` shows his copy and links out to his working form.
+
+#### Deferred: our own on-site form (a later epic)
+Blocked on Bryan converting `Writer Email` from `aiText` to a plain text field
+(§8). **Do not** work around it by folding the email into the `Pitches` body — his
+guidelines forbid identifying information inside the pitch ("This will
+automatically disqualify you"), and his separate **`Pitch View`** grid exists
+precisely so he can read pitches blind. The workaround would defeat the blind
+review; waiting is correct.
 
 ### Phase 4 — Copy + About image
 - Replace placeholder copy with Bryan's real materials (§9): tagline, About
@@ -203,7 +263,7 @@ design fast (Phase 1 runs on mock data), with Sanity and the form following.
 ### Phase 5 — Cutover + domain
 - Final routing cutover: `/` = finalized site; `/designs` = exploration; remove
   the dead Airtable review path + `/api/photo` (reviews).
-- **Domain + email** setup (⟢ GRILL, §12) — Bryan buys the domain; decide
+- **Domain + email** setup (deferred — §12) — Bryan buys the domain; decide
   whether/how to run email at it.
 - **Done when:** the site is live on the domain, reading Sanity, writing
   Airtable, exploration preserved at `/designs`.
@@ -221,7 +281,9 @@ in the chrome.
 - `--ink` `#1b1a16`  ·  `--ink2` `#6a675c`
 - `--rule` `#d5d0c1` (hairlines)  ·  `--blue` ink-blue `#1e3a8a` (accent: active
   nav, dateline link, hairline emphasis)
-⟢ GRILL: keep Broadside blue exactly, or nudge toward a specific hue?
+
+Resolved (not a question): use **Broadside's palette values verbatim**. Bryan
+asked for "the color of 3" — that is 3's palette, not our reinterpretation of it.
 
 **Type (from Kunsthalle):** Newsreader body serif; Fraunces display for the
 wordmark/headlines; mono for labels/nav/meta. Title size steps **down** one notch
@@ -234,7 +296,7 @@ inline), stacked as a continuous museum-wall scroll:
 ```
 ——————————— THE BROADWAY ART LEDGER ———————————
       Incisive criticism and equitable publishing…
-              Reviews · About · Submit
+         Reviews · Archive · About · Submit
 ———————————————————————————————————————————————
 
         [    full-width marquee image    ]
@@ -251,28 +313,58 @@ inline), stacked as a continuous museum-wall scroll:
         (next review, same pattern, below)
 ```
 
-**Review permalink (`/reviews/[slug]`):** same typography, single review, hero
-image + aligned caption, dateline link, byline, body; prev/next pager.
+**Archive (`/archive`):** the *finding* surface, in the same palette/type. A
+compact ruled index (thumbnail · date · showName · headline) over a **fuzzy
+search** field; clicking a row **expands the full review inline** (accordion) —
+this is how reviews stay readable with no permalink pages. Reviews (`/`) is the
+*reading* surface (raw scroll); Archive is the *retrieval* surface.
+
+**No review permalinks.** `ReviewPage` in the theme registry stays an
+exploration-only concern (note: it is already dead code — `reviewHref()` points
+at a `/t/<theme>/r/<slug>` route that has never existed).
 
 **The eight tweaks (Bryan), applied:**
 1. No № anywhere.
-2. Headline one step smaller.
-3. No dek by default (optional field retained).
+2. **Review headline** one step smaller — *not* the masthead. Resolved by
+   evidence: Kunsthalle's site wordmark is already `20px` (nobody calls that
+   "slightly smaller"), while the review headline `.title` is
+   `clamp(38px, 5.2vw, 66px)`. Step it down roughly to
+   `clamp(34px, 4.6vw, 56px)`; the wordmark is untouched.
+3. No tagline by default (optional field retained).
 4. Dateline = `showName, date-range`, **hyperlinked** to the show.
-5. Nav = **Reviews · About · Submit** (Current/Archive split deferred).
+5. Nav = **Reviews · Archive · About · Submit** (only the "Current" *rename* is deferred; Archive ships now).
 6. Newest review always first.
 7. About & Submit kept clean/minimal (Bryan's copy, §9).
 8. **Captions align with images** — caption block shares the image's width and
    left edge.
 
-**Nav / wordmark:** horizontal header — "The Broadway Art Ledger" wordmark left,
-`Reviews · About · Submit` right, tagline strap beneath a hairline. ⟢ GRILL: does
-the two-squares Mark stay as an accent, or is the finalized identity wordmark-
-only? (Bryan's supplied materials are wordmark-only.)
+**Nav / wordmark:** horizontal header — "The Broadway Art Ledger" **text
+wordmark** left, `Reviews · Archive · About · Submit` right, tagline strap beneath
+a hairline.
 
-**Footer:** hairline + the three facts + motto ("…King Kong died here, and it's
-where the best art lives.") + colophon. ⟢ GRILL: confirm footer keeps the facts
-list, or goes more minimal.
+**No Mark, no invented branding.** The two-squares Mark is **cut** (parked in
+`docs/IDEAS.md`): Bryan never called it out, Kunsthalle is wordmark-only, and
+vermilion would fight the ink-blue accent. **Rule for this build: the surface
+carries only what Bryan explicitly asked for — no branding, chrome, or copy we
+invented.**
+
+**Boundary of that rule — functional microcopy is ours** (approved): UI strings
+Bryan will never write are fine, kept plain and neutral, never in a publication
+"voice." Covers: search placeholder, no-results text, empty states, form labels,
+button text, success/error messages. The test — *would Bryan recognize this as
+writing, or as a button?* Editorial voice and branding remain strictly his.
+
+**Empty states** (needed — Kunsthalle has **no** empty guard today, and
+`production` ships with zero reviews):
+- Day-one feed with no reviews → renders chrome and nothing else. No invented
+  "coming soon." Transient; resolves on his first publish.
+- Archive **no-search-results** → neutral microcopy (this is a permanent,
+  normal-use state, not transient).
+
+**Footer: none.** No footer at all — not even a colophon. Bryan never called one
+out. The facts strip was our paraphrase; the motto stays where he actually wrote
+it (the closing line of the About statement); his contact email lives on Submit,
+where he put it. Pages simply end.
 
 **Quality floor:** responsive to mobile (mobile hero/text placement — carry the
 Folio mobile fix), visible keyboard focus, `prefers-reduced-motion` respected,
@@ -282,11 +374,20 @@ next/image natural aspect.
 
 ## 7. Sanity (reviews)
 
-**Setup:** Vercel Marketplace **Sanity integration** — one-click provisioning,
-auto-injected env vars (`NEXT_PUBLIC_SANITY_PROJECT_ID`,
-`NEXT_PUBLIC_SANITY_DATASET`, read token), billing via Vercel. Manual fallback:
-`sanity` CLI project + hand-set env vars. Decision recorded: **install the
-integration** (§11).
+**Setup: DONE — verified 2026-07-16.** The Vercel Marketplace integration is
+already installed and has provisioned the project. Confirmed by probe:
+
+- Project **`bnbcebcv`**, dataset **`production`** (the only dataset → no
+  prod/dev split question).
+- `.env.local` carries `NEXT_PUBLIC_SANITY_PROJECT_ID`,
+  `NEXT_PUBLIC_SANITY_DATASET`, `SANITY_API_READ_TOKEN`, **and
+  `SANITY_API_WRITE_TOKEN`** (plus non-public duplicates). Properly gitignored
+  (`.gitignore:24 → .env*.local`).
+- Project is **empty**: 12 documents, all system types (`system.group`,
+  `system.retention`). No schema, no content yet.
+
+**Consequence:** the **write token means seeding is scriptable** — Phase 2's
+"prove the contract" step is a seed script, not hand-typing into Studio.
 
 **Packages:** `next-sanity` (client + `defineQuery` GROQ + Studio),
 `@portabletext/react` (body), `@sanity/image-url` (images).
@@ -299,13 +400,14 @@ integration** (§11).
 - `showUrl` (url)
 - `writer` (string)
 - `heroImage` (image with `hotspot`; fields: `alt`, `caption`, `credit`)
-- `body` (Portable Text — **restricted marks: emphasis (italic) + link**, plus
-  `strong`; block style `normal` only, no headings/lists unless requested)
-- `dek` (text, optional)
+- `body` (Portable Text — Sanity **default block content**: standard styles,
+  marks, and lists, plus a link annotation. No hand-restriction.)
+- `tagline` (text, optional — not rendered by default)
 - `publishedAt` (datetime)
 
-⟢ GRILL: any block types beyond plain paragraphs (blockquote? inline image in
-body)? Bryan said "just hyperlink and italicize really" → default to minimal.
+Resolved: use Sanity's **default** block content (standard styles/marks/lists +
+link). "Just italic + link" was Bryan's take on a hand-rolled CMS; Sanity's
+defaults are free and fine.
 
 **Studio:** embedded at `/app/studio/[[...tool]]` so Bryan edits at
 `site.com/studio` with no separate app.
@@ -317,11 +419,27 @@ call Sanity and map documents → the §4 `Review` shape. Image URLs built with
 `metadata.dimensions`; LQIP available for blur-up.
 
 **Revalidation:** Sanity **webhook** on publish → `POST /api/revalidate`
-(existing endpoint, `revalidateTag("reviews")`, guarded by `REVALIDATE_SECRET`).
+(existing endpoint: `updateTag` + `revalidatePath("/", "layout")`, guarded by
+`REVALIDATE_SECRET`).
 
-**Datasets:** `production` (+ optional `development`). ⟢ GRILL: one dataset or
-prod/dev split? Recommended: start with `production` only; add `development` if
-Bryan wants a staging space.
+⚠️ **`/api/revalidate` is dead code today — verified 2026-07-16.** It requires
+`REVALIDATE_SECRET`, which is set **nowhere** (absent from `.env.local`); the
+endpoint currently returns `"REVALIDATE_SECRET is not configured"` and bails.
+Phase 2 must: generate the secret, add it to `.env.local` **and** Vercel, then
+point the Sanity webhook at the endpoint with it. Without this, Bryan publishes
+and nothing happens until the ISR window lapses.
+
+**Datasets — two, and the free tier allows exactly two:**
+- **`production`** — Bryan's real reviews. Serves 100% of the live site (reviews
+  are the only content type, so one dataset covers production entirely).
+- **`development`** — created by us; holds the **seeded 8 fake CC0 reviews** and
+  any contract-proving work.
+
+Rationale: the seed content is fabricated (invented run-dates and show URLs on
+fake reviews of real museums). It must never be one env var away from the live
+site. The app already reads `NEXT_PUBLIC_SANITY_DATASET`, so switching between
+them is a single variable. `production` stays pristine from day one — we never
+purge-before-launch, because nothing fake ever enters it.
 
 ---
 
@@ -336,31 +454,39 @@ Bryan wants a staging space.
   - `Writer Email` — **aiText** ⚠️
   - `Status` — singleSelect [Denied, Maybe, Approved]
 
-**Form → field mapping (`/api/pitch`):**
+**Views (read-only probe):** `Master View` (grid), **`Pitch View`** (grid — almost
+certainly his blind-review view with identity columns hidden), and **"The Broadway
+Art Ledger Submission"** (**form**, `viwp8fcRdPjTirQkF`).
+
+**This epic writes nothing to Airtable.** `/submit` links out to Bryan's own form
+(Phase 3). The app has **no Airtable dependency at all** once the Reviews read
+moves to Sanity — the PAT is then unused by the running app.
+
+### Deferred: our own on-site form
+When we build it, the mapping is:
 - Writer Name → `Writer Name`
-- Pitch → `Pitches` (writers are told to include a **proposed filing date** and
-  their **photo caption** here per the guidelines)
+- Pitch → `Pitches` (guidelines tell writers to include a **proposed filing date**
+  and their **photo caption** here)
 - Attachment(s) → `Attachments`
-- Email → `Writer Email` *(blocked — see snag)*
-- `Status` left empty (Bryan sets it during triage)
+- Email → `Writer Email` **← blocked**
+- `Status` left empty (Bryan triages)
 
-**The `aiText` snag:** `Writer Email` is an AI-computed field; the Airtable API
-cannot write user input into it. Options:
-1. **(Recommended)** Bryan converts `Writer Email` to a plain **single-line text**
-   / email field in his base (his change, trivial, non-structural to us).
-2. We prepend the email into the `Pitches` text (works today, uglier).
-⟢ GRILL: which option — ideally (1).
+**The `aiText` blocker:** `Writer Email` is an AI-computed field; the API cannot
+write user input into it. **Bryan must convert it to a plain text/email field.**
 
-**Attachments:** Airtable attachment fields accept records referencing a
-**public URL**, not raw multipart. Options: (a) collect the file, upload to our
-own store / Vercel Blob, pass the URL to Airtable; (b) defer attachments in v1
-and have writers paste an image link; (c) Airtable's newer upload-attachment
-endpoint. ⟢ GRILL: attachment mechanics + whether attachments are required at
-pitch time (guidelines say one photo is required for the *review*, not
-necessarily the pitch).
+**Do not work around it** by folding the email into `Pitches`. His guidelines
+forbid identifying information inside the pitch ("This will automatically
+disqualify you from consideration"), and the existence of a separate `Pitch View`
+shows the blind read is a real part of his process. The workaround would put
+identity directly in his eye-line while judging. Waiting is correct.
+
+**Attachments (when we build it):** Airtable attachment fields take a **public
+URL**, not raw multipart — so we'd need an upload step (Vercel Blob → URL) or
+Airtable's upload-attachment endpoint. Note his guidelines require the photo for
+the *review*, not necessarily at *pitch* time. Unresolved until that epic.
 
 **Security:** PAT stays in gitignored `.env.local`, read via `process.env`, never
-echoed or committed. New base id → env var (e.g. `AIRTABLE_PITCH_BASE_ID`).
+echoed or committed.
 
 ---
 
@@ -371,17 +497,21 @@ image), `Submission Instructions.md` (Submit guide + guidelines).
 
 - **Tagline / strap:** "Incisive criticism and equitable publishing in the New
   York Metropolitan area."
-- **About page:** Bryan's `image1` (base64 in the md → extract to `public/`) atop
-  the four-paragraph About/Submissions statement (ending "…Because King Kong died
-  here, and it's where the best art lives.").
+- **About page:** Bryan's `image1` atop the four-paragraph About/Submissions
+  statement (ending "…Because King Kong died here, and it's where the best art
+  lives."). **Verified:** the blob is a real **PNG, ~205 KB**, embedded as a
+  base64 data-URI reference-link (`[image1]: <data:image/png;base64,…>`) at the
+  end of `The Broadway Art Ledger.md` → decode and write to `public/`. He
+  explicitly asked for this image on the About page.
 - **Submit page:** "Anonymous Pitch Guide" intro + the 10-bullet Review
   Guidelines + contact `thebroadwayartledger@gmail.com`. Note the guidelines ask
   writers to include a proposed filing date and to supply their own caption — both
   live in the pitch text (keeps the form to four fields).
 - **Footer:** facts (blind/anonymous pitches; one marquee image; $200 flat fee) +
   motto + colophon.
-⟢ GRILL: is the current placeholder About/Submit prose replaced verbatim by
-Bryan's md, or lightly edited? Default: use Bryan's md as the source of truth.
+**Resolved: Bryan's md is the source of truth, used verbatim.** The rule is
+"only keep copy from him" — the existing placeholder About/Submit prose was our
+paraphrase and is replaced wholesale.
 
 ---
 
@@ -389,101 +519,156 @@ Bryan's md, or lightly edited? Default: use Bryan's md as the source of truth.
 
 - **Content model / rendering:** the Phase 0 fixture and the Phase 2 Sanity seed
   render identically → proves the contract holds across data sources.
-- **Design:** manual review by Bryan on `/` (feed) and a permalink; responsive
-  check at mobile widths; keyboard focus + reduced-motion pass.
-- **Sanity:** publish an edit in Studio → confirm the webhook revalidates and the
-  change appears; malformed doc (missing image/date) degrades gracefully.
-- **Airtable pitch:** submit the form → row appears with correct field mapping;
-  error path (Airtable down / validation) shows the Submit error UX; success
-  shows the confirmation. Verify no PAT leakage in client bundle.
-- **Routing:** `/` finalized, `/designs` exploration intact, `/t/[theme]` still
-  browsable, old review URLs handled.
+- **Design:** manual review by Bryan on `/` (feed) and `/archive`; responsive
+  check at mobile widths (carry the Folio mobile fix); keyboard focus +
+  reduced-motion pass.
+- **Empty states:** point local at an empty dataset → `/` renders chrome only, no
+  crash (Kunsthalle has **no** empty guard today); archive search with no match
+  shows neutral microcopy.
+- **Archive:** search finds by `headline`/`showName`/`tagline`/body; row expands
+  and collapses; one row open at a time; expansion never fights scroll position.
+- **Sanity:** publish an edit in Studio → webhook revalidates → change appears.
+  Malformed doc (missing image, missing `endDate`, empty `showUrl`) degrades
+  gracefully — dateline renders unlinked rather than crashing.
+- **Dateline:** `formatRange` unit-checked against all three CMOS cases
+  (same-year, same-month, cross-year).
+- **Exploration freeze:** `/designs` + all 9 themes + 7 lab designs still build
+  and render after the new model lands — the whole point of the freeze.
+- **Routing:** `/`, `/archive`, `/about`, `/submit` are the real site;
+  `/designs` + `/designs/archive` + `/t/[theme]` serve the exploration; no
+  collision on `/archive`.
+- **Submit:** the outbound Airtable link opens in a new tab and renders for a
+  logged-out visitor.
 - **Build:** `next build` clean (types + lint) before cutover.
 
 ---
 
 ## 11. Decision log
 
-- **Vercel ↔ Sanity integration: INSTALL.** It provisions the Sanity project,
-  injects env vars, and consolidates billing — removing exactly the setup friction
-  Josh is unfamiliar with — while the app code (Studio embed, GROQ, Portable Text,
-  images, revalidation) is written the same either way. Manual CLI path documented
-  as fallback.
-- **Feed model: full essays inline** (newest first), permalinks also exist.
-- **Show link: link the dateline itself** (no trailing "For more information"
-  sentence).
-- **Reviews from Sanity; pitches to Airtable** — two separate planes; app never
-  reads reviews from Airtable after Phase 2.
-- **Do not modify Bryan's Airtable structure** (the one email-field fix is his to
-  make).
+Every entry below is **resolved** — settled in the 2026-07-16 grill, by evidence
+where noted.
+
+**The governing rule**
+- **The app surface carries only what Bryan explicitly called out.** No invented
+  branding, chrome, or copy. Our ideas go to `docs/IDEAS.md` and graduate only
+  with his sign-off.
+- **Boundary:** *functional microcopy is ours* — search placeholder, no-results,
+  empty states, form labels/buttons/errors — kept plain and neutral. Test: *would
+  Bryan recognize this as writing, or as a button?*
+
+**Content model**
+- `headline` is **distinct** from the dateline label (seed confirms: "The Face in
+  the Glass" vs "Brooklyn Museum").
+- Dateline label is a **single free-text `showName`** — no gallery/artist/
+  neighborhood sub-structure. Neighborhood dropped.
+- **Show link: the dateline itself** is the link (no trailing "For more
+  information" sentence).
+- **Dates: CMOS** (he states he follows it) — collapse the repeated month.
+- **Body: Sanity's default** block content — "just italic + link" described a
+  hand-rolled CMS, which we aren't building.
+- **`tagline` renders iff non-empty** — his per-review opt-in, no toggle, no dead
+  code. Default (blank) = no teaser, as he asked.
+- **Cut from the surface:** `no`/№, `venue`, `artist`, `artwork`, `credit`, and
+  the **byline** → all parked in `docs/IDEAS.md`.
+
+**Architecture**
+- **Four surfaces, no permalinks:** `/` (Reviews), `/archive`, `/about`,
+  `/submit`. Reviews are read in the feed or expanded inline in the Archive.
+  (Note: `ReviewPage` + `reviewHref()` are already dead code — they point at a
+  route that has never existed.)
+- **Reviews = the raw scroll** (all, newest first). **Archive = search/find** —
+  search is its *reason to exist*, so Folio's fuse.js + inline accordion carry
+  over.
+- **Freeze the exploration** on the legacy type + static seed. Measured: 38 files
+  reference dropped fields, 19 consume `body` as `string[]`. `/designs` goes fully
+  static and can never be broken by the live model again.
+- **Real site on first-class routes**; the theme registry stays exploration-only.
+
+**Design**
+- **Kunsthalle layout + Broadside palette verbatim** — he asked for "the color of
+  3", so we take 3's values, not a reinterpretation.
+- **"Slightly smaller title" = the review headline**, not the masthead (evidence:
+  wordmark is already 20px; `.title` is up to 66px).
+- **No Mark. No footer at all.** Both were ours, not his.
+
+**Sanity**
+- **Vercel integration: already installed** — it provisioned project `bnbcebcv`.
+  (The earlier "install it" recommendation is moot; the reversed advice to skip it
+  was also moot — it was already done.)
+- **Two datasets** (the free-tier max): `production` (real, serves 100% of the
+  live site) and `development` (the 8 seeded fakes). Fabricated seed data never
+  sits one env var from the live site.
+- **Studio embedded at `/studio`**; dataset per environment via
+  `NEXT_PUBLIC_SANITY_DATASET` — local can flip to `production` any time to test
+  against real content, no code change.
+- **Seeding is scripted** (a `SANITY_API_WRITE_TOKEN` exists), including uploading
+  the 8 `public/art` images as Sanity assets.
+
+**Submit / Airtable**
+- **This epic ships `/submit` as his copy + an outbound link to his own Airtable
+  form** (`shrEAVG242D5A34Hk`, verified public in incognito, opens in a new tab).
+  Our own form is **deferred**.
+- **The app has no Airtable dependency** once reviews come from Sanity.
+- **Never fold the email into the pitch body** — it would defeat his blind review.
+  Blocked until Bryan converts `Writer Email` from `aiText` to a text field.
+- **Do not modify Bryan's Airtable structure.**
 
 ---
 
-## 12. Open questions for `/grill-me`
+## 12. Still open
 
-Grouped by area. These are the inputs needed before/while building.
+Everything needed to **build this epic** is resolved. What remains is either
+Bryan's to unblock or deliberately deferred.
 
-**Content model**
-1. Does each review have its **own headline** distinct from the show name, or are
-   pieces titled by the show? (affects `headline` vs `showName`)
-2. Exact **date format** (CMOS): `May 15–June 13, 2026` confirmed? Same-year and
-   same-month collapsing rules?
-3. Any **body block types** beyond paragraphs/italic/links (blockquote, inline
-   image, strong)?
+**Blocked on Bryan (not blocking this epic)**
+1. Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
+   form only; `/submit` ships as copy + link regardless.
 
-**Design**
-4. **First-class routes** for the real site vs. a `/` theme module? (rec:
-   first-class)
-5. Keep the **two-squares Mark** as an accent, or wordmark-only identity?
-6. Ink-blue accent exactly as Broadside `#1e3a8a`, or adjust?
-7. Footer: keep the **facts list** or go more minimal?
+**Deferred by decision**
+2. **Domain** — parked. Affects canonical URLs, Sanity CORS, and the webhook when
+   it lands. No real content exists yet, so there's no urgency.
+3. **Email at the domain** — parked. Orientation for when it matters:
+   Cloudflare Email Routing (free forward → Gmail + "send as") for a single
+   contact address; Zoho free tier; Fastmail ~$3–5/user/mo; Google Workspace
+   ~$7/user/mo for real mailboxes. He already uses
+   `thebroadwayartledger@gmail.com`, so free forwarding likely suffices.
+4. **Our own on-site pitch form** — its own epic, after (1).
+5. **Current/Archive rename**, **byline**, **photo credit**, **the Mark** — all in
+   `docs/IDEAS.md` awaiting Bryan.
 
-**Sanity**
-8. Has the **Sanity account/project** been created yet, or do we provision fresh
-   via the Vercel integration?
-9. **One dataset** (`production`) or a prod/dev split?
-10. Studio at `/studio` on the main domain acceptable, or separate?
-
-**Airtable / pitches**
-11. **`Writer Email` fix** — Bryan converts it to a text field (rec) or we fold
-    email into the pitch text?
-12. **Attachments** — required at pitch time? Upload mechanism (Vercel Blob →
-    URL / paste a link / defer to v1)?
-13. Should `Status` stay untouched by our writes (Bryan triages)? (assumed yes)
-
-**Copy**
-14. Use Bryan's md copy **verbatim** for About/Submit, or lightly edited?
-
-**Domain & email**
-15. What **domain** is Bryan buying? (affects canonical URLs, Sanity CORS,
-    webhook, email)
-16. Does he want **email at the domain**, and what's the budget? Orientation:
-    - **Cloudflare Email Routing** — free forwarding `you@domain → Gmail`, pair
-      with Gmail "send as" for sending. ~$0.
-    - **Zoho Mail** — free tier, 1 domain / limited users.
-    - **Fastmail** — ~$3–5/user/mo, clean.
-    - **Google Workspace** — ~$7/user/mo, familiar (he already uses Gmail).
-    Recommendation for a single contact address: Cloudflare Routing (free) +
-    Gmail send-as, unless he wants full mailboxes → Workspace/Fastmail.
-
-**Deployment**
-17. Confirm **Vercel** as host and that we install the Sanity integration there.
-18. Revalidation secret + webhook wiring env available in Vercel?
+**Operational, during Phase 2**
+6. Generate `REVALIDATE_SECRET` → `.env.local` + Vercel, then point the Sanity
+   webhook at `/api/revalidate`. (Verified: it is set nowhere today, so the
+   endpoint is currently dead code.)
+7. Create the `development` dataset and flip local `NEXT_PUBLIC_SANITY_DATASET`.
 
 ---
 
 ## 13. What lands where (file-level orientation)
 
-- **New:** `app/page.tsx` (finalized feed), `app/about/page.tsx`,
-  `app/submit/page.tsx`, `app/reviews/[slug]/page.tsx`, the finalized theme's
-  styles, `app/studio/[[...tool]]/page.tsx`, `sanity/` (schema, client, queries),
-  `content/reviews-fixture.ts` (Phase 0 mock).
-- **Moved:** current `app/page.tsx` exploration → `app/designs/page.tsx`
-  (`/t/[theme]`, `/lab` stay).
-- **Rewritten:** `lib/reviews-data.ts` (Airtable read → Sanity read),
-  `app/api/pitch/route.ts` (→ Pitch Submissions base), `content/reviews.ts` type +
-  chrome copy.
-- **Retired after cutover:** `app/api/photo/*` (reviews), Airtable "Reviews"
-  read path, `no`/`exhibition`/`venue`/`artist`/`artwork` model fields.
-- **Untouched:** the 8 exploration themes + Lab (preserved under `/designs`).
+**The real site (new, on the new model):**
+- `app/page.tsx` (Reviews feed), `app/archive/page.tsx` (index + search + inline
+  expand), `app/about/page.tsx`, `app/submit/page.tsx`
+- the finalized theme's styles (Kunsthalle layout + Broadside palette)
+- `app/studio/[[...tool]]/page.tsx`, `sanity/` (schema, client, GROQ queries)
+- the new model module + `content/reviews-fixture.ts` (Phase 0 mock)
+- `scripts/sanity-seed.mts` (seeds the 8 fakes + image assets into `development`)
+
+**The exploration (frozen — legacy type + static seed):**
+- **Moved:** `app/page.tsx` → `app/designs/page.tsx`; `app/archive/` →
+  `app/designs/archive/` (frees `/archive` for the real site)
+- **Touched only at the seams:** 8 theme `Archive` hrefs (`/archive?from=` →
+  `/designs/archive?from=`), the `/t/[theme]/archive` redirect, and the
+  "← All designs" back-link (which breaks anyway once `/` is the real site)
+- **Data source:** the static `reviews[]` seed in `content/reviews.ts` — routes
+  stop calling `getReviews()`
+- **Otherwise untouched:** all 9 themes, 7 lab designs, and their `Review` type
+
+**Rewritten:** `lib/reviews-data.ts` (Airtable read → Sanity read).
+
+**Deferred (Bryan asleep / blocked):** `app/api/pitch/route.ts` → Pitch
+Submissions base, pending his `aiText` email-field fix.
+
+**Retired after cutover:** `app/api/photo/*` (reviews), the Airtable "Reviews"
+read path.
 ```
