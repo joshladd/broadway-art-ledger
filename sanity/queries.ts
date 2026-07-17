@@ -34,17 +34,16 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
 `);
 
 export const ABOUT_QUERY = defineQuery(`
-  *[_type == "aboutPage" && _id == "aboutPage"][0] { title, body }
+  *[_type == "aboutPage" && _id == "aboutPage"][0] {
+    title,
+    body,
+    image {
+      alt,
+      asset->{ url, "dimensions": metadata.dimensions }
+    }
+  }
 `);
 
 export const SUBMIT_QUERY = defineQuery(`
-  *[_type == "submitPage" && _id == "submitPage"][0] {
-    pitchGuideTitle,
-    intro,
-    guidelinesTitle,
-    guidelinesIntro,
-    guidelines,
-    formUrl,
-    outro
-  }
+  *[_type == "submitPage" && _id == "submitPage"][0] { body, formUrl, blurb }
 `);

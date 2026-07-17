@@ -203,9 +203,9 @@
   text-underline-offset: 3px;
 }
 
-/* Bryan's About image is only 447px wide — cap it at natural size rather than
-   stretching it across the column, which would visibly upscale it. */
-.aboutFig { margin: 0 0 44px; max-width: 447px; }
+/* The About image's cap is set inline from its natural width (up to the column)
+   so a low-res source never upscales. */
+.aboutFig { margin: 0 0 44px; }
 .aboutImg { width: 100%; height: auto; display: block; background: #e9e5d8; }
 
 .subhead {

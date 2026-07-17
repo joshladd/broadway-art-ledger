@@ -21,6 +21,21 @@ export const aboutPage = defineType({
       of: [{ type: "block" }],
       description: "The About statement. Links and italics work.",
     }),
+    defineField({
+      name: "image",
+      title: "Image",
+      type: "image",
+      description:
+        "The image beside the statement. Leave empty to keep the built-in one.",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt text",
+          type: "string",
+          description: "Describes the image for screen readers. Never shown on the page.",
+        }),
+      ],
+    }),
   ],
   preview: {
     prepare: () => ({ title: "About page" }),

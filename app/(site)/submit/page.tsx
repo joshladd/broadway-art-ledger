@@ -8,15 +8,11 @@ export const metadata: Metadata = { title: "Submit — The Broadway Art Ledger" 
 
 // This epic does NOT build our own form. /submit is Bryan's copy plus a link to
 // the Airtable form he already built, so writers can pitch today. Our own form
-// is blocked on him converting `Writer Email` from an aiText field — and we do
-// not work around that by folding the email into the pitch body, because his
-// guidelines forbid identifying information inside a pitch.
+// is blocked on him converting `Writer Email` from an aiText field.
 //
-// The copy is editable in Sanity (submitPage singleton). The page is a fixed
-// sequence of named regions around the form button — intro, guidelines, button,
-// contact line — so the layout holds and only the words change. The jargon
-// essay link and the contact mailto are ordinary link marks inside the copy now,
-// not special cases in this file.
+// The page is one rich-text body (Bryan owns its headings, paragraphs, and
+// bullets), then the form-link button, then a small blurb. All editable in
+// Sanity (submitPage singleton), with content/site.ts as the fallback.
 export default async function SubmitPage() {
   const submit = await getSubmitContent();
 
@@ -24,17 +20,9 @@ export default async function SubmitPage() {
     <main className={styles.root}>
       <Header active="Submit" />
       <div className={styles.reader}>
-        <h1 className={styles.readerTitle}>{submit.pitchGuideTitle}</h1>
-
         <div className={styles.readerBody}>
-          <PortableCopy value={submit.intro} />
+          <PortableCopy value={submit.body} variant="editorial" />
         </div>
-
-        {/* Guidelines come before the button: read what's expected, then pitch. */}
-        <h2 className={styles.subhead}>{submit.guidelinesTitle}</h2>
-        <p className={styles.subheadNote}>{submit.guidelinesIntro}</p>
-
-        <PortableCopy value={submit.guidelines} variant="guidelines" />
 
         {/* Outbound handoff to Bryan's Airtable form. New tab: it's a different
             product, and a writer shouldn't hit a dead end. */}
@@ -47,9 +35,9 @@ export default async function SubmitPage() {
           Open the pitch form
         </a>
 
-        {/* Contact line last — it's for people the form doesn't serve. */}
+        {/* The little blurb under the button — the contact line. */}
         <div className={styles.readerBody}>
-          <PortableCopy value={submit.outro} />
+          <PortableCopy value={submit.blurb} />
         </div>
       </div>
     </main>

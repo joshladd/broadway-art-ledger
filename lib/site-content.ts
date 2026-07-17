@@ -5,14 +5,12 @@ import { SITE_SETTINGS_QUERY, ABOUT_QUERY, SUBMIT_QUERY } from "@/sanity/queries
 import {
   strap as DEFAULT_STRAP,
   aboutStatement,
-  submitGuide,
   SUBMIT_FORM_URL,
 } from "@/content/site";
 import {
   aboutBodyBlocks,
-  submitIntroBlocks,
-  submitGuidelineBlocks,
-  submitOutroBlocks,
+  submitBodyBlocks,
+  submitBlurbBlocks,
 } from "./copy-blocks";
 
 // The site's editable copy comes from Sanity singletons, with content/site.ts
@@ -31,16 +29,37 @@ const str = (v: unknown, fallback: string): string =>
 const blocks = (v: unknown, fallback: PortableTextBlock[]): PortableTextBlock[] =>
   Array.isArray(v) && v.length ? (v as PortableTextBlock[]) : fallback;
 
-export type AboutContent = { title: string; body: PortableTextBlock[] };
-export type SubmitContent = {
-  pitchGuideTitle: string;
-  intro: PortableTextBlock[];
-  guidelinesTitle: string;
-  guidelinesIntro: string;
-  guidelines: PortableTextBlock[];
-  formUrl: string;
-  outro: PortableTextBlock[];
+// The About image, sized off Sanity's CDN. null -> the page uses its built-in
+// image (public/about.png) until Bryan uploads a hi-res one.
+export type AboutImage = { url: string; width: number; height: number; alt: string };
+export type AboutContent = {
+  title: string;
+  body: PortableTextBlock[];
+  image: AboutImage | null;
 };
+export type SubmitContent = {
+  body: PortableTextBlock[];
+  formUrl: string;
+  blurb: PortableTextBlock[];
+};
+
+const ABOUT_IMAGE_WIDTH = 900;
+
+function aboutImage(raw: unknown): AboutImage | null {
+  const img = raw as {
+    alt?: unknown;
+    asset?: { url?: unknown; dimensions?: { width?: number; height?: number } | null } | null;
+  } | null;
+  const url = img?.asset?.url;
+  if (typeof url !== "string" || !url) return null;
+  const sep = url.includes("?") ? "&" : "?";
+  return {
+    url: `${url}${sep}w=${ABOUT_IMAGE_WIDTH}&fit=max&auto=format`,
+    width: img.asset?.dimensions?.width ?? ABOUT_IMAGE_WIDTH,
+    height: img.asset?.dimensions?.height ?? Math.round((ABOUT_IMAGE_WIDTH * 2) / 3),
+    alt: typeof img.alt === "string" ? img.alt : "",
+  };
+}
 
 export const getStrap = cache(async (): Promise<string> => {
   const row = await client.fetch(
@@ -60,6 +79,7 @@ export const getAboutContent = cache(async (): Promise<AboutContent> => {
   return {
     title: str(row?.title, aboutStatement.title),
     body: blocks(row?.body, aboutBodyBlocks()),
+    image: aboutImage(row?.image),
   };
 });
 
@@ -70,12 +90,8 @@ export const getSubmitContent = cache(async (): Promise<SubmitContent> => {
     { next: { revalidate: REVALIDATE, tags: ["copy"] } },
   );
   return {
-    pitchGuideTitle: str(row?.pitchGuideTitle, submitGuide.pitchGuideTitle),
-    intro: blocks(row?.intro, submitIntroBlocks()),
-    guidelinesTitle: str(row?.guidelinesTitle, submitGuide.guidelinesTitle),
-    guidelinesIntro: str(row?.guidelinesIntro, submitGuide.guidelinesIntro),
-    guidelines: blocks(row?.guidelines, submitGuidelineBlocks()),
+    body: blocks(row?.body, submitBodyBlocks()),
     formUrl: str(row?.formUrl, SUBMIT_FORM_URL),
-    outro: blocks(row?.outro, submitOutroBlocks()),
+    blurb: blocks(row?.blurb, submitBlurbBlocks()),
   };
 });

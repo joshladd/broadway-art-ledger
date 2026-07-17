@@ -51,6 +51,12 @@ function paragraph(key: string, text: string): PortableTextBlock {
   return block(key, [span(`${key}s0`, text)]);
 }
 
+// A heading block (h1/h2/...). The Submit body renders its own hierarchy now,
+// so titles are headings inside the rich text rather than separate fields.
+function heading(key: string, text: string, style: string): PortableTextBlock {
+  return block(key, [span(`${key}s0`, text)], { style });
+}
+
 // A paragraph that italicizes every literal occurrence of the publication
 // title, reproducing the old withEmphasis() renderer exactly.
 function emphasizedParagraph(key: string, text: string): PortableTextBlock {
@@ -69,7 +75,7 @@ export function aboutBodyBlocks(): PortableTextBlock[] {
   );
 }
 
-export function submitIntroBlocks(): PortableTextBlock[] {
+function submitIntroBlocks(): PortableTextBlock[] {
   return submitGuide.intro.map((text, i) => paragraph(`intro${i}`, text));
 }
 
@@ -78,7 +84,7 @@ export function submitIntroBlocks(): PortableTextBlock[] {
 const JARGON_BULLET =
   "Avoid making your piece read like a press release, and avoid jargon.";
 
-export function submitGuidelineBlocks(): PortableTextBlock[] {
+function submitGuidelineBlocks(): PortableTextBlock[] {
   return submitGuide.guidelines.map((text, i) => {
     const key = `guide${i}`;
     const listProps = { listItem: "bullet" as const, level: 1 };
@@ -99,15 +105,29 @@ export function submitGuidelineBlocks(): PortableTextBlock[] {
   });
 }
 
-export function submitOutroBlocks(): PortableTextBlock[] {
-  const linkKey = "outrolink";
+// The whole Submit guide as one rich-text body: title, intro, guidelines
+// heading, and the bulleted list — the layout Bryan edits in one field.
+export function submitBodyBlocks(): PortableTextBlock[] {
+  return [
+    heading("stitle", submitGuide.pitchGuideTitle, "h1"),
+    ...submitIntroBlocks(),
+    heading("gtitle", submitGuide.guidelinesTitle, "h2"),
+    paragraph("gintro", submitGuide.guidelinesIntro),
+    ...submitGuidelineBlocks(),
+  ];
+}
+
+// The little blurb under the form button: the contact line, with the email as
+// a mailto link.
+export function submitBlurbBlocks(): PortableTextBlock[] {
+  const linkKey = "blurblink";
   return [
     block(
-      "outro0",
+      "blurb0",
       [
-        span("outro0s0", `${submitGuide.outro.before} `),
-        span("outro0s1", CONTACT_EMAIL, [linkKey]),
-        span("outro0s2", ` ${submitGuide.outro.after}`),
+        span("blurb0s0", `${submitGuide.outro.before} `),
+        span("blurb0s1", CONTACT_EMAIL, [linkKey]),
+        span("blurb0s2", ` ${submitGuide.outro.after}`),
       ],
       {},
       [{ _type: "link", _key: linkKey, href: `mailto:${CONTACT_EMAIL}` }],
