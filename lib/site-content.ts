@@ -12,6 +12,7 @@ import {
   submitBodyBlocks,
   submitBlurbBlocks,
 } from "./copy-blocks";
+import { aboutImage, type AboutImage } from "./about-image";
 
 // The site's editable copy comes from Sanity singletons, with content/site.ts
 // as the committed fallback. Every field falls back independently, so a
@@ -29,9 +30,6 @@ const str = (v: unknown, fallback: string): string =>
 const blocks = (v: unknown, fallback: PortableTextBlock[]): PortableTextBlock[] =>
   Array.isArray(v) && v.length ? (v as PortableTextBlock[]) : fallback;
 
-// The About image, sized off Sanity's CDN. null -> the page uses its built-in
-// image (public/about.png) until Bryan uploads a hi-res one.
-export type AboutImage = { url: string; width: number; height: number; alt: string };
 export type AboutContent = {
   title: string;
   body: PortableTextBlock[];
@@ -42,24 +40,6 @@ export type SubmitContent = {
   formUrl: string;
   blurb: PortableTextBlock[];
 };
-
-const ABOUT_IMAGE_WIDTH = 900;
-
-function aboutImage(raw: unknown): AboutImage | null {
-  const img = raw as {
-    alt?: unknown;
-    asset?: { url?: unknown; dimensions?: { width?: number; height?: number } | null } | null;
-  } | null;
-  const url = img?.asset?.url;
-  if (typeof url !== "string" || !url) return null;
-  const sep = url.includes("?") ? "&" : "?";
-  return {
-    url: `${url}${sep}w=${ABOUT_IMAGE_WIDTH}&fit=max&auto=format`,
-    width: img.asset?.dimensions?.width ?? ABOUT_IMAGE_WIDTH,
-    height: img.asset?.dimensions?.height ?? Math.round((ABOUT_IMAGE_WIDTH * 2) / 3),
-    alt: typeof img.alt === "string" ? img.alt : "",
-  };
-}
 
 export const getStrap = cache(async (): Promise<string> => {
   const row = await client.fetch(
