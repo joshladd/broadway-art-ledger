@@ -24,41 +24,19 @@
 
 /* ------------------------------------------------------------------ *
  * TOP NAV — the app's core affordances, a slim row at the very top.
- * The links sit top-right; the left anchor is the house mark on Home,
- * a compact wordmark elsewhere.
+ * Just the links, top-right, on every page — no wordmark (the masthead
+ * is the wordmark on Home, and the links alone keep the row aligned).
  * ------------------------------------------------------------------ */
 .topnav {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 18px 28px;
   flex-wrap: wrap;
   max-width: 1240px;
   margin: 0 auto;
   padding: clamp(16px, 2.6vw, 26px) clamp(18px, 5vw, 72px) 0;
-}
-.navWordmark {
-  font-family: var(--f-fraunces);
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-size: 21px;
-  letter-spacing: -0.012em;
-  line-height: 1;
-  color: var(--ink);
-  transition: color 0.2s ease;
-}
-/* The two-squares house mark set between "Art" and "Ledger" — a scaled-down
-   echo of the masthead: black wordmark, red accent boxes. */
-.navWordMark {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
-  position: relative;
-  top: -0.02em;
-  margin: 0 0.16em;
-  font-size: 0.82em;
-  color: var(--accent);
 }
 .navLinks {
   display: flex;
@@ -80,6 +58,43 @@
 .navlink:hover { color: var(--ink); border-bottom-color: var(--line); }
 .navOn { color: var(--ink); border-bottom-color: var(--accent); }
 .navOn:hover { border-bottom-color: var(--accent); }
+
+/* Inner-page logo (omitted on Home). Desktop: the full "The Broadway Art [mark]
+   Ledger" wordmark. Mobile: just the two-squares mark. Sits at the left of the
+   nav row, aligned with the page content below. */
+.navLogo {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: -0.012em;
+  line-height: 1;
+  color: var(--ink);
+}
+.navLogoFull { display: inline; }
+.navLogoMark {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  top: -0.02em;
+  margin: 0 0.16em;
+  font-size: 0.82em;
+  color: var(--accent);
+}
+.navLogoIcon {
+  display: none;
+  align-items: center;
+  font-size: 22px;
+  line-height: 0;
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .navLogoFull { display: none; }
+  .navLogoIcon { display: inline-flex; }
+}
 
 /* ------------------------------------------------------------------ *
  * MASTHEAD HERO — the oversized two-line Fraunces masthead alone, held
@@ -236,27 +251,6 @@
 /* ------------------------------------------------------------------ *
  * Shared text pieces.
  * ------------------------------------------------------------------ */
-.sectionTag {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  margin: 0 0 14px;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  line-height: 1;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.sectionTag > span { line-height: 1; }
-.sectionTag .no {
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-.sectionTag .dot { color: var(--line); letter-spacing: 0; }
-
 .mTitle {
   margin: 0 0 14px;
   font-family: var(--f-fraunces);
@@ -693,6 +687,14 @@
   padding: 0 0 20px;
   border-bottom: 2px solid var(--ink);
 }
+.arcKicker {
+  margin: 0 0 8px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .arcTitle {
   margin: 0;
   font-family: var(--f-fraunces);
@@ -743,61 +745,7 @@
 .arcSearchInput:disabled { cursor: not-allowed; }
 .arcSearchInput:focus { outline: none; }
 
-.arcFilters {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-}
-.arcFilterLabel {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.arcChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.arcChip {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-.arcChip:hover { border-color: var(--accent); color: var(--accent); }
-/* selected section chip — vermilion fill, paper text */
-.arcChipOn,
-.arcChipOn:hover {
-  color: var(--bg);
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.arcSort {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: transparent;
-  border: 1px solid var(--ink);
-  border-radius: 2px;
-  padding: 6px 13px;
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-.arcSort:hover { color: var(--accent); border-color: var(--accent); }
-
-/* live search/filter result count */
+/* live search result count */
 .arcStatus {
   min-height: 1.4em;
   margin: 14px 0 0;
@@ -823,11 +771,11 @@
   margin: 26px 0 0;
 }
 
-/* shared row grid: plate · date · section · main · by */
+/* shared row grid: plate · date · main · by */
 .arcHead,
 .arcSummary {
   display: grid;
-  grid-template-columns: 80px 96px 108px 1fr 148px;
+  grid-template-columns: 80px 96px 1fr 148px;
   gap: 24px;
 }
 
@@ -890,9 +838,6 @@
 }
 
 .arcDate {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   font-family: var(--f-mono);
   font-size: 12px;
   color: var(--muted);
@@ -900,16 +845,6 @@
   padding-top: 2px;
 }
 .arcDay { color: var(--ink); letter-spacing: 0.02em; }
-.arcNo { font-size: 10.5px; letter-spacing: 0.08em; }
-
-.arcSection {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  padding-top: 3px;
-}
 
 .arcMain { display: block; min-width: 0; }
 .arcRowTitle {
@@ -1139,12 +1074,9 @@
   }
   .arcPlate { grid-row: span 3; width: 72px; height: 56px; }
   .arcDate {
-    flex-direction: row;
-    gap: 12px;
     grid-column: 2;
     padding-top: 0;
   }
-  .arcSection { grid-column: 2; padding-top: 2px; }
   .arcMain { grid-column: 2; }
   .arcBy { grid-column: 2; text-align: left; padding-top: 2px; }
   .arcCue { position: static; grid-column: 2; padding-top: 6px; }
@@ -1160,8 +1092,7 @@
 @media (prefers-reduced-motion: reduce) {
   .arcChevron,
   .arcCueRead,
-  .arcRowTitle,
-  .arcChip { transition: none; }
+  .arcRowTitle { transition: none; }
   /* back-to-top: no slide/fade animation; it simply appears/disappears */
   .toTop { transition: none; transform: none; }
 }

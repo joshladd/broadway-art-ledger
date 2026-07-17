@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import type { Review, SubmitField } from "@/content/reviews";
-import { facts, motto } from "@/content/reviews";
 import type { AboutContent, ThemeModule } from "@/lib/themes";
 import { reviewHref, tHref } from "@/lib/paths";
 import { Mark } from "@/components/Mark";
@@ -19,10 +18,10 @@ import ArchiveList from "./archive-list";
  * export the ThemeModule object).
  * ------------------------------------------------------------------ */
 
-// The slim top row — the app's core affordances. Same nav on every page. On
-// Home there is no left mark (the oversized masthead below IS the wordmark, so a
-// corner mark would be redundant): the nav is just the links, top-right. On
-// inner pages a compact wordmark anchors the left.
+// The slim top row — the app's core affordances. On inner pages a house logo
+// anchors the left (the full "The Broadway Art Ledger" wordmark on desktop, just
+// the two-squares mark on mobile); on Home it's omitted (the big masthead is the
+// wordmark). Links sit on the right, aligned with the page content below.
 function TopNav({ t, active, home = false }: { t: string; active: string; home?: boolean }) {
   const items = [
     { label: "Feed", href: tHref(t) },
@@ -33,11 +32,14 @@ function TopNav({ t, active, home = false }: { t: string; active: string; home?:
   return (
     <nav className={styles.topnav} aria-label="Primary">
       {!home && (
-        <a href={tHref(t)} className={styles.navWordmark} aria-label="The Broadway Art Ledger">
-          The Broadway Art{" "}
-          <span className={styles.navWordMark} aria-hidden="true"><Mark /></span>{" "}
-          Ledger
-        </a>
+        <span className={styles.navLogo} aria-label="The Broadway Art Ledger">
+          <span className={styles.navLogoFull}>
+            The Broadway Art{" "}
+            <span className={styles.navLogoMark} aria-hidden="true"><Mark /></span>{" "}
+            Ledger
+          </span>
+          <span className={styles.navLogoIcon} aria-hidden="true"><Mark /></span>
+        </span>
       )}
       <div className={styles.navLinks}>
         {items.map((it) => (
@@ -55,8 +57,8 @@ function TopNav({ t, active, home = false }: { t: string; active: string; home?:
   );
 }
 
-// Meta line: venue · hood · date. Section is dropped here — it already sits in
-// the `№ · section` plate directly above this line.
+// Meta line: venue · hood · date. Leads the article; the section is not shown
+// (it stays in the data, just not on screen).
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
@@ -90,12 +92,11 @@ function Masthead() {
   );
 }
 
+// Footer — a hairline rule and the house mark, nothing else.
 function Colophon() {
   return (
     <footer className={styles.colophon}>
       <span className={styles.colMark} aria-hidden="true"><Mark /></span>
-      <div className={styles.facts}>{facts.join("  ·  ")}</div>
-      <p className={styles.motto}>“{motto}”</p>
     </footer>
   );
 }
@@ -143,11 +144,6 @@ function ReviewPage({ review, prev, next, t }: { review: Review; prev: Review | 
       <TopNav t={t} active="Feed" />
       <article className={styles.article}>
         <a href={tHref(t)} className={styles.back}>← The feed</a>
-        <p className={styles.sectionTag}>
-          <span className={styles.no}>{review.no}</span>
-          <span className={styles.dot} aria-hidden="true">·</span>
-          <span>{review.section}</span>
-        </p>
         <Meta review={review} />
         <h1 className={styles.aTitle}>{review.title}</h1>
         <p className={styles.aDek}>{review.dek}</p>
@@ -257,8 +253,8 @@ function ArchiveSkeleton() {
 
 // Archive — Folio's own reading-index. This SERVER shell renders the chrome
 // (nav, masthead, colophon) and hands the reviews to the client ArchiveList,
-// which owns search, filters, and the row-expand view transition. Kept a server
-// module so it can still export the ThemeModule object.
+// which owns search and the row-expand accordion. Kept a server module so it
+// can still export the ThemeModule object.
 function Archive({ reviews, t }: { reviews: Review[]; t: string }) {
   return (
     <main className={styles.page}>

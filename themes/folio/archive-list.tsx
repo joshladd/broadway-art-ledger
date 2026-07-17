@@ -8,10 +8,10 @@ import styles from "./styles.module.css";
 
 /* ------------------------------------------------------------------ *
  * ArchiveList — the interactive half of Folio's Archive. Owns the
- * fuzzy search (Fuse.js), the section + sort filters, and the
- * controlled row expansion (a View-Transitions morph from the row's
- * cropped thumbnail to the full-bleed reading image). index.tsx stays
- * a server module (renders the shell) and hands us the reviews.
+ * fuzzy search (Fuse.js) and the controlled row expansion (a CSS
+ * grid-rows accordion from the row's cropped thumbnail to the full
+ * reading view). index.tsx stays a server module (renders the shell)
+ * and hands us the reviews.
  * ------------------------------------------------------------------ */
 
 // A review augmented with its body flattened to a single string, so Fuse can
@@ -22,8 +22,6 @@ type Searchable = Review & { bodyText: string };
 type MatchMap = Record<string, ReadonlyArray<RangeTuple>>;
 
 type Entry = { r: Review; matches: MatchMap };
-
-type Sort = "relevance" | "newest" | "oldest" | "section";
 
 // Weighted keys — title dominates, body barely registers. Stable (module scope).
 const FUSE_KEYS = [
@@ -37,13 +35,6 @@ const FUSE_KEYS = [
   { name: "dek", weight: 0.03 },
   { name: "bodyText", weight: 0.02 },
 ];
-
-const SORT_LABEL: Record<Sort, string> = {
-  relevance: "Relevance",
-  newest: "Newest",
-  oldest: "Oldest",
-  section: "Section",
-};
 
 // Render `text` with the Fuse-matched ranges wrapped in <mark>. Non-matched
 // runs render as plain strings. Fuse hands back non-overlapping, but we sort
@@ -72,8 +63,6 @@ function highlight(text: string, ranges?: ReadonlyArray<RangeTuple>): React.Reac
 export default function ArchiveList({ reviews }: { reviews: Review[] }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [sort, setSort] = useState<Sort>("newest");
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   // debounce the search input ~120ms
@@ -83,16 +72,6 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
   }, [query]);
 
   const searching = debounced.trim().length > 0;
-
-  // Relevance is only meaningful while searching. Default to it when a search
-  // begins (Fuse score takes precedence), and fall back to Newest when cleared.
-  useEffect(() => {
-    setSort((prev) => {
-      if (searching && prev === "newest") return "relevance";
-      if (!searching && prev === "relevance") return "newest";
-      return prev;
-    });
-  }, [searching]);
 
   const searchable = useMemo<Searchable[]>(
     () => reviews.map((r) => ({ ...r, bodyText: r.body.join(" ") })),
@@ -112,16 +91,9 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
     [searchable],
   );
 
-  // sections present in the data, in first-appearance order
-  const sections = useMemo(() => {
-    const seen: string[] = [];
-    for (const r of reviews) if (!seen.includes(r.section)) seen.push(r.section);
-    return seen;
-  }, [reviews]);
-
   // search step: empty query -> all reviews (newest-first as delivered);
-  // otherwise Fuse results ranked by score, carrying their match ranges.
-  const results = useMemo<Entry[]>(() => {
+  // otherwise Fuse results ranked by relevance, carrying their match ranges.
+  const list = useMemo<Entry[]>(() => {
     const q = debounced.trim();
     if (!q) return reviews.map((r) => ({ r, matches: {} }));
     return fuse.search(q).map((res) => {
@@ -132,31 +104,6 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
       return { r: res.item as Review, matches };
     });
   }, [debounced, fuse, reviews]);
-
-  // filter (section) + sort. Relevance keeps Fuse order; the rest re-order.
-  const list = useMemo<Entry[]>(() => {
-    let out = results;
-    if (activeSection) out = out.filter((e) => e.r.section === activeSection);
-    const arr = [...out];
-    if (sort === "newest") arr.sort((a, b) => b.r.iso.localeCompare(a.r.iso));
-    else if (sort === "oldest") arr.sort((a, b) => a.r.iso.localeCompare(b.r.iso));
-    else if (sort === "section")
-      arr.sort(
-        (a, b) =>
-          a.r.section.localeCompare(b.r.section) || b.r.iso.localeCompare(a.r.iso),
-      );
-    // "relevance": leave Fuse's ranking untouched
-    return arr;
-  }, [results, activeSection, sort]);
-
-  const sortOptions: Sort[] = searching
-    ? ["relevance", "newest", "oldest", "section"]
-    : ["newest", "oldest", "section"];
-
-  function cycleSort() {
-    const i = sortOptions.indexOf(sort);
-    setSort(sortOptions[(i + 1) % sortOptions.length]);
-  }
 
   // Controlled expand: one row open at a time; re-clicking the open row closes
   // it. A plain state flip — the reveal is a CSS grid-rows accordion (no view
@@ -170,7 +117,7 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
 
   return (
     <>
-      {/* ---------- search + filter toolbar ---------- */}
+      {/* ---------- search toolbar ---------- */}
       <div className={styles.arcTools}>
         <div className={styles.arcSearch}>
           <svg
@@ -200,43 +147,11 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
           />
         </div>
 
-        <div className={styles.arcFilters} role="group" aria-label="Filter by section">
-          <span className={styles.arcFilterLabel}>Filter</span>
-          <div className={styles.arcChips}>
-            <button
-              type="button"
-              className={`${styles.arcChip} ${activeSection === null ? styles.arcChipOn : ""}`}
-              aria-pressed={activeSection === null}
-              onClick={() => setActiveSection(null)}
-            >
-              All
-            </button>
-            {sections.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={`${styles.arcChip} ${activeSection === s ? styles.arcChipOn : ""}`}
-                aria-pressed={activeSection === s}
-                onClick={() => setActiveSection((cur) => (cur === s ? null : s))}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className={styles.arcSort}
-            onClick={cycleSort}
-            aria-label={`Sort order: ${SORT_LABEL[sort]}. Activate to change.`}
-          >
-            Sort: {SORT_LABEL[sort]}
-          </button>
-        </div>
       </div>
 
-      {/* live result count for search/filter feedback */}
+      {/* live result count for search feedback */}
       <p className={styles.arcStatus} role="status" aria-live="polite">
-        {searching || activeSection
+        {searching
           ? `${shown} of ${total} ${total === 1 ? "entry" : "entries"}`
           : ` `}
       </p>
@@ -246,7 +161,6 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
         <div className={styles.arcHead} aria-hidden="true">
           <span className={styles.arcHeadPlate} />
           <span>Date</span>
-          <span>Section</span>
           <span>Show &amp; venue</span>
           <span className={styles.arcHeadBy}>By</span>
         </div>
@@ -292,11 +206,6 @@ export default function ArchiveList({ reviews }: { reviews: Review[] }) {
 
                     <span className={styles.arcDate}>
                       <span className={styles.arcDay}>{r.date}</span>
-                      <span className={styles.arcNo}>{r.no}</span>
-                    </span>
-
-                    <span className={styles.arcSection}>
-                      {highlight(r.section, matches.section)}
                     </span>
 
                     <span className={styles.arcMain}>

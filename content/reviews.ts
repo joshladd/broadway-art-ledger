@@ -202,9 +202,7 @@ export type SubmitField = {
 export const submitFields: SubmitField[] = [
   { name: "show", label: "Exhibition or show", type: "text", placeholder: "Artist / show title", required: true },
   { name: "venue", label: "Venue", type: "text", placeholder: "Gallery or museum, neighborhood", required: true },
-  { name: "section", label: "Discipline", type: "select", options: ["Painting", "Sculpture", "Photography", "Prints", "Installation", "Old Masters", "Group Show", "Other"] },
   { name: "pitch", label: "Your pitch", type: "textarea", placeholder: "Your central argument, in a few sentences. What’s at stake, and why does it matter?", required: true, help: "200–400 words when published. Tell us your position, not the press release." },
-  { name: "sample", label: "Writing sample (link)", type: "url", placeholder: "https://…", help: "Optional. Reviews are read blind; this is only used if we need it." },
   { name: "name", label: "Your name", type: "text", placeholder: "First and last", help: "Hidden during our blind review — used only if your pitch is accepted." },
   { name: "email", label: "Contact email", type: "email", placeholder: "you@example.com", required: true, help: "Kept private. We only use it to reply about your pitch." },
 ];

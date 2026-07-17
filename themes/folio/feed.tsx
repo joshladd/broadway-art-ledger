@@ -39,8 +39,8 @@ function useInView<T extends Element>(): { ref: React.RefObject<T | null>; inVie
   return { ref, inView };
 }
 
-// Meta line: venue · hood · date. The section is dropped here — it already
-// lives in the `№ · section` plate directly above this line.
+// Meta line: venue · hood · date. Leads the text column; the section is not
+// shown (it stays in the data, just not on screen).
 function Meta({ review }: { review: Review }) {
   return (
     <p className={styles.metaLine}>
@@ -118,11 +118,6 @@ function Moment({ review, index }: { review: Review; index: number }) {
           {review.credit && <p className={styles.mediaCredit}>{review.credit}</p>}
         </div>
         <div className={styles.splitText}>
-          <p className={styles.sectionTag}>
-            <span className={styles.no}>{review.no}</span>
-            <span className={styles.dot} aria-hidden="true">·</span>
-            <span>{review.section}</span>
-          </p>
           <Meta review={review} />
           <h2 className={styles.mTitle}>{review.title}</h2>
           <p className={styles.mDek}>{review.dek}</p>
