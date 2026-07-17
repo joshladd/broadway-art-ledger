@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Fuse, { type FuseResultMatch, type RangeTuple } from "fuse.js";
 import type { ArchiveItem } from "@/lib/map-review";
 import { formatRange } from "@/lib/format-date";
 import styles from "./site.module.css";
+
+// next/image's default device widths; the review marquee displays at ~888px
+// (see ReviewArticle's sizes). We prefetch the width the browser will actually
+// request for the viewer's pixel density, so the hover prefetch is a cache hit.
+const DEVICE_SIZES = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+const HERO_DISPLAY_WIDTH = 888;
 
 /* The interactive half of the Archive. Its job is to find a review without the
  * raw scroll, so search is its reason to exist. Rows link to each review's own
@@ -52,6 +58,24 @@ function highlight(text: string, ranges?: ReadonlyArray<RangeTuple>): React.Reac
 export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
+  const prefetched = useRef<Set<string>>(new Set());
+
+  // Route data is already prefetched by <Link>; the review's marquee image is
+  // not. On hover/focus of a row, prefetch that image so the review page paints
+  // it instantly on click. Deduped per review, and only fires on real intent
+  // (hover/focus) rather than eagerly for every row, to bound the bandwidth.
+  function prefetchHero(item: ArchiveItem) {
+    if (!item.heroUrl || prefetched.current.has(item.slug)) return;
+    prefetched.current.add(item.slug);
+    const dpr = window.devicePixelRatio || 1;
+    const target = Math.ceil(HERO_DISPLAY_WIDTH * dpr);
+    const w = DEVICE_SIZES.find((s) => s >= target) ?? DEVICE_SIZES[DEVICE_SIZES.length - 1];
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "image";
+    link.href = `/_next/image?url=${encodeURIComponent(item.heroUrl)}&w=${w}&q=75`;
+    document.head.appendChild(link);
+  }
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(query), 120);
@@ -134,7 +158,12 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
             const range = formatRange(r.startDate, r.endDate);
             return (
               <div key={r.slug} className={styles.arcRow}>
-                <Link href={`/reviews/${r.slug}`} className={styles.arcSummary}>
+                <Link
+                  href={`/reviews/${r.slug}`}
+                  className={styles.arcSummary}
+                  onMouseEnter={() => prefetchHero(r)}
+                  onFocus={() => prefetchHero(r)}
+                >
                   <span className={styles.arcPlate}>
                     {r.thumbUrl && (
                       <Image

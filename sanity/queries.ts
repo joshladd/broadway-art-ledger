@@ -46,8 +46,9 @@ export const REVIEW_SLUGS_QUERY = defineQuery(`
 `);
 
 // The archive's search index: no portable text, no full-size images. pt::text()
-// flattens the body to a plain string server-side, and only a thumbnail URL is
-// carried — so the client receives a compact list, not every review's essay.
+// flattens the body to a plain string server-side. The raw hero asset URL is
+// carried once and the client derives both a thumbnail (shown) and the
+// full-size marquee URL (prefetched on hover) from it.
 export const ARCHIVE_QUERY = defineQuery(`
   *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     "slug": slug.current,
@@ -57,7 +58,7 @@ export const ARCHIVE_QUERY = defineQuery(`
     startDate,
     endDate,
     "bodyText": pt::text(body),
-    "thumbUrl": heroImage.asset->url
+    "imageUrl": heroImage.asset->url
   }
 `);
 

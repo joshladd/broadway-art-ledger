@@ -80,8 +80,9 @@ export function mapReviewRows(rows: ReviewRow[] | null): Review[] {
   return (rows ?? []).filter(isRenderable).map(mapReviewRow);
 }
 
-// The archive's lightweight search item: plain body text (flattened in GROQ)
-// and a small thumbnail, never the portable text or the full-size image.
+// The archive's lightweight search item: plain body text (flattened in GROQ),
+// a small thumbnail (shown), and the full-size marquee URL — the same URL the
+// review page loads — so hovering a row can prefetch it. Never portable text.
 export type ArchiveItem = {
   slug: string;
   headline: string;
@@ -91,6 +92,7 @@ export type ArchiveItem = {
   endDate: string;
   bodyText: string;
   thumbUrl: string;
+  heroUrl: string;
 };
 
 export type ArchiveRow = {
@@ -101,7 +103,7 @@ export type ArchiveRow = {
   startDate: string | null;
   endDate: string | null;
   bodyText: string | null;
-  thumbUrl: string | null;
+  imageUrl: string | null;
 };
 
 const ARCHIVE_THUMB_WIDTH = 160; // ~2x the 64px display slot, for retina
@@ -115,14 +117,20 @@ function sizedThumbUrl(assetUrl: string): string {
 export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
   return (rows ?? [])
     .filter((r) => Boolean(r?.slug))
-    .map((r) => ({
-      slug: s(r.slug),
-      headline: s(r.headline),
-      showName: s(r.showName),
-      tagline: s(r.tagline),
-      startDate: s(r.startDate),
-      endDate: s(r.endDate),
-      bodyText: s(r.bodyText),
-      thumbUrl: sizedThumbUrl(s(r.thumbUrl)),
-    }));
+    .map((r) => {
+      const raw = s(r.imageUrl);
+      return {
+        slug: s(r.slug),
+        headline: s(r.headline),
+        showName: s(r.showName),
+        tagline: s(r.tagline),
+        startDate: s(r.startDate),
+        endDate: s(r.endDate),
+        bodyText: s(r.bodyText),
+        thumbUrl: sizedThumbUrl(raw),
+        // Same sizing the review page uses (sizedImageUrl), so a hover prefetch
+        // targets the exact asset the marquee will request.
+        heroUrl: raw ? sizedImageUrl(raw) : "",
+      };
+    });
 }
