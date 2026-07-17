@@ -7,12 +7,11 @@
     "build": "next build",
     "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "next lint",
-    "test": "node --import tsx --test lib/format-date.test.ts"
+    "test": "node --import tsx --test lib/format-date.test.ts lib/map-review.test.ts"
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",
     "@portabletext/types": "^4.0.2",
-    "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^6.5.0",
     "fuse.js": "^7.5.0",
     "next": "16.2.10",
