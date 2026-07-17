@@ -643,27 +643,43 @@ duplicate-project risk that was flagged before the integration was installed.
   deploying per-project.
 - The seed script refuses any dataset named `production`, in either project.
 
-#### RESOLVED: Josh IS the admin of production — under his .edu identity
+#### RESOLVED: production is administered THROUGH VERCEL, not sanity.io
 
-`bnbcebcv`'s administrator `pw8xaHgNK` is **joshua.ladd@colorado.edu** (org
-`oCJNMzdPm` = "joshladd's projects"). It was never a permissions problem — the
-Sanity CLI logins used `ladd6531@gmail.com`, which is a *different* Sanity user
-(`gA9Goao8t`) that owns nothing.
+`bnbcebcv`'s administrator `pw8xaHgNK` is a **Vercel-federated identity**, not a
+Sanity signup:
 
-**To administer production:** sanity.io/manage → sign in with Google as
-**joshua.ladd@colorado.edu** (not the gmail). From there: invite Bryan (Members →
-Invite → role `editor`), manage datasets, create the revalidation webhook.
+```
+{ "id": "pw8xaHgNK", "email": "joshua.ladd@colorado.edu",
+  "provider": "vercel", "sanityUserId": "gP4ky7MWn",
+  "createdAt": "2026-07-17T02:21:56Z" }     <- the instant the integration ran
+org oCJNMzdPm: { "name": "joshladd's projects", "managedBy": "vercel" }
+```
 
-**Studio access:** the deployed `/studio` authenticates against Sanity, so Josh
-signs in with the .edu account and Bryan with whatever address he's invited under.
+The `.edu` address is **Josh's Vercel account email** — GitHub is only his auth
+*method*; Vercel stores its own account email and passed it to Sanity when
+provisioning.
+
+**Front door = Vercel.** The project metadata carries the management URL:
+`https://vercel.com/d/dashboard/integrations/sanity/icfg_2gDjZGOBZSlYTU3pZ4Cz4dRQ/resources/res-wlo6nlv9g3gh5m2e`
+→ Vercel Dashboard → project → Integrations/Storage → Sanity → Open/Manage,
+which SSOs into `bnbcebcv` as administrator.
+
+**Do NOT** try to reach it by signing into sanity.io/manage with Google/GitHub.
+Because `pw8xaHgNK` is provider `vercel`, a direct Google login for the same
+address mints a *different*, empty Sanity user — exactly what happened with the
+gmail account.
+
+**Inviting Bryan:** do it from the Sanity Manage UI reached via that Vercel SSO
+(Members → Invite → role `editor`). Since the org is Vercel-managed, member
+management may route through Vercel — verify once inside.
 
 Identity map, so this never confuses anyone again:
 
-| Sanity user | Email | Owns |
-|---|---|---|
-| `pw8xaHgNK` | joshua.ladd@colorado.edu | **`bnbcebcv` (production)** — administrator |
-| `gWejjEkFi` | ladd6531@gmail.com (GitHub login) | `6vag9i62` (dev) |
-| `gA9Goao8t` | ladd6531@gmail.com (Google login) | nothing |
+| Sanity user | Email | Provider | Owns |
+|---|---|---|---|
+| `pw8xaHgNK` | joshua.ladd@colorado.edu | **vercel** | **`bnbcebcv` (production)** — administrator |
+| `gWejjEkFi` | ladd6531@gmail.com | github | `6vag9i62` (dev) |
+| `gA9Goao8t` | ladd6531@gmail.com | google | nothing (created by a stray CLI login) |
 
 ### Blocked on Bryan (blocks nothing shipped)
 - Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
