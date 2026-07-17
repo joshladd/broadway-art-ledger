@@ -9,6 +9,16 @@ const eslintConfig = [
   },
   ...next,
   ...ts,
+  {
+    // `_`-prefixed identifiers are intentional throwaways (e.g. the compile-time
+    // query/type binding assertions in map-review.ts and site-content.ts).
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
