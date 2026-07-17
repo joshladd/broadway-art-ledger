@@ -30,17 +30,7 @@ export default function SubmitPage() {
           ))}
         </div>
 
-        {/* Outbound handoff to Bryan's Airtable form. New tab: it's a different
-            product, and a writer shouldn't hit a dead end. */}
-        <a
-          className={styles.formLink}
-          href={SUBMIT_FORM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open the pitch form
-        </a>
-
+        {/* Guidelines come before the button: read what's expected, then pitch. */}
         <h2 className={styles.subhead}>{submitGuide.guidelinesTitle}</h2>
         <p className={styles.subheadNote}>{submitGuide.guidelinesIntro}</p>
 
@@ -63,6 +53,18 @@ export default function SubmitPage() {
           ))}
         </ul>
 
+        {/* Outbound handoff to Bryan's Airtable form. New tab: it's a different
+            product, and a writer shouldn't hit a dead end. */}
+        <a
+          className={styles.formLink}
+          href={SUBMIT_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open the pitch form
+        </a>
+
+        {/* Contact line last — it's for people the form doesn't serve. */}
         <div className={styles.readerBody}>
           <p>
             {submitGuide.outro.before}{" "}

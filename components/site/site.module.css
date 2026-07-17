@@ -234,10 +234,12 @@
   text-underline-offset: 3px;
 }
 
-/* The outbound link to Bryan's Airtable form. */
+/* The outbound link to Bryan's Airtable form. It sits between the guidelines
+   list and the contact line, so it needs real air on both sides — it should
+   read as the page's one action, not as another paragraph. */
 .formLink {
   display: inline-block;
-  margin: 12px 0 8px;
+  margin: 16px 0 40px;
   padding: 14px 24px;
   background: var(--blue);
   color: var(--bg);
