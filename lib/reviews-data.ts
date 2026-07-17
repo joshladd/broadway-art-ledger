@@ -72,10 +72,14 @@ export async function getReviews(): Promise<Review[]> {
         no: "", // derived from position after the full list is assembled (below)
         date: displayDate(iso),
         iso,
+        // Airtable columns: Exhibition = "what was the event" (shown first),
+        // Venue = "where" (a neighborhood or named location, shown second).
+        // The app's Review keeps its venue/hood names: venue = Exhibition, hood =
+        // Venue. (Section was removed from Airtable — no longer displayed.)
         section: str(f["Section"]),
         title: str(f["Title"]),
-        venue: str(f["Venue"]),
-        hood: str(f["Hood"]),
+        venue: str(f["Exhibition"]),
+        hood: str(f["Venue"]),
         by: str(f["Byline"]),
         dek: str(f["Dek"]),
         body: str(f["Body"]).split(/\n{2,}/).map((s) => s.trim()).filter(Boolean),
