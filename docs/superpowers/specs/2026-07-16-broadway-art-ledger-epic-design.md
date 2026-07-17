@@ -619,44 +619,42 @@ where noted.
 
 ## 12. Still open
 
-### ⚠️ DECISION NEEDED: there are TWO Sanity projects
+### RESOLVED: two Sanity projects, split prod/dev
 
-Discovered 2026-07-17 while trying to create the `development` dataset. This is
-exactly the duplicate-project risk flagged before the integration was installed.
+Discovered 2026-07-17 while trying to create the `development` dataset — the
+duplicate-project risk that was flagged before the integration was installed.
 
-| Project | Name | Org | Created by | Josh's access |
+| Project | Name | Created by | Josh's access | Role |
 |---|---|---|---|---|
-| `bnbcebcv` | broadway-art-ledger | `oCJNMzdPm` | Vercel integration | **none** — 401 on every call |
-| `6vag9i62` | **BroadwayArtLedgerCMS** | `ovGIJzIlS` | Josh (GitHub login) | **owner/admin** |
+| `bnbcebcv` | broadway-art-ledger | Vercel integration | none (401) | **PRODUCTION** |
+| `6vag9i62` | BroadwayArtLedgerCMS | Josh (GitHub) | owner/admin | **DEV** |
 
-`bnbcebcv` is what the Vercel integration injected into `.env.local` and into
-Vercel's env vars — but Josh **cannot administer it**. Its members are
-`pw8xaHgNK` (an identity that is neither of Josh's logins) plus the two robot
-tokens the integration made. His Google identity is `gA9Goao8t`; his GitHub
-identity is `gWejjEkFi`. Neither is a member, so he cannot create datasets,
-invite Bryan, or manage the project that his publication depends on.
+**Decision (Josh, 2026-07-17): `bnbcebcv` is canonical for production;
+`6vag9i62` is dev.** This is already the live state and needs no migration:
 
-**Current state:** local `.env.local` points at **`6vag9i62` / `development`**
-(the old Vercel values are preserved as comments, so reverting is trivial).
-The 8 fakes are seeded there and the site renders from them.
+- **Production** — the Vercel integration injects `bnbcebcv` env vars into Vercel
+  directly. Its `production` dataset is `aclMode: public`, so the deployed site
+  reads it with no token. Untouched by us.
+- **Dev** — `.env.local` points at `6vag9i62` / `development`, seeded with the 8
+  fabricated reviews. Josh administers this project, which is why the dev dataset
+  could be created at all.
+- The schema is **code** (`sanity/schemas/review.ts` + `sanity.config.ts`), so the
+  embedded Studio serves it against whichever project the env names. Nothing needs
+  deploying per-project.
+- The seed script refuses any dataset named `production`, in either project.
 
-**Recommendation: make `6vag9i62` canonical.** Josh owns it, can create datasets
-(verified: HTTP 201), and can invite Bryan — all things `bnbcebcv` cannot do for
-him. The integration's only real value was env-var injection and billing; that is
-three variables set by hand against a project he actually controls. A CMS the
-owner cannot administer is not viable for a publication Bryan will run for years.
+#### ⚠️ Open risk of this split: can Bryan log into the production Studio?
 
-**If `6vag9i62` is chosen, the follow-through is:**
-1. Create its `production` dataset content home (it already has `production`).
-2. Set `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` /
-   `SANITY_API_READ_TOKEN` in Vercel to `6vag9i62` values.
-3. Remove or ignore the Vercel Sanity integration so it stops re-injecting
-   `bnbcebcv` (it will otherwise fight the manual vars).
-4. Point the revalidation webhook at `6vag9i62`.
+`bnbcebcv`'s only human member is **`pw8xaHgNK`** — neither of Josh's identities
+(Google `gA9Goao8t`, GitHub `gWejjEkFi`). The embedded Studio authenticates against
+Sanity, so **only a member of `bnbcebcv` can write reviews in production.** Josh
+cannot invite Bryan to a project he isn't a member of.
 
-**If `bnbcebcv` must be kept**, Josh needs whoever/whatever `pw8xaHgNK` is to add
-his account as an administrator — reachable via the Vercel dashboard's Sanity
-integration.
+**Must be verified before launch:** deploy, open `/studio` on the Vercel URL, and
+confirm (a) Josh can get in — likely via the Vercel dashboard's Sanity integration,
+which should federate his Vercel identity — and (b) Bryan can be invited from
+there. If neither works, production has a CMS nobody can write to, and
+`6vag9i62` becomes the better canonical choice after all.
 
 ### Blocked on Bryan (blocks nothing shipped)
 - Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
