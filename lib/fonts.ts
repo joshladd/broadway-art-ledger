@@ -5,8 +5,14 @@ import { Fraunces, Newsreader, Space_Mono } from "next/font/google";
 
 // axes: ["opsz"] keeps the optical-size axis so `font-optical-sizing: auto`
 // engages Fraunces' display cut (refined large titles + its swash ampersand).
+// Italic is loaded even though no static style asks for it: Fraunces renders the
+// headings in review and Submit bodies (.prose / editorial), so an editor
+// italicizing text inside a heading (an artwork title, a foreign word) would
+// otherwise get a synthesized faux-oblique. Bold needs no cut — the variable
+// font covers the weight axis.
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--f-fraunces", display: "swap", style: ["normal", "italic"], axes: ["opsz"] });
 const newsreader = Newsreader({ subsets: ["latin"], variable: "--f-newsreader", display: "swap", style: ["normal", "italic"], axes: ["opsz"] });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--f-mono", display: "swap" });
+// Only the 400 weight is used — mono is for small labels, never bold.
+const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400"], variable: "--f-mono", display: "swap" });
 
 export const fontVars = [fraunces, newsreader, spaceMono].map((f) => f.variable).join(" ");
