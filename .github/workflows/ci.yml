@@ -18,6 +18,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Sanity types must match the queries/schema. Regenerate and fail if the
+      # committed sanity.types.ts is stale (a query changed without a typegen run).
+      - run: npm run typegen
+      - run: git diff --exit-code sanity.types.ts
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test

@@ -1,4 +1,5 @@
 import type { Review } from "@/content/review";
+import type { REVIEW_BY_SLUG_QUERY_RESULT, ARCHIVE_QUERY_RESULT } from "@/sanity.types";
 import { sanityImageUrl, MARQUEE_WIDTH } from "./sanity-image";
 
 // The Sanity -> Review mapping, kept pure and separate from the fetch so it can
@@ -120,3 +121,18 @@ export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
       };
     });
 }
+
+// Compile-time binding between the GROQ projections and the row types this
+// mapper consumes. sanity.types.ts is generated from the queries (npm run
+// typegen). If a projection stops providing a field the mapper reads, the
+// generated result is no longer assignable to the row type and this stops
+// compiling — turning a former runtime-only bug (the feed silently loses its
+// images) into a build error. The mapper stays intentionally defensive about
+// nulls, so the row types are the looser contract the generated types satisfy.
+type Assert<T extends true> = T;
+type _ReviewRowBinding = Assert<
+  NonNullable<REVIEW_BY_SLUG_QUERY_RESULT> extends ReviewRow ? true : false
+>;
+type _ArchiveRowBinding = Assert<
+  ARCHIVE_QUERY_RESULT[number] extends ArchiveRow ? true : false
+>;

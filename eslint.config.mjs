@@ -5,7 +5,7 @@ import ts from "eslint-config-next/typescript";
 // eslint-config-next ships native flat-config arrays, so no FlatCompat.
 const eslintConfig = [
   {
-    ignores: [".next/**", "node_modules/**", "scripts/**", "*.mjs"],
+    ignores: [".next/**", "node_modules/**", "scripts/**", "*.mjs", "sanity.types.ts"],
   },
   ...next,
   ...ts,
