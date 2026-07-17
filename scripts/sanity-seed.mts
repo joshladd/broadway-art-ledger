@@ -49,7 +49,9 @@ function fabricateRun(iso: string): { startDate: string; endDate: string } {
 
 let count = 0;
 for (const r of legacy) {
-  const file = r.image.replace(/^\//, "");
+  // The legacy seed stores web paths ("/art/art-01.jpg"); on disk they live
+  // under public/.
+  const file = `public${r.image}`;
   const asset = await client.assets.upload("image", readFileSync(file), {
     filename: file.split("/").pop(),
   });
