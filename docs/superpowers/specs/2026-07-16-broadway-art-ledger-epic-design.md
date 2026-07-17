@@ -1,7 +1,8 @@
 # The Broadway Art Ledger — Master Spec (Epic)
 
 - **Date:** 2026-07-16
-- **Status:** **Grilled 2026-07-16** — decisions resolved; ready for implementation planning
+- **Status:** **Built 2026-07-16.** Phases 0/1/3/4/5 shipped; Phase 2 (Sanity) shipped except the
+  seed, which is blocked on one manual step (see §12).
 - **Owner:** Josh (build), Bryan (editorial/design sign-off)
 
 This is the single master spec for the whole epic. It is intentionally
@@ -617,30 +618,54 @@ where noted.
 
 ## 12. Still open
 
-Everything needed to **build this epic** is resolved. What remains is either
-Bryan's to unblock or deliberately deferred.
+**Blocked on a manual step (Josh) — the only thing standing between us and a
+fully seeded Sanity)**
+1. **Create the `development` dataset.** Verified: the `SANITY_API_WRITE_TOKEN`
+   is a project token that lacks the `sanity.project.datasets/create` grant
+   (HTTP 401), so this cannot be scripted. Either sanity.io/manage → project
+   `bnbcebcv` → Datasets → Add, or `npx sanity login && npx sanity dataset create
+   development`. Then set `NEXT_PUBLIC_SANITY_DATASET=development` in
+   `.env.local` and run:
+   `node --env-file=.env.local --import tsx scripts/sanity-seed.mts`
+   (The seed script refuses to run against `production` — verified.)
 
-**Blocked on Bryan (not blocking this epic)**
-1. Convert `Writer Email` from `aiText` → plain text field. Gates *our own* submit
-   form only; `/submit` ships as copy + link regardless.
+**Blocked on Bryan (does not block anything shipped)**
+2. Convert `Writer Email` from `aiText` → plain text field. Gates *our own*
+   submit form only; `/submit` ships as his copy + a link to his form.
+
+**Manual, at deploy time**
+3. Add `REVALIDATE_SECRET` (already generated into `.env.local`) to Vercel's env
+   vars.
+4. Create the Sanity webhook: sanity.io/manage → `bnbcebcv` → API → Webhooks →
+   URL `https://<domain>/api/revalidate?secret=<REVALIDATE_SECRET>`, dataset
+   `production`, filter `_type == "review"`.
 
 **Deferred by decision**
-2. **Domain** — parked. Affects canonical URLs, Sanity CORS, and the webhook when
-   it lands. No real content exists yet, so there's no urgency.
-3. **Email at the domain** — parked. Orientation for when it matters:
+5. **Domain** and **email at the domain** — parked. Orientation when it matters:
    Cloudflare Email Routing (free forward → Gmail + "send as") for a single
    contact address; Zoho free tier; Fastmail ~$3–5/user/mo; Google Workspace
-   ~$7/user/mo for real mailboxes. He already uses
-   `thebroadwayartledger@gmail.com`, so free forwarding likely suffices.
-4. **Our own on-site pitch form** — its own epic, after (1).
-5. **Current/Archive rename**, **byline**, **photo credit**, **the Mark** — all in
+   ~$7/user/mo for real mailboxes.
+6. **Our own on-site pitch form** — its own epic, after (2).
+7. **Current/Archive rename**, **byline**, **photo credit**, **the Mark** — all in
    `docs/IDEAS.md` awaiting Bryan.
 
-**Operational, during Phase 2**
-6. Generate `REVALIDATE_SECRET` → `.env.local` + Vercel, then point the Sanity
-   webhook at `/api/revalidate`. (Verified: it is set nowhere today, so the
-   endpoint is currently dead code.)
-7. Create the `development` dataset and flip local `NEXT_PUBLIC_SANITY_DATASET`.
+---
+
+## 12b. Bugs found and fixed while building
+
+- **`/api/revalidate` could never have worked.** Broken two ways: no
+  `REVALIDATE_SECRET` was set anywhere, *and* it called `updateTag`, which throws
+  outside a Server Action ("use revalidateTag instead"). Next 16 also requires a
+  cache-life profile as `revalidateTag`'s second argument. Now fixed and verified
+  (200 `{ok:true}` with the secret, 401 without).
+- **Review permalinks never existed.** `reviewHref()` generated
+  `/t/<theme>/r/<slug>`, a route that was never created, and every theme's
+  `ReviewPage` was dead code. Resolved by decision: the site has no review pages.
+- **`@sanity/image-url` v2** deprecated its default export and moved
+  `SanityImageSource` to the package root; the documented
+  `lib/types/types` subpath no longer exists.
+- **`npm run lint` is broken** (pre-existing): it calls `next lint`, which Next 16
+  removed. Not fixed — out of scope, but it means lint is not a real gate.
 
 ---
 
