@@ -11,9 +11,6 @@ next-env.d.ts
 # production
 /build
 
-# runtime data (pitch submissions land here locally)
-/data
-
 # misc
 .DS_Store
 *.pem
