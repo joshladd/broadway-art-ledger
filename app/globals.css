@@ -1,6 +1,6 @@
-/* Minimal reset — theme stylesheets layer on top of this.
-   Font CSS variables (--f-fraunces, --f-newsreader, --f-archivo, --f-mono)
-   are provided by next/font on <html> (see lib/fonts.ts), self-hosted.
+/* Minimal reset for the site. Font CSS variables (--f-fraunces,
+   --f-newsreader, --f-mono) are provided by next/font on <html>
+   (see lib/fonts.ts), self-hosted.
 
    This file is imported by app/(site)/layout.tsx, NOT the root layout, so these
    bare element selectors never reach the embedded Sanity Studio at /studio.
