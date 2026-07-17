@@ -1,5 +1,6 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
+import { safeHref, isExternal } from "@/lib/safe-href";
 import styles from "./site.module.css";
 
 // Renders editable site copy (About / Submit) as Portable Text. Unlike Body,
@@ -12,8 +13,9 @@ import styles from "./site.module.css";
 // mailto, which used to be special-cased in the page components.
 const linkMark: PortableTextComponents["marks"] = {
   link: ({ value, children }) => {
-    const href = String(value?.href ?? "");
-    const external = /^https?:\/\//i.test(href);
+    const href = safeHref(value?.href);
+    if (!href) return <>{children}</>;
+    const external = isExternal(href);
     return (
       <a
         href={href}

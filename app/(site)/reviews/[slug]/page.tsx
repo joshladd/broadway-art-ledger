@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/site/Header";
 import { ReviewArticle } from "@/components/site/ReviewArticle";
-import { getReview, getReviews } from "@/lib/reviews-source";
+import { getReview, getReviewSlugs } from "@/lib/reviews-source";
 import styles from "@/components/site/site.module.css";
 
 // A review's own page, so a writer can link to their piece. The full essay,
@@ -13,8 +13,8 @@ type Params = { params: Promise<{ slug: string }> };
 
 // Pre-render the known reviews at build; new ones fill in on demand via ISR.
 export async function generateStaticParams() {
-  const reviews = await getReviews();
-  return reviews.map((r) => ({ slug: r.slug }));
+  const slugs = await getReviewSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

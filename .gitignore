@@ -11,16 +11,13 @@ next-env.d.ts
 # production
 /build
 
-# runtime data (pitch submissions land here locally)
-/data
-
 # misc
 .DS_Store
 *.pem
 *.log
 npm-debug.log*
 
-# local env
+# local env — never commit real credentials
 .env*.local
 .env*.local.*
 .env
@@ -28,8 +25,8 @@ npm-debug.log*
 # vercel
 .vercel
 
-# typescript
+# typescript build info
 *.tsbuildinfo
-/shots
 
-.vercel
+# local screenshot output
+/shots

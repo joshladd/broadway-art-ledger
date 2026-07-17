@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { wordmark } from "@/content/site";
 import { getStrap } from "@/lib/site-content";
 import styles from "./site.module.css";
@@ -21,19 +22,19 @@ export async function Header({ active }: { active: string }) {
   return (
     <header className={styles.header}>
       <div className={styles.headBar}>
-        <a href="/" className={styles.wordmark}>
+        <Link href="/" className={styles.wordmark}>
           {wordmark}
-        </a>
+        </Link>
         <nav className={styles.nav} aria-label="Primary">
           {NAV.map((it) => (
-            <a
+            <Link
               key={it.label}
               href={it.href}
               className={`${styles.navlink} ${it.label === active ? styles.navOn : ""}`}
               aria-current={it.label === active ? "page" : undefined}
             >
               {it.label}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>

@@ -279,8 +279,7 @@
 
 /* ---------- archive ---------- */
 /* The Archive exists to find a review without the raw scroll, so search is the
-   point, not decoration. Rows expand inline because there are no review pages.
-   Pattern carried over from Folio, rewritten against the live model. */
+   point, not decoration. Each row links to the review's own page. */
 .archive {
   max-width: 1000px;
   margin: 0 auto;
@@ -384,23 +383,6 @@
 .hl {
   background: color-mix(in srgb, var(--blue) 16%, transparent);
   color: inherit;
-}
-
-/* Accordion via grid-rows 0fr -> 1fr. Deliberately NOT a view transition: that
-   fought the scroll position when this pattern was first built in Folio. */
-.arcPanelClip {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 260ms ease;
-}
-.arcRow[data-open] .arcPanelClip { grid-template-rows: 1fr; }
-.arcPanelInner { overflow: hidden; }
-.arcPanel { padding: 4px 0 32px; }
-.arcFigure { margin: 0 0 16px; max-width: 560px; }
-.arcExpandImg { width: 100%; height: auto; display: block; background: #e9e5d8; }
-
-@media (prefers-reduced-motion: reduce) {
-  .arcPanelClip { transition: none; }
 }
 
 @media (max-width: 820px) {
