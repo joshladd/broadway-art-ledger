@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import type { ComponentType } from "react";
 import { labs } from "@/lib/lab";
-import { getReviews } from "@/lib/reviews-data";
+// The exploration is frozen: it renders the static legacy seed, never live
+// data. This is what keeps /designs immune to the live content model.
+import { reviews } from "@/content/reviews";
 import type { Review } from "@/content/reviews";
 
 // Server-only key → View map. Because this is a server component, it can import
@@ -21,9 +23,6 @@ const views: Record<string, ComponentType<{ reviews: Review[] }>> = {
   salon: Salon,
 };
 
-// ISR: prerendered at build, revalidated from Airtable every 15s (no redeploy).
-export const revalidate = 15;
-
 export function generateStaticParams() {
   return labs.map((l) => ({ design: l.key }));
 }
@@ -32,6 +31,5 @@ export default async function LabDesignPage({ params }: { params: Promise<{ desi
   const { design } = await params;
   const View = views[design];
   if (!View) notFound();
-  const reviews = await getReviews();
   return <View reviews={reviews} />;
 }

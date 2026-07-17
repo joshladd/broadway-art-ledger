@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { getTheme } from "@/lib/themes";
-import { getReviews } from "@/lib/reviews-data";
-
-// ISR: prerendered/served fresh from Airtable within 15s (no redeploy).
-export const revalidate = 15;
+// The exploration is frozen: it renders the static legacy seed, never live
+// data. This is what keeps /designs immune to the live content model.
+import { reviews } from "@/content/reviews";
 
 export default async function ThemeArchivePage({ params }: { params: Promise<{ theme: string }> }) {
   const { theme: t } = await params;
@@ -11,7 +10,6 @@ export default async function ThemeArchivePage({ params }: { params: Promise<{ t
   if (!theme) notFound();
   const Archive = theme.Archive;
   // Themes without their own archive fall back to the shared one.
-  if (!Archive) redirect(`/archive?from=${t}`);
-  const reviews = await getReviews();
+  if (!Archive) redirect(`/designs/archive?from=${t}`);
   return <Archive reviews={reviews} t={t} />;
 }
