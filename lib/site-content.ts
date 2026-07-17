@@ -1,12 +1,12 @@
 import { cache } from "react";
 import type { PortableTextBlock } from "@portabletext/types";
-import { client } from "@/sanity/client";
 import { SITE_SETTINGS_QUERY, ABOUT_QUERY, SUBMIT_QUERY } from "@/sanity/queries";
 import {
   strap as DEFAULT_STRAP,
   aboutStatement,
   SUBMIT_FORM_URL,
 } from "@/content/site";
+import { sanityFetch } from "./sanity-fetch";
 import {
   aboutBodyBlocks,
   submitBodyBlocks,
@@ -20,9 +20,9 @@ import { aboutImage, type AboutImage } from "./about-image";
 // come out blank. Before Bryan seeds/edits anything, the site looks exactly as
 // it does today, because the fallback IS today's copy.
 //
-// Tagged "copy" so /api/revalidate can flush it on publish, same as reviews.
-
-const REVALIDATE = 60;
+// Fetching goes through sanityFetch, tagged "copy" so /api/revalidate flushes it
+// on publish. The row types below are loose on purpose — the str()/blocks()
+// coalescers accept unknown and fall back per field.
 
 const str = (v: unknown, fallback: string): string =>
   typeof v === "string" && v.trim() ? v : fallback;
@@ -42,19 +42,15 @@ export type SubmitContent = {
 };
 
 export const getStrap = cache(async (): Promise<string> => {
-  const row = await client.fetch(
-    SITE_SETTINGS_QUERY,
-    {},
-    { next: { revalidate: REVALIDATE, tags: ["copy"] } },
-  );
+  const row = await sanityFetch<{ strap: unknown } | null>(SITE_SETTINGS_QUERY, {}, "copy");
   return str(row?.strap, DEFAULT_STRAP);
 });
 
 export const getAboutContent = cache(async (): Promise<AboutContent> => {
-  const row = await client.fetch(
+  const row = await sanityFetch<{ title: unknown; body: unknown; image: unknown } | null>(
     ABOUT_QUERY,
     {},
-    { next: { revalidate: REVALIDATE, tags: ["copy"] } },
+    "copy",
   );
   return {
     title: str(row?.title, aboutStatement.title),
@@ -64,10 +60,10 @@ export const getAboutContent = cache(async (): Promise<AboutContent> => {
 });
 
 export const getSubmitContent = cache(async (): Promise<SubmitContent> => {
-  const row = await client.fetch(
+  const row = await sanityFetch<{ body: unknown; formUrl: unknown; blurb: unknown } | null>(
     SUBMIT_QUERY,
     {},
-    { next: { revalidate: REVALIDATE, tags: ["copy"] } },
+    "copy",
   );
   return {
     body: blocks(row?.body, submitBodyBlocks()),
