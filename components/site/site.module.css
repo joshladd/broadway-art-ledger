@@ -274,3 +274,136 @@
   outline: 2px solid var(--blue);
   outline-offset: 3px;
 }
+
+/* ---------- archive ---------- */
+/* The Archive exists to find a review without the raw scroll, so search is the
+   point, not decoration. Rows expand inline because there are no review pages.
+   Pattern carried over from Folio, rewritten against the live model. */
+.archive {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 84px 56px 0;
+}
+.arcTitle {
+  font-family: var(--f-fraunces);
+  font-optical-sizing: auto;
+  font-weight: 760;
+  font-size: clamp(34px, 4.6vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+  margin: 0 0 28px;
+}
+.arcSearch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--ink);
+  padding: 0 0 10px;
+}
+.arcSearchGlyph { color: var(--ink2); flex: none; }
+.arcSearchInput {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-family: var(--f-newsreader);
+  font-size: 19px;
+  color: var(--ink);
+  padding: 4px 0;
+}
+.arcSearchInput::placeholder { color: var(--ink2); }
+.arcSearchInput:focus { outline: none; }
+.arcSearch:focus-within { border-bottom-color: var(--blue); }
+
+.arcStatus {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  min-height: 1.4em;
+  margin: 12px 0 0;
+}
+.arcEmpty {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink2);
+  padding: 28px 0;
+}
+
+.arcRows { border-top: 1px solid var(--rule); }
+.arcRow { border-bottom: 1px solid var(--rule); }
+.arcSummary {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.arcSummary:hover .arcRowTitle { color: var(--blue); }
+.arcSummary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.arcPlate {
+  position: relative;
+  width: 64px;
+  height: 48px;
+  overflow: hidden;
+  background: #e9e5d8;
+}
+.arcPlateImg { object-fit: cover; }
+.arcRowTitle {
+  display: block;
+  font-family: var(--f-fraunces);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.arcRowMeta {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.arcCue {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.hl {
+  background: color-mix(in srgb, var(--blue) 16%, transparent);
+  color: inherit;
+}
+
+/* Accordion via grid-rows 0fr -> 1fr. Deliberately NOT a view transition: that
+   fought the scroll position when this pattern was first built in Folio. */
+.arcPanelClip {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms ease;
+}
+.arcRow[data-open] .arcPanelClip { grid-template-rows: 1fr; }
+.arcPanelInner { overflow: hidden; }
+.arcPanel { padding: 4px 0 32px; }
+.arcFigure { margin: 0 0 16px; max-width: 560px; }
+.arcExpandImg { width: 100%; height: auto; display: block; background: #e9e5d8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arcPanelClip { transition: none; }
+}
+
+@media (max-width: 820px) {
+  .archive { padding: 52px 22px 0; }
+  .arcSummary { grid-template-columns: 48px 1fr; gap: 12px; }
+  .arcPlate { width: 48px; height: 40px; }
+  .arcCue { display: none; }
+}
