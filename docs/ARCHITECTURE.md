@@ -38,8 +38,9 @@ All product routes live in the `app/(site)/` group so that group's layout can ow
 `globals.css` — keeping the site's CSS reset off the embedded Studio (a bare
 `svg { max-width: 100% }` was collapsing Sanity's icons).
 
-- `/` — the feed (all reviews, newest first, full text)
-- `/archive` — search (a compact index: plain body text + thumbnails)
+- `/` — the feed (newest first, full text; first page server-rendered, more on
+  scroll)
+- `/archive` — server-side search + a paginated browse list of compact rows
 - `/reviews/[slug]` — one review, its own permalink (fetches only its document)
 - `/about`, `/submit` — Sanity-driven copy
 - `/studio` — the embedded Sanity Studio
@@ -53,10 +54,12 @@ Sanity webhook `POST`s `/api/revalidate?secret=…` on publish and flushes the
 on the read client; the CDN may lag a publish by a second or two, which the tag
 flush covers.
 
-Data fetching is scoped per surface — the feed pulls full reviews, a review page
-pulls one document, `generateStaticParams` pulls slugs only, and the archive
-pulls a `pt::text()`-flattened index. Nothing fetches the whole dataset to render
-one thing.
+Data fetching is scoped per surface and bounded for scale — the feed pulls one
+page of full reviews and loads more on scroll (via a server action), a review
+page pulls one document, `generateStaticParams` pulls the recent slugs only
+(older pages generate on demand), and the archive searches server-side and
+browses a paginated index. Nothing fetches the whole dataset. See the "Scaling"
+section in `DECISIONS.md`.
 
 ## Images
 
@@ -77,6 +80,13 @@ There are **two** Sanity projects, and confusing them wastes hours:
 Production runtime env is injected by the Vercel integration. Local dev reads the
 public development dataset with no token; the write token in `.env.local` is only
 for the seed script. Never point local writes at `production` by accident.
+
+**Studio CORS.** The embedded Studio talks to the Sanity API from the browser, so
+every origin it runs on must be in the project's CORS allowlist (Manage → API →
+CORS origins), with credentials. If an origin is missing, the login screen loads
+but the Studio hangs on a spinner after auth. The production domain
+(`broadway-art-ledger.vercel.app`) and `http://localhost:3000` are registered on
+`bnbcebcv`; add any new deploy alias there.
 
 ## Pitches
 

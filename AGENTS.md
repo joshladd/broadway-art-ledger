@@ -40,10 +40,12 @@ uphold them and push back if a request would violate one.
 3. **Keep the fetch behind the seams.** Only `reviews-source` / `site-content`
    call the Sanity client. Pages and components take plain props. Mapping stays
    pure so it can be tested without a dataset.
-4. **Fetch only what a surface needs.** A review page fetches its own document
-   (`REVIEW_BY_SLUG_QUERY`), `generateStaticParams` fetches slugs only, and the
-   archive fetches a compact index (`pt::text()` + thumbnails). Never pull the
-   whole dataset to render one thing.
+4. **Fetch only what a surface needs, and bound it for scale.** A review page
+   fetches its own document (`REVIEW_BY_SLUG_QUERY`), the feed and archive browse
+   are paginated (`[start...end]` slices, load-more), archive search runs
+   server-side (`ARCHIVE_SEARCH_QUERY`), and `generateStaticParams` prerenders
+   only the recent slugs. Never pull the whole dataset to render one thing. (See
+   the Scaling section in `docs/DECISIONS.md`.)
 5. **`content/site.ts` is the fallback for the copy singletons.** The
    `copy-blocks.ts` builders are the single source of the default copy — both
    the seed and the runtime fallback use them, so seeded and unseeded render

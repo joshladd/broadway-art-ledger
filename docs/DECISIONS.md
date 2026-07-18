@@ -53,19 +53,25 @@ makes no Airtable API calls.
 ## Scaling for a large review count
 
 The publication expects a large number of reviews over time. Two surfaces are
-O(N) in review count and are being moved to bounded patterns. Measured against a
-500-review dev seed: the feed query is ~1.4 MB (~2.8 KB/review) and the archive
-index ~1 MB (~2.2 KB/review), both linear — roughly ~12 MB and ~9 MB at 4,500.
+O(N) in review count. Measured against a 500-review dev seed before the fix: the
+feed query was ~1.4 MB (~2.8 KB/review) and the archive index ~1 MB
+(~2.2 KB/review), both linear — roughly ~12 MB and ~9 MB at 4,500. All three are
+now bounded:
 
-- **Feed (`/`)** — keep the full-text reading experience, but paginate: server-
-  render the newest ~15, then infinite-scroll the rest from a paginated GROQ
-  slice (`| order(publishedAt desc) [start...end]`). Bounds payload and DOM.
-- **Archive (`/archive`)** — server-side search (GROQ `match`, scored) instead of
-  shipping the whole corpus to the client for Fuse; the no-query browse list is a
-  virtualized/windowed list of compact rows over a paginated index.
-- **Build** — cap `generateStaticParams` to the recent N and enable on-demand ISR
-  (`dynamicParams`) for older reviews, so the build never prerenders thousands of
-  pages.
+- **Feed (`/`)** — the full-text reading experience is kept, but paginated. The
+  server renders the newest `FEED_PAGE_SIZE`; a client `Feed` appends further
+  pages on scroll via a server action that returns already-rendered
+  `ReviewArticle` nodes (`REVIEWS_PAGE_QUERY`, a `[start...end]` slice). Payload
+  and DOM stay bounded.
+- **Archive (`/archive`)** — search runs server-side (`ARCHIVE_SEARCH_QUERY`
+  matches headline / show name / body text in the Content Lake; no corpus ships
+  to the client), and the no-query browse list is paginated (`ARCHIVE_PAGE_QUERY`)
+  with load-more. `fuse.js` was removed. A windowing library isn't used yet —
+  with search available and pages bounded the DOM never holds thousands of rows;
+  layer it in if that changes.
+- **Build** — `generateStaticParams` prerenders the recent `PRERENDER_LIMIT` (50)
+  and `dynamicParams` lets older reviews generate on demand (ISR), so the build
+  stays flat.
 
 Review pages (`/reviews/[slug]`) are O(1) and need no change.
 
