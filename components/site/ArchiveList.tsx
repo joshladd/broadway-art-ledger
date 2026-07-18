@@ -8,6 +8,7 @@ import { formatRange } from "@/lib/format-date";
 import { marqueePrefetchUrl } from "@/lib/sanity-image";
 import { parseSearchTerms, splitOnTerms } from "@/lib/search";
 import { loadMoreArchive, runArchiveSearch } from "@/app/(site)/archive-actions";
+import { usePaginatedList } from "./use-paginated-list";
 import styles from "./site.module.css";
 
 /* The interactive half of the Archive. Search runs server-side (the Content Lake
@@ -41,11 +42,13 @@ export default function ArchiveList({
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
 
-  // Browse list (no query): accumulates pages.
-  const [browse, setBrowse] = useState<ArchiveItem[]>(initialItems);
-  const [offset, setOffset] = useState(initialOffset);
-  const [hasMore, setHasMore] = useState(initialHasMore);
-  const [loadingMore, setLoadingMore] = useState(false);
+  // Browse list (no query): paginated via the shared hook.
+  const {
+    items: browse,
+    hasMore,
+    loading: loadingMore,
+    loadMore,
+  } = usePaginatedList<ArchiveItem>(initialItems, initialHasMore, initialOffset, loadMoreArchive);
 
   // Search results (a query is active).
   const [results, setResults] = useState<ArchiveItem[] | null>(null);
@@ -88,19 +91,6 @@ export default function ArchiveList({
     };
   }, [debounced]);
   /* eslint-enable react-hooks/set-state-in-effect */
-
-  async function loadMore() {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    try {
-      const res = await loadMoreArchive(offset);
-      setBrowse((b) => [...b, ...res.items]);
-      setOffset(res.nextOffset);
-      setHasMore(res.hasMore);
-    } finally {
-      setLoadingMore(false);
-    }
-  }
 
   function prefetchHero(item: ArchiveItem) {
     if (!item.heroUrl || prefetched.current.has(item.slug)) return;
