@@ -22,12 +22,13 @@ const REVIEW_FIELDS = `
   }
 `;
 
-// Newest first — Bryan: "Make sure that the most recent review is always at the
-// top." Drafts are excluded: Sanity keeps them as a parallel doc whose _id is
-// prefixed `drafts.`, so without this filter unpublished edits would leak onto
-// the live feed. Used by the home feed only.
-export const REVIEWS_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
+// One page of the feed, newest first — Bryan: "Make sure that the most recent
+// review is always at the top." The [$start...$end] slice bounds the payload so
+// the feed doesn't fetch every review at once. Drafts are excluded: Sanity keeps
+// them as a parallel `drafts.`-prefixed doc that would otherwise leak onto the
+// live feed.
+export const REVIEWS_PAGE_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
     ${REVIEW_FIELDS}
   }
 `);
@@ -41,24 +42,45 @@ export const REVIEW_BY_SLUG_QUERY = defineQuery(`
 `);
 
 // Slugs only — for generateStaticParams, which needs nothing else.
+// The most-recent N slugs — for generateStaticParams, which prerenders only the
+// recent reviews; older ones generate on demand via ISR.
 export const REVIEW_SLUGS_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))]{ "slug": slug.current }
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...$limit] {
+    "slug": slug.current
+  }
 `);
 
-// The archive's search index: no portable text, no full-size images. pt::text()
-// flattens the body to a plain string server-side. The raw hero asset URL is
-// carried once and the client derives both a thumbnail (shown) and the
-// full-size marquee URL (prefetched on hover) from it.
-export const ARCHIVE_QUERY = defineQuery(`
-  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
-    "slug": slug.current,
-    headline,
-    showName,
-    tagline,
-    startDate,
-    endDate,
-    "bodyText": pt::text(body),
-    "imageUrl": heroImage.asset->url
+// The archive's compact index row: no portable text, no full-size images. The
+// body is matched inside the search query's filter (server-side), so the row
+// itself carries none of it — only what the rows render. The raw hero asset URL
+// is carried once and the client derives a thumbnail (shown) and the marquee URL
+// (prefetched on hover) from it.
+const ARCHIVE_FIELDS = `
+  "slug": slug.current,
+  headline,
+  showName,
+  tagline,
+  startDate,
+  endDate,
+  "imageUrl": heroImage.asset->url
+`;
+
+// One page of the archive browse list, newest first — bounded so the client
+// never receives the whole index at once.
+export const ARCHIVE_PAGE_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**"))] | order(publishedAt desc) [$start...$end] {
+    ${ARCHIVE_FIELDS}
+  }
+`);
+
+// Server-side search: match the term against headline, show name, and the body
+// text, newest first. Runs in the Content Lake, so no corpus ships to the
+// client. $q carries the user's term with a trailing * for prefix matching.
+export const ARCHIVE_SEARCH_QUERY = defineQuery(`
+  *[_type == "review" && !(_id in path("drafts.**")) && (
+    headline match $q || showName match $q || pt::text(body) match $q
+  )] | order(publishedAt desc) [0...$limit] {
+    ${ARCHIVE_FIELDS}
   }
 `);
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mapReviewRows, type ReviewRow } from "./map-review";
+import { mapReviewRows, mapArchiveRows, type ReviewRow, type ArchiveRow } from "./map-review";
 
 // Proves the Sanity -> Review structural contract without needing a dataset:
 // these payloads are shaped exactly as the GROQ projection in sanity/queries.ts
@@ -106,4 +106,45 @@ test("requests a sized image from the CDN without upscaling or distorting", () =
   // fit=max never upscales and preserves the true aspect ratio.
   assert.equal(u.searchParams.get("fit"), "max");
   assert.equal(u.searchParams.get("auto"), "format");
+});
+
+// --- mapArchiveRows -------------------------------------------------------
+// The archive/search rows deliberately DIVERGE from the feed: an archive row is
+// kept as long as it has a slug, even with no image (it renders an empty plate),
+// whereas mapReviewRows drops imageless reviews. Lock that contract.
+
+function archiveRow(over: Partial<ArchiveRow> = {}): ArchiveRow {
+  return {
+    slug: "a-show",
+    headline: "A Show",
+    showName: "The Gallery",
+    tagline: null,
+    startDate: "2026-05-01",
+    endDate: "2026-06-01",
+    imageUrl: "https://cdn.sanity.io/images/p/d/x.png",
+    ...over,
+  };
+}
+
+test("archive: maps a row and sizes both image URLs off the CDN", () => {
+  const [item] = mapArchiveRows([archiveRow()]);
+  assert.equal(item.headline, "A Show");
+  assert.equal(item.showName, "The Gallery");
+  assert.match(item.thumbUrl, /x\.png\?w=160&fit=max&auto=format/);
+  assert.match(item.heroUrl, /x\.png\?w=1600&fit=max&auto=format/);
+});
+
+test("archive: keeps an imageless row (unlike the feed), with empty image URLs", () => {
+  const [item] = mapArchiveRows([archiveRow({ imageUrl: null })]);
+  assert.equal(item.slug, "a-show");
+  assert.equal(item.thumbUrl, "");
+  assert.equal(item.heroUrl, "");
+});
+
+test("archive: drops a row with no slug", () => {
+  assert.equal(mapArchiveRows([archiveRow({ slug: null })]).length, 0);
+});
+
+test("archive: null rows -> empty list", () => {
+  assert.deepEqual(mapArchiveRows(null), []);
 });

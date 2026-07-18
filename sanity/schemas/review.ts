@@ -4,9 +4,9 @@ import { defineField, defineType } from "sanity";
 // Sanity conforms to the contract, not the reverse.
 //
 // What is deliberately ABSENT: an issue number, a byline, a venue/neighborhood,
-// artist/artwork, and a separate photo credit. Bryan never asked for them; they
-// are parked in docs/IDEAS.md. Descriptions are written for Bryan, in the
-// editor — plain and functional.
+// artist/artwork, and a separate photo credit. Bryan never asked for them, and
+// only what he asked to show reaches the surface. Descriptions are written for
+// Bryan, in the editor — plain and functional.
 export const review = defineType({
   name: "review",
   title: "Review",

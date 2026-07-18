@@ -13,12 +13,15 @@ cp .env.example .env.local   # then fill in the values (see below)
 npm run dev                  # http://localhost:3000
 ```
 
-Local dev points at the Sanity `development` dataset. Seed it with sample data:
+Local dev points at the Sanity `development` dataset. Seed the editable copy
+(reviews are added in the Studio at `/studio`):
 
 ```bash
-node --env-file=.env.local --import tsx scripts/sanity-seed.mts        # 8 sample reviews
-node --env-file=.env.local --import tsx scripts/sanity-seed-copy.mts   # About/Submit/tagline copy
+node --env-file=.env.local --import tsx scripts/sanity-seed-copy.mts
 ```
+
+For agent/contributor conventions and the principles this codebase enforces, see
+[AGENTS.md](AGENTS.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Architecture
 

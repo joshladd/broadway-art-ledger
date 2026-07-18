@@ -84,10 +84,33 @@
 .entry { padding: 120px 0 0; }
 .entry:first-child { padding-top: 84px; }
 
-.figure { display: block; margin: 0; }
+/* Load-more sits at the foot of the feed; it's also the infinite-scroll
+   sentinel. Quiet by default, blue on hover like the rest of the chrome. */
+.feedSentinel { display: flex; justify-content: center; padding: 96px 0 48px; }
+.loadMore {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  background: none;
+  border: 1px solid var(--rule);
+  padding: 12px 24px;
+  cursor: pointer;
+}
+.loadMore:hover { color: var(--blue); border-color: var(--blue); }
+.loadMore:disabled { cursor: default; opacity: 0.55; }
+
+/* The figure shrink-wraps the image so the caption stays aligned to it even
+   when a tall image is capped narrower than the column. */
+.figure { display: block; margin: 0; width: fit-content; max-width: 100%; }
 .img {
-  width: 100%;
+  /* Fill the column when wide, but cap height at ~90vh so tall/vertical images
+     stay on screen. Aspect ratio preserved; never upscaled and no min height. */
+  width: auto;
   height: auto;
+  max-width: 100%;
+  max-height: 90vh;
   display: block;
   background: #e9e5d8;
 }

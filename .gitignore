@@ -28,5 +28,8 @@ npm-debug.log*
 # typescript build info
 *.tsbuildinfo
 
+# sanity typegen intermediate (sanity.types.ts is committed; this is regenerated)
+schema.json
+
 # local screenshot output
 /shots

@@ -1,10 +1,8 @@
 import type { PortableTextBlock } from "@portabletext/types";
 
-// The live content contract: what Sanity produces and the finalized site renders.
-//
-// DISTINCT from the legacy `Review` in content/reviews.ts, which is frozen and
-// belongs to the /designs exploration. Do not merge them — 38 exploration files
-// depend on the legacy shape (see the spec's "Why the freeze").
+// The content contract: what Sanity produces and the site renders. This is the
+// source of truth for a review's shape — Sanity's schema conforms to it, not the
+// other way around. Change this type deliberately when the model changes.
 
 export type ReviewImage = {
   url: string;

@@ -1,4 +1,6 @@
 import type { Review } from "@/content/review";
+import type { REVIEW_BY_SLUG_QUERY_RESULT, ARCHIVE_PAGE_QUERY_RESULT } from "@/sanity.types";
+import { sanityImageUrl, MARQUEE_WIDTH } from "./sanity-image";
 
 // The Sanity -> Review mapping, kept pure and separate from the fetch so it can
 // be tested without a dataset (and so the contract is asserted, not assumed).
@@ -8,19 +10,10 @@ import type { Review } from "@/content/review";
 // bad document must never take down the whole feed.
 //
 // Deliberately does NOT use @sanity/image-url: GROQ already hands back an
-// absolute cdn.sanity.io asset URL, and the CDN takes sizing as query params.
-// The builder would drag in sanity/env (which throws without env vars) and buy
-// us only hotspot/crop handling — which this design never uses, because every
-// image renders uncropped at its natural aspect.
-
-const IMAGE_WIDTH = 1600;
-
-function sizedImageUrl(assetUrl: string): string {
-  // fit=max never upscales and preserves the true aspect ratio; auto=format
-  // serves webp/avif to browsers that take them.
-  const sep = assetUrl.includes("?") ? "&" : "?";
-  return `${assetUrl}${sep}w=${IMAGE_WIDTH}&fit=max&auto=format`;
-}
+// absolute cdn.sanity.io asset URL, and the CDN takes sizing as query params
+// (see sanity-image). The builder would drag in sanity/env (which throws without
+// env vars) and buy us only hotspot/crop handling — which this design never
+// uses, because every image renders uncropped at its natural aspect.
 
 export type Dimensions = { width: number; height: number } | null;
 
@@ -63,7 +56,7 @@ export function mapReviewRow(row: ReviewRow): Review {
     body: (Array.isArray(row.body) ? row.body : []) as Review["body"],
     image: {
       // Serve a sized image off Sanity's CDN rather than the full original.
-      url: sizedImageUrl(s(row.heroImage?.asset?.url)),
+      url: sanityImageUrl(s(row.heroImage?.asset?.url), MARQUEE_WIDTH),
       // Sanity's asset metadata carries the true pixel size. Falling back to a
       // 4:3 guess would distort layout, so only use it if metadata is absent.
       width: dim?.width ?? 1200,
@@ -80,9 +73,10 @@ export function mapReviewRows(rows: ReviewRow[] | null): Review[] {
   return (rows ?? []).filter(isRenderable).map(mapReviewRow);
 }
 
-// The archive's lightweight search item: plain body text (flattened in GROQ),
-// a small thumbnail (shown), and the full-size marquee URL — the same URL the
-// review page loads — so hovering a row can prefetch it. Never portable text.
+// The archive's lightweight row: only what it renders — headline, show name,
+// dates, a small thumbnail (shown), and the full-size marquee URL (the same URL
+// the review page loads, so hovering a row can prefetch it). The body is matched
+// server-side in the search filter and is never carried here.
 export type ArchiveItem = {
   slug: string;
   headline: string;
@@ -90,7 +84,6 @@ export type ArchiveItem = {
   tagline: string;
   startDate: string;
   endDate: string;
-  bodyText: string;
   thumbUrl: string;
   heroUrl: string;
 };
@@ -102,17 +95,10 @@ export type ArchiveRow = {
   tagline: string | null;
   startDate: string | null;
   endDate: string | null;
-  bodyText: string | null;
   imageUrl: string | null;
 };
 
-const ARCHIVE_THUMB_WIDTH = 160; // ~2x the 64px display slot, for retina
-
-function sizedThumbUrl(assetUrl: string): string {
-  if (!assetUrl) return "";
-  const sep = assetUrl.includes("?") ? "&" : "?";
-  return `${assetUrl}${sep}w=${ARCHIVE_THUMB_WIDTH}&fit=max&auto=format`;
-}
+const THUMB_WIDTH = 160; // ~2x the 64px display slot, for retina
 
 export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
   return (rows ?? [])
@@ -126,11 +112,25 @@ export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
         tagline: s(r.tagline),
         startDate: s(r.startDate),
         endDate: s(r.endDate),
-        bodyText: s(r.bodyText),
-        thumbUrl: sizedThumbUrl(raw),
-        // Same sizing the review page uses (sizedImageUrl), so a hover prefetch
-        // targets the exact asset the marquee will request.
-        heroUrl: raw ? sizedImageUrl(raw) : "",
+        thumbUrl: sanityImageUrl(raw, THUMB_WIDTH),
+        // The same marquee variant the review page loads, so a hover prefetch
+        // targets the exact asset (see marqueePrefetchUrl).
+        heroUrl: sanityImageUrl(raw, MARQUEE_WIDTH),
       };
     });
 }
+
+// Compile-time binding between the GROQ projections and the row types this
+// mapper consumes. sanity.types.ts is generated from the queries (npm run
+// typegen). If a projection stops providing a field the mapper reads, the
+// generated result is no longer assignable to the row type and this stops
+// compiling — turning a former runtime-only bug (the feed silently loses its
+// images) into a build error. The mapper stays intentionally defensive about
+// nulls, so the row types are the looser contract the generated types satisfy.
+type Assert<T extends true> = T;
+type _ReviewRowBinding = Assert<
+  NonNullable<REVIEW_BY_SLUG_QUERY_RESULT> extends ReviewRow ? true : false
+>;
+type _ArchiveRowBinding = Assert<
+  ARCHIVE_PAGE_QUERY_RESULT[number] extends ArchiveRow ? true : false
+>;

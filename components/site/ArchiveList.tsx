@@ -1,118 +1,112 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Fuse, { type FuseResultMatch, type RangeTuple } from "fuse.js";
 import type { ArchiveItem } from "@/lib/map-review";
 import { formatRange } from "@/lib/format-date";
+import { marqueePrefetchUrl } from "@/lib/sanity-image";
+import { parseSearchTerms, splitOnTerms } from "@/lib/search";
+import { loadMoreArchive, runArchiveSearch } from "@/app/(site)/archive-actions";
+import { usePaginatedList } from "./use-paginated-list";
 import styles from "./site.module.css";
 
-// next/image's default device widths; the review marquee displays at ~888px
-// (see ReviewArticle's sizes). We prefetch the width the browser will actually
-// request for the viewer's pixel density, so the hover prefetch is a cache hit.
-const DEVICE_SIZES = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
-const HERO_DISPLAY_WIDTH = 888;
+/* The interactive half of the Archive. Search runs server-side (the Content Lake
+ * matches the term — no corpus ships to the client); the no-query browse list is
+ * paginated. Rows link to each review's own page. The server hands us the first
+ * browse page. */
 
-/* The interactive half of the Archive. Its job is to find a review without the
- * raw scroll, so search is its reason to exist. Rows link to each review's own
- * page (/reviews/<slug>) — a writer can share that link. The server hands us a
- * compact index (plain body text + thumbnails), already flattened in GROQ, so
- * no portable text or full-size images reach the client. */
-
-type MatchMap = Record<string, ReadonlyArray<RangeTuple>>;
-type Entry = { r: ArchiveItem; matches: MatchMap };
-
-// Keys map to the index fields. headline dominates; body barely registers.
-const FUSE_KEYS = [
-  { name: "headline", weight: 0.5 },
-  { name: "showName", weight: 0.28 },
-  { name: "tagline", weight: 0.12 },
-  { name: "bodyText", weight: 0.1 },
-];
-
-// Render `text` with Fuse's matched ranges wrapped in <mark>. Fuse hands back
-// non-overlapping ranges, but sort defensively and never emit a zero-length or
-// backwards slice.
-function highlight(text: string, ranges?: ReadonlyArray<RangeTuple>): React.ReactNode {
-  if (!ranges || ranges.length === 0) return text;
-  const sorted = [...ranges].sort((a, b) => a[0] - b[0]);
-  const out: React.ReactNode[] = [];
-  let cursor = 0;
-  sorted.forEach(([start, end], i) => {
-    const s = Math.max(start, cursor);
-    const e = end + 1; // Fuse ranges are inclusive
-    if (e <= s) return;
-    if (s > cursor) out.push(text.slice(cursor, s));
-    out.push(
+// Wrap each occurrence of a search term in <mark>. splitOnTerms (shared with the
+// server search) escapes the terms, so a query like "c++" can't break the regex.
+function highlight(text: string, terms: string[]): React.ReactNode {
+  return splitOnTerms(text, terms).map((seg, i) =>
+    seg.match ? (
       <mark key={i} className={styles.hl}>
-        {text.slice(s, e)}
-      </mark>,
-    );
-    cursor = e;
-  });
-  if (cursor < text.length) out.push(text.slice(cursor));
-  return out;
+        {seg.value}
+      </mark>
+    ) : (
+      seg.value
+    ),
+  );
 }
 
-export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
+export default function ArchiveList({
+  initialItems,
+  initialHasMore,
+  initialOffset,
+}: {
+  initialItems: ArchiveItem[];
+  initialHasMore: boolean;
+  initialOffset: number;
+}) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
+
+  // Browse list (no query): paginated via the shared hook.
+  const {
+    items: browse,
+    hasMore,
+    loading: loadingMore,
+    loadMore,
+  } = usePaginatedList<ArchiveItem>(initialItems, initialHasMore, initialOffset, loadMoreArchive);
+
+  // Search results (a query is active).
+  const [results, setResults] = useState<ArchiveItem[] | null>(null);
+  const [searching, setSearching] = useState(false);
+
   const prefetched = useRef<Set<string>>(new Set());
 
-  // Route data is already prefetched by <Link>; the review's marquee image is
-  // not. On hover/focus of a row, prefetch that image so the review page paints
-  // it instantly on click. Deduped per review, and only fires on real intent
-  // (hover/focus) rather than eagerly for every row, to bound the bandwidth.
-  function prefetchHero(item: ArchiveItem) {
-    if (!item.heroUrl || prefetched.current.has(item.slug)) return;
-    prefetched.current.add(item.slug);
-    const dpr = window.devicePixelRatio || 1;
-    const target = Math.ceil(HERO_DISPLAY_WIDTH * dpr);
-    const w = DEVICE_SIZES.find((s) => s >= target) ?? DEVICE_SIZES[DEVICE_SIZES.length - 1];
-    const link = document.createElement("link");
-    link.rel = "prefetch";
-    link.as = "image";
-    link.href = `/_next/image?url=${encodeURIComponent(item.heroUrl)}&w=${w}&q=75`;
-    document.head.appendChild(link);
-  }
+  // Same term parsing the server search uses, so highlights match what was found.
+  const terms = parseSearchTerms(debounced);
+  const isSearching = terms.length > 0;
+  const items = isSearching ? results ?? [] : browse;
 
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(query), 120);
+    const id = setTimeout(() => setDebounced(query), 200);
     return () => clearTimeout(id);
   }, [query]);
 
-  const searching = debounced.trim().length > 0;
-
-  const fuse = useMemo(
-    () =>
-      new Fuse(items, {
-        keys: FUSE_KEYS,
-        includeMatches: true,
-        ignoreLocation: true,
-        threshold: 0.38,
-        minMatchCharLength: 2,
-      }),
-    [items],
-  );
-
-  // Empty query -> every review, newest-first as delivered. Otherwise Fuse
-  // results ranked by relevance, carrying their match ranges.
-  const list = useMemo<Entry[]>(() => {
+  // Data-fetching effect: run the server-side search when the debounced query
+  // changes, and clear back to browse when it's emptied. This is a legitimate
+  // effect (synchronizing with an external system — the search API); the eager
+  // setSearching drives the loading label. `active` guards out-of-order results.
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
     const q = debounced.trim();
-    if (!q) return items.map((r) => ({ r, matches: {} }));
-    return fuse.search(q).map((res) => {
-      const matches: MatchMap = {};
-      for (const m of (res.matches ?? []) as ReadonlyArray<FuseResultMatch>) {
-        if (m.key && !(m.key in matches)) matches[m.key] = m.indices;
+    if (!q) {
+      setResults(null);
+      setSearching(false);
+      return;
+    }
+    let active = true;
+    setSearching(true);
+    runArchiveSearch(q).then((r) => {
+      if (active) {
+        setResults(r);
+        setSearching(false);
       }
-      return { r: res.item as ArchiveItem, matches };
     });
-  }, [debounced, fuse, items]);
+    return () => {
+      active = false;
+    };
+  }, [debounced]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (items.length === 0) {
-    return <p className={styles.arcEmpty}>No reviews yet.</p>;
+  function prefetchHero(item: ArchiveItem) {
+    if (!item.heroUrl || prefetched.current.has(item.slug)) return;
+    prefetched.current.add(item.slug);
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "image";
+    link.href = marqueePrefetchUrl(item.heroUrl, window.devicePixelRatio || 1);
+    document.head.appendChild(link);
   }
+
+  const status = searching
+    ? "Searching…"
+    : isSearching
+      ? `${items.length} result${items.length === 1 ? "" : "s"}`
+      : " ";
 
   return (
     <>
@@ -147,14 +141,16 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
       </div>
 
       <p className={styles.arcStatus} role="status" aria-live="polite">
-        {searching ? `${list.length} of ${items.length}` : " "}
+        {status}
       </p>
 
-      {list.length === 0 ? (
+      {isSearching && !searching && items.length === 0 ? (
         <p className={styles.arcEmpty}>No reviews match that search.</p>
+      ) : items.length === 0 && !isSearching ? (
+        <p className={styles.arcEmpty}>No reviews yet.</p>
       ) : (
         <div className={styles.arcRows}>
-          {list.map(({ r, matches }) => {
+          {items.map((r) => {
             const range = formatRange(r.startDate, r.endDate);
             return (
               <div key={r.slug} className={styles.arcRow}>
@@ -177,11 +173,9 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
                   </span>
 
                   <span>
-                    <span className={styles.arcRowTitle}>
-                      {highlight(r.headline, matches.headline)}
-                    </span>
+                    <span className={styles.arcRowTitle}>{highlight(r.headline, terms)}</span>
                     <span className={styles.arcRowMeta}>
-                      {highlight(r.showName, matches.showName)}
+                      {highlight(r.showName, terms)}
                       {range ? `, ${range}` : ""}
                     </span>
                   </span>
@@ -193,6 +187,19 @@ export default function ArchiveList({ items }: { items: ArchiveItem[] }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!isSearching && hasMore && (
+        <div className={styles.feedSentinel}>
+          <button
+            type="button"
+            className={styles.loadMore}
+            onClick={loadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading…" : "Load more"}
+          </button>
         </div>
       )}
     </>

@@ -11,7 +11,12 @@ import styles from "@/components/site/site.module.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-// Pre-render the known reviews at build; new ones fill in on demand via ISR.
+// A slug not returned by generateStaticParams still renders — it's generated on
+// first request, then cached (ISR). This keeps the build flat as reviews grow.
+export const dynamicParams = true;
+
+// Prerender only the recent reviews at build (PRERENDER_LIMIT); older ones
+// generate on demand.
 export async function generateStaticParams() {
   const slugs = await getReviewSlugs();
   return slugs.map((slug) => ({ slug }));
