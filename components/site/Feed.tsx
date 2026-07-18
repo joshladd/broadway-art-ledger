@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadMoreReviews } from "@/app/(site)/feed-actions";
 import styles from "./site.module.css";
 
@@ -17,7 +17,7 @@ export function Feed({
   startOffset: number;
   hasMore: boolean;
 }) {
-  const [pages, setPages] = useState<ReactNode[]>([]);
+  const [appended, setAppended] = useState<ReactNode[]>([]);
   const [offset, setOffset] = useState(startOffset);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,8 @@ export function Feed({
     setLoading(true);
     try {
       const res = await loadMoreReviews(offset);
-      setPages((p) => [...p, <Fragment key={offset}>{res.nodes}</Fragment>]);
+      // Each node is keyed by slug, so appending flat is safe.
+      setAppended((a) => [...a, ...res.items]);
       setOffset(res.nextOffset);
       setHasMore(res.hasMore);
     } finally {
@@ -56,7 +57,7 @@ export function Feed({
   return (
     <div className={styles.feed}>
       {children}
-      {pages}
+      {appended}
       {hasMore && (
         <div ref={sentinel} className={styles.feedSentinel}>
           <button

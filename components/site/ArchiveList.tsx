@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ArchiveItem } from "@/lib/map-review";
 import { formatRange } from "@/lib/format-date";
 import { marqueePrefetchUrl } from "@/lib/sanity-image";
+import { parseSearchTerms, splitOnTerms } from "@/lib/search";
 import { loadMoreArchive, runArchiveSearch } from "@/app/(site)/archive-actions";
 import styles from "./site.module.css";
 
@@ -14,20 +15,16 @@ import styles from "./site.module.css";
  * paginated. Rows link to each review's own page. The server hands us the first
  * browse page. */
 
-// Wrap each occurrence of a search term in <mark>. Terms are escaped so a query
-// like "c++" can't break the regex.
+// Wrap each occurrence of a search term in <mark>. splitOnTerms (shared with the
+// server search) escapes the terms, so a query like "c++" can't break the regex.
 function highlight(text: string, terms: string[]): React.ReactNode {
-  const escaped = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).filter(Boolean);
-  if (escaped.length === 0) return text;
-  const parts = text.split(new RegExp(`(${escaped.join("|")})`, "gi"));
-  // split with one capture group -> odd indices are the matches.
-  return parts.map((part, i) =>
-    i % 2 === 1 ? (
+  return splitOnTerms(text, terms).map((seg, i) =>
+    seg.match ? (
       <mark key={i} className={styles.hl}>
-        {part}
+        {seg.value}
       </mark>
     ) : (
-      part
+      seg.value
     ),
   );
 }
@@ -35,16 +32,18 @@ function highlight(text: string, terms: string[]): React.ReactNode {
 export default function ArchiveList({
   initialItems,
   initialHasMore,
+  initialOffset,
 }: {
   initialItems: ArchiveItem[];
   initialHasMore: boolean;
+  initialOffset: number;
 }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
 
   // Browse list (no query): accumulates pages.
   const [browse, setBrowse] = useState<ArchiveItem[]>(initialItems);
-  const [offset, setOffset] = useState(initialItems.length);
+  const [offset, setOffset] = useState(initialOffset);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -54,7 +53,8 @@ export default function ArchiveList({
 
   const prefetched = useRef<Set<string>>(new Set());
 
-  const terms = debounced.trim().split(/\s+/).filter(Boolean);
+  // Same term parsing the server search uses, so highlights match what was found.
+  const terms = parseSearchTerms(debounced);
   const isSearching = terms.length > 0;
   const items = isSearching ? results ?? [] : browse;
 

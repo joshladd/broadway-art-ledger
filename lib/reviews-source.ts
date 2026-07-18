@@ -8,6 +8,8 @@ import {
   ARCHIVE_SEARCH_QUERY,
 } from "@/sanity/queries";
 import { sanityFetch } from "./sanity-fetch";
+import { clampOffset, pageResult, type Page } from "./pagination";
+import { parseSearchTerms, buildSearchPattern } from "./search";
 import {
   mapReviewRows,
   mapReviewRow,
@@ -24,20 +26,22 @@ import {
 // "reviews" so /api/revalidate flushes it the moment Bryan publishes.
 
 // How many reviews the feed shows per page (initial render and each load-more).
-export const FEED_PAGE_SIZE = 10;
+const FEED_PAGE_SIZE = 10;
 
-// One page of the feed. The [start...end) slice keeps the payload bounded no
-// matter how many reviews exist; the feed loads more on scroll.
+// One page of the feed as a page view-model ({items, hasMore, nextOffset}) — the
+// [start...end) slice keeps the payload bounded, and the "is there more?"
+// invariant lives here, not in every caller. offset is clamped (public action).
 export async function getReviewPage(
   offset: number,
   limit: number = FEED_PAGE_SIZE,
-): Promise<Review[]> {
+): Promise<Page<Review>> {
+  const start = clampOffset(offset);
   const rows = await sanityFetch<ReviewRow[]>(
     REVIEWS_PAGE_QUERY,
-    { start: offset, end: offset + limit },
+    { start, end: start + limit },
     "reviews",
   );
-  return mapReviewRows(rows);
+  return pageResult(mapReviewRows(rows), start, limit);
 }
 
 // One review by slug — fetches only its own document, so a review page (and its
@@ -64,34 +68,34 @@ export const getReviewSlugs = cache(async (limit: number = PRERENDER_LIMIT): Pro
 });
 
 // How many archive rows the browse list shows per page.
-export const ARCHIVE_PAGE_SIZE = 20;
+const ARCHIVE_PAGE_SIZE = 20;
 
-// One page of the archive browse list (compact rows: plain text + thumbnails),
-// so the client never receives the whole index or any portable text.
+// One page of the archive browse list (compact rows: plain text + thumbnails) as
+// a page view-model, so the client never receives the whole index.
 export async function getArchivePage(
   offset: number,
   limit: number = ARCHIVE_PAGE_SIZE,
-): Promise<ArchiveItem[]> {
+): Promise<Page<ArchiveItem>> {
+  const start = clampOffset(offset);
   const rows = await sanityFetch<ArchiveRow[]>(
     ARCHIVE_PAGE_QUERY,
-    { start: offset, end: offset + limit },
+    { start, end: start + limit },
     "reviews",
   );
-  return mapArchiveRows(rows);
+  return pageResult(mapArchiveRows(rows), start, limit);
 }
 
 const ARCHIVE_SEARCH_LIMIT = 40;
 
 // Server-side search — the match runs in the Content Lake, so no corpus ships to
-// the client. Each term is prefix-matched. The term is passed as a parameter, so
-// it can't inject into the query.
+// the client. Terms are parsed/bounded and prefix-matched (see ./search); the
+// pattern is passed as a parameter, so it can't inject into the query.
 export async function searchArchive(query: string): Promise<ArchiveItem[]> {
-  const terms = query.trim().split(/\s+/).filter(Boolean);
+  const terms = parseSearchTerms(query);
   if (terms.length === 0) return [];
-  const pattern = terms.map((w) => `${w}*`).join(" ");
   const rows = await sanityFetch<ArchiveRow[]>(
     ARCHIVE_SEARCH_QUERY,
-    { q: pattern, limit: ARCHIVE_SEARCH_LIMIT },
+    { q: buildSearchPattern(terms), limit: ARCHIVE_SEARCH_LIMIT },
     "reviews",
   );
   return mapArchiveRows(rows);
