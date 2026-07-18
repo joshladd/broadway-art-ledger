@@ -50,10 +50,11 @@ export const REVIEW_SLUGS_QUERY = defineQuery(`
   }
 `);
 
-// The archive's compact index row: no portable text, no full-size images.
-// pt::text() flattens the body to a plain string server-side; the raw hero asset
-// URL is carried once and the client derives a thumbnail (shown) and the marquee
-// URL (prefetched on hover) from it.
+// The archive's compact index row: no portable text, no full-size images. The
+// body is matched inside the search query's filter (server-side), so the row
+// itself carries none of it — only what the rows render. The raw hero asset URL
+// is carried once and the client derives a thumbnail (shown) and the marquee URL
+// (prefetched on hover) from it.
 const ARCHIVE_FIELDS = `
   "slug": slug.current,
   headline,
@@ -61,7 +62,6 @@ const ARCHIVE_FIELDS = `
   tagline,
   startDate,
   endDate,
-  "bodyText": pt::text(body),
   "imageUrl": heroImage.asset->url
 `;
 

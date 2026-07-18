@@ -73,9 +73,10 @@ export function mapReviewRows(rows: ReviewRow[] | null): Review[] {
   return (rows ?? []).filter(isRenderable).map(mapReviewRow);
 }
 
-// The archive's lightweight search item: plain body text (flattened in GROQ),
-// a small thumbnail (shown), and the full-size marquee URL — the same URL the
-// review page loads — so hovering a row can prefetch it. Never portable text.
+// The archive's lightweight row: only what it renders — headline, show name,
+// dates, a small thumbnail (shown), and the full-size marquee URL (the same URL
+// the review page loads, so hovering a row can prefetch it). The body is matched
+// server-side in the search filter and is never carried here.
 export type ArchiveItem = {
   slug: string;
   headline: string;
@@ -83,7 +84,6 @@ export type ArchiveItem = {
   tagline: string;
   startDate: string;
   endDate: string;
-  bodyText: string;
   thumbUrl: string;
   heroUrl: string;
 };
@@ -95,7 +95,6 @@ export type ArchiveRow = {
   tagline: string | null;
   startDate: string | null;
   endDate: string | null;
-  bodyText: string | null;
   imageUrl: string | null;
 };
 
@@ -113,7 +112,6 @@ export function mapArchiveRows(rows: ArchiveRow[] | null): ArchiveItem[] {
         tagline: s(r.tagline),
         startDate: s(r.startDate),
         endDate: s(r.endDate),
-        bodyText: s(r.bodyText),
         thumbUrl: sanityImageUrl(raw, THUMB_WIDTH),
         // The same marquee variant the review page loads, so a hover prefetch
         // targets the exact asset (see marqueePrefetchUrl).

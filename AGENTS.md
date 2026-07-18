@@ -75,7 +75,7 @@ npm run build       # production build
 npm run start       # serve the production build
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint
-npm test            # node --test over lib/**/*.test.ts
+npm test            # node --test over lib/**/*.test.ts and components/**/*.test.tsx
 # seed the editable copy into the current dataset (reviews are added in the Studio):
 node --env-file=.env.local --import tsx scripts/sanity-seed-copy.mts
 ```
