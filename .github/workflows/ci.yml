@@ -11,6 +11,13 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # Public, non-secret Sanity config (both are NEXT_PUBLIC_ and ship in the
+    # client bundle). sanity/env.ts asserts they're set, so schema extraction
+    # during typegen needs them present — the dataset name is all that matters
+    # here; typegen is an offline schema + query analysis and hits no network.
+    env:
+      NEXT_PUBLIC_SANITY_PROJECT_ID: 6vag9i62
+      NEXT_PUBLIC_SANITY_DATASET: development
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
